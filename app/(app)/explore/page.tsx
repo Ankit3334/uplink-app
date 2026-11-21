@@ -21,36 +21,38 @@ export default async function ExplorePage() {
   }));
 
   return (
-    <section className="mx-auto flex min-h-[calc(100vh-6rem)] w-full max-w-md flex-col gap-6 px-4 pb-8 pt-10">
-      <header className="border border-zinc-800 bg-[#0a0a0a] p-5">
+    <section className="mx-auto flex min-h-[calc(100vh-6rem)] w-full max-w-md flex-col gap-4 px-4 pt-6 pb-24">
+      <header className="border border-zinc-800 bg-[#0a0a0a] p-4">
         <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
           Channel // Explore
         </p>
-        <h1 className="mt-3 text-3xl font-bold uppercase tracking-tight text-zinc-100">
+        <h1 className="mt-2 text-xl font-bold uppercase tracking-wider text-zinc-100">
           Explore
         </h1>
-        <p className="mt-3 text-sm leading-relaxed text-zinc-400">
+        <p className="mt-2 text-xs leading-relaxed text-zinc-400">
           Search nodes and scan high-signal transmissions across the network.
         </p>
       </header>
 
-      <div className="border border-zinc-800 bg-[#0a0a0a] p-4">
-        <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
-          Node Search
-        </p>
-        <UserSearch />
-      </div>
-
-      <div>
-        <div className="mb-3 flex items-center justify-between border-b border-zinc-800 pb-3">
-          <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-100">
-            Explore Grid
-          </h2>
-          <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-zinc-500">
-            Top Signals
-          </span>
+      <div className="flex flex-col gap-4 border-t border-zinc-800 pt-4">
+        <div className="border border-zinc-800 bg-[#0a0a0a] p-4">
+          <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
+            Node Search
+          </p>
+          <UserSearch />
         </div>
-        <PostGrid posts={posts} />
+
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
+            <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-100">
+              Explore Grid
+            </h2>
+            <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-zinc-500">
+              Top Signals
+            </span>
+          </div>
+          <PostGrid posts={posts} />
+        </div>
       </div>
     </section>
   );

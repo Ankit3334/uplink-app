@@ -105,17 +105,17 @@ function PostUploadForm() {
   }
 
   return (
-    <div className="border border-zinc-800 bg-[#0a0a0a] p-5">
-      <div className="mb-5 border-b border-zinc-800 pb-4">
-        <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-zinc-500">
+    <div className="border border-zinc-800 bg-[#0a0a0a] p-4">
+      <div className="mb-4 border-b border-zinc-800 pb-3">
+        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
           System Transmission // Image Payload
         </p>
-        <p className="mt-2 text-sm leading-relaxed text-zinc-400">
+        <p className="mt-2 text-xs leading-relaxed text-zinc-400">
           Select image asset and attach data payload for uplink.
         </p>
       </div>
 
-      <form action={formAction} className="space-y-5">
+      <form action={formAction} className="space-y-4">
         <div>
           <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-400">
             &gt; Image_Payload
@@ -182,7 +182,7 @@ function PostUploadForm() {
             name="caption"
             rows={4}
             placeholder="ENTER TRANSMISSION TEXT..."
-            className="w-full resize-y border border-zinc-800 bg-[#111111] px-3 py-3 font-mono text-sm leading-relaxed text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-[#22d3ee]"
+            className="w-full resize-y border border-zinc-800 bg-[#111111] px-3 py-2.5 font-mono text-sm leading-relaxed text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-[#22d3ee]"
           />
         </label>
 
@@ -238,17 +238,17 @@ function ReelUploadForm() {
   }
 
   return (
-    <div className="border border-zinc-800 bg-[#0a0a0a] p-5">
-      <div className="mb-5 border-b border-zinc-800 pb-4">
-        <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-zinc-500">
+    <div className="border border-zinc-800 bg-[#0a0a0a] p-4">
+      <div className="mb-4 border-b border-zinc-800 pb-3">
+        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
           System Transmission // Video Reel Payload
         </p>
-        <p className="mt-2 text-sm leading-relaxed text-zinc-400">
+        <p className="mt-2 text-xs leading-relaxed text-zinc-400">
           Select video asset for reel broadcast. Vertical short-form recommended.
         </p>
       </div>
 
-      <form action={formAction} className="space-y-5">
+      <form action={formAction} className="space-y-4">
         <div>
           <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-400">
             &gt; Video_Payload
@@ -317,7 +317,7 @@ function ReelUploadForm() {
             name="caption"
             rows={4}
             placeholder="ENTER REEL TRANSMISSION TEXT..."
-            className="w-full resize-y border border-zinc-800 bg-[#111111] px-3 py-3 font-mono text-sm leading-relaxed text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-[#22d3ee]"
+            className="w-full resize-y border border-zinc-800 bg-[#111111] px-3 py-2.5 font-mono text-sm leading-relaxed text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-[#22d3ee]"
           />
         </label>
 

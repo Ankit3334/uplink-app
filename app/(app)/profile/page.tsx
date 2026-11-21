@@ -41,17 +41,17 @@ export default async function ProfilePage() {
   const bio = profile?.bio ?? null;
 
   return (
-    <section className="mx-auto flex min-h-[calc(100vh-6rem)] w-full max-w-md flex-col gap-6 px-4 pb-8 pt-10">
-      <header className="border border-zinc-800 bg-[#0a0a0a] p-5">
+    <section className="mx-auto flex min-h-[calc(100vh-6rem)] w-full max-w-md flex-col gap-4 px-4 pt-6 pb-24">
+      <header className="border border-zinc-800 bg-[#0a0a0a] p-4">
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
               Channel // 04
             </p>
-            <h1 className="mt-3 text-3xl font-bold uppercase tracking-tight text-zinc-100">
+            <h1 className="mt-2 text-xl font-bold uppercase tracking-wider text-zinc-100">
               Node Configuration
             </h1>
-            <p className="mt-3 text-sm leading-relaxed text-zinc-400">
+            <p className="mt-2 text-xs leading-relaxed text-zinc-400">
               Operator identity, signal metrics, and profile controls.
             </p>
           </div>
@@ -61,89 +61,91 @@ export default async function ProfilePage() {
         </div>
       </header>
 
-      <div className="border border-zinc-800 bg-[#0a0a0a] p-5">
-        <div className="flex items-center gap-4">
-          <div className="flex h-20 w-20 items-center justify-center border border-zinc-800 bg-[#111111] text-zinc-400">
-            {avatarUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={avatarUrl}
-                alt={`${username} avatar`}
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              <Terminal size={32} strokeWidth={1.6} />
-            )}
+      <div className="flex flex-col gap-4 border-t border-zinc-800 pt-4">
+        <div className="border border-zinc-800 bg-[#0a0a0a] p-4">
+          <div className="flex items-center gap-4">
+            <div className="flex h-20 w-20 items-center justify-center border border-zinc-800 bg-[#111111] text-zinc-400">
+              {avatarUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={avatarUrl}
+                  alt={`${username} avatar`}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <Terminal size={32} strokeWidth={1.6} />
+              )}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-lg font-bold uppercase tracking-[0.08em] text-zinc-100">
+                @{username}
+              </p>
+              <p className="mt-1 truncate text-xs uppercase tracking-[0.12em] text-zinc-300">
+                {displayName}
+              </p>
+              <p className="mt-2 whitespace-pre-wrap font-mono text-xs leading-relaxed text-zinc-500">
+                {bio || "No bio data written to node."}
+              </p>
+            </div>
           </div>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-xl font-bold uppercase tracking-[0.08em] text-zinc-100">
-              @{username}
+        </div>
+
+        <AvatarUploader initialAvatarUrl={avatarUrl} />
+
+        <div className="grid grid-cols-3 gap-3">
+          <div className="border border-zinc-800 bg-[#0a0a0a] p-3">
+            <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-zinc-500">
+              Transmissions
             </p>
-            <p className="mt-1 truncate text-sm uppercase tracking-[0.12em] text-zinc-300">
-              {displayName}
+            <p className="mt-2 text-lg font-bold text-zinc-100">
+              {transmissionsCount ?? 0}
             </p>
-            <p className="mt-3 whitespace-pre-wrap font-mono text-xs leading-relaxed text-zinc-500">
-              {bio || "No bio data written to node."}
+          </div>
+          <div className="border border-zinc-800 bg-[#0a0a0a] p-3">
+            <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-zinc-500">
+              Total Boosts
+            </p>
+            <p className="mt-2 text-lg font-bold text-zinc-100">{totalBoosts}</p>
+          </div>
+          <div className="border border-zinc-800 bg-[#0a0a0a] p-3">
+            <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-zinc-500">
+              Node Level
+            </p>
+            <p className="mt-2 inline-block border border-zinc-700 bg-[#111111] px-2 py-0.5 font-mono text-base font-bold text-[#22d3ee]">
+              1
             </p>
           </div>
         </div>
-      </div>
 
-      <AvatarUploader initialAvatarUrl={avatarUrl} />
-
-      <div className="grid grid-cols-3 gap-3">
-        <div className="border border-zinc-800 bg-[#0a0a0a] p-4">
-          <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-zinc-500">
-            Transmissions
-          </p>
-          <p className="mt-3 text-xl font-bold text-zinc-100">
-            {transmissionsCount ?? 0}
-          </p>
-        </div>
-        <div className="border border-zinc-800 bg-[#0a0a0a] p-4">
-          <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-zinc-500">
-            Total Boosts
-          </p>
-          <p className="mt-3 text-xl font-bold text-zinc-100">{totalBoosts}</p>
-        </div>
-        <div className="border border-zinc-800 bg-[#0a0a0a] p-4">
-          <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-zinc-500">
-            Node Level
-          </p>
-          <p className="mt-3 inline-block border border-zinc-700 bg-[#111111] px-2 py-0.5 font-mono text-lg font-bold text-[#22d3ee]">
-            1
-          </p>
-        </div>
-      </div>
-
-      <ProfileEditor
-        initialDisplayName={profile?.display_name ?? ""}
-        initialBio={profile?.bio ?? ""}
-      />
-
-      <div>
-        <div className="mb-3 flex items-center justify-between border-b border-zinc-800 pb-3">
-          <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-100">
-            Transmission Grid
-          </h2>
-          <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-zinc-500">
-            {transmissionsCount} records
-          </span>
-        </div>
-        <PostGrid
-          posts={posts.map((p) => ({
-            id: p.id as string,
-            image_url: p.image_url as string,
-            caption: (p.caption as string | null) ?? null,
-          }))}
-          canDelete
-          deleteRedirectTo="/profile"
+        <ProfileEditor
+          initialDisplayName={profile?.display_name ?? ""}
+          initialBio={profile?.bio ?? ""}
         />
-      </div>
 
-      <form action={signOut}>
-        <SignOutButton />
-      </form>
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
+            <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-100">
+              Transmission Grid
+            </h2>
+            <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-zinc-500">
+              {transmissionsCount} records
+            </span>
+          </div>
+          <PostGrid
+            posts={posts.map((p) => ({
+              id: p.id as string,
+              image_url: p.image_url as string,
+              caption: (p.caption as string | null) ?? null,
+            }))}
+            canDelete
+            deleteRedirectTo="/profile"
+          />
+        </div>
+
+        <form action={signOut}>
+          <SignOutButton />
+        </form>
+      </div>
     </section>
   );
 }
