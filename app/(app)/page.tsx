@@ -9,7 +9,7 @@ import {
 import { PostActions } from "./_components/post-actions";
 import { DoubleTapBoost } from "./_components/double-tap-boost";
 import { FadeIn } from "@/src/components/fade-in";
-import { renderTextWithLinks } from "@/src/lib/linkify";
+import { parseRichText } from "@/src/lib/utils";
 import { requireUser } from "@/src/lib/auth";
 import { createClient } from "@/src/lib/supabase/server";
 
@@ -27,6 +27,8 @@ type FeedPost = {
   boost_count: number;
   thread_count: number;
   created_at: string;
+  updated_at: string | null;
+  is_edited: boolean | null;
   profiles: FeedProfile | FeedProfile[];
 };
 
@@ -169,7 +171,7 @@ async function FeedContent() {
     const { data } = await supabase
       .from("posts")
       .select(
-        "id, user_id, image_url, caption, body, boost_count, thread_count, created_at, profiles(username, avatar_url)",
+        "id, user_id, image_url, caption, body, boost_count, thread_count, created_at, updated_at, is_edited, profiles(username, avatar_url)",
       )
       .order("created_at", { ascending: false })
       .limit(20);
@@ -178,7 +180,7 @@ async function FeedContent() {
     const { data } = await supabase
       .from("posts")
       .select(
-        "id, user_id, image_url, caption, body, boost_count, thread_count, created_at, profiles(username, avatar_url)",
+        "id, user_id, image_url, caption, body, boost_count, thread_count, created_at, updated_at, is_edited, profiles(username, avatar_url)",
       )
       .in("user_id", followingIds)
       .order("created_at", { ascending: false })
@@ -254,7 +256,10 @@ async function FeedContent() {
                         <p className="truncate text-sm font-semibold text-zinc-100">{username}</p>
                       )}
                     </div>
-                    <p className="font-mono text-xs text-zinc-500">{formatTimestamp(post.created_at)}</p>
+                    <p className="font-mono text-xs text-zinc-500">
+                      {formatTimestamp(post.created_at)}
+                      {post.is_edited ? <span className="ml-1 normal-case tracking-normal text-zinc-600">(edited)</span> : null}
+                    </p>
                   </header>
 
                   {post.image_url ? (
@@ -276,6 +281,9 @@ async function FeedContent() {
                     threadCount={post.thread_count ?? 0}
                     initialBookmarked={bookmarkedSet.has(post.id)}
                     shareUrl={shareUrl}
+                    isOwner={post.user_id === user.id}
+                    initialBody={post.body ?? ""}
+                    canEdit
                   />
 
                   <div className="px-4 pb-3">
@@ -288,14 +296,14 @@ async function FeedContent() {
                         {!post.image_url ? (
                           <span className="mr-2 font-semibold text-zinc-100">{username}</span>
                         ) : null}
-                        {renderTextWithLinks(post.body)}
+                        {parseRichText(post.body)}
                       </div>
                     ) : null}
 
                     {post.caption ? (
                       <p className="mt-1 text-sm leading-relaxed text-zinc-300">
                         <span className="mr-2 font-semibold text-zinc-100">{username}</span>
-                        {renderTextWithLinks(post.caption)}
+                        {parseRichText(post.caption)}
                       </p>
                     ) : null}
 

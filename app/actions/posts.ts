@@ -16,6 +16,11 @@ export type AddThreadState = {
   error?: string;
 };
 
+export type EditPostState = {
+  error?: string;
+  success?: boolean;
+};
+
 export async function transmitPost(
   _prevState: TransmitPostState,
   formData: FormData,
@@ -480,6 +485,58 @@ export async function uploadReel(
   revalidatePath("/reels");
   revalidatePath("/");
   redirect("/reels");
+}
+
+export async function editPost(
+  _prevState: EditPostState,
+  formData: FormData,
+): Promise<EditPostState> {
+  const postId = formData.get("postId");
+  const bodyRaw = formData.get("body");
+  const body = typeof bodyRaw === "string" ? bodyRaw.trim() : "";
+
+  if (typeof postId !== "string" || !postId) {
+    return { error: "EDIT FAILED: Missing post reference." };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    return { error: "EDIT FAILED: Authentication required." };
+  }
+
+  const { data: post } = await supabase
+    .from("posts")
+    .select("id, user_id")
+    .eq("id", postId)
+    .maybeSingle();
+
+  if (!post || post.user_id !== user.id) {
+    return { error: "EDIT FAILED: Not authorized." };
+  }
+
+  const { error } = await supabase
+    .from("posts")
+    .update({
+      body: body || null,
+      is_edited: true,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", postId)
+    .eq("user_id", user.id);
+
+  if (error) {
+    return { error: `EDIT FAILED: ${error.message}` };
+  }
+
+  revalidatePath("/");
+  revalidatePath(`/post/${postId}`);
+  revalidatePath("/profile");
+  return { success: true };
 }
 
 export async function deletePost(formData: FormData): Promise<void> {

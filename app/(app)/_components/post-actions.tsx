@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useState, useTransition, useActionState } from "react";
 import Link from "next/link";
-import { Bookmark, Heart, MessageCircle, Send } from "lucide-react";
-import { toggleBookmark, toggleBoostPost } from "@/app/actions/posts";
+import { Bookmark, Heart, MessageCircle, Pencil, Send, X } from "lucide-react";
+import { toggleBookmark, toggleBoostPost, editPost, type EditPostState } from "@/app/actions/posts";
+
+const initialEditState: EditPostState = {};
 
 export function PostActions({
   postId,
@@ -13,6 +15,9 @@ export function PostActions({
   initialBookmarked,
   shareUrl,
   compact = false,
+  isOwner = false,
+  initialBody = "",
+  canEdit = false,
 }: {
   postId: string;
   initialBoosted: boolean;
@@ -21,11 +26,17 @@ export function PostActions({
   initialBookmarked: boolean;
   shareUrl: string;
   compact?: boolean;
+  isOwner?: boolean;
+  initialBody?: string;
+  canEdit?: boolean;
 }) {
   const [boosted, setBoosted] = useState(initialBoosted);
   const [boostCount, setBoostCount] = useState(initialBoostCount);
   const [bookmarked, setBookmarked] = useState(initialBookmarked);
   const [isPending, startTransition] = useTransition();
+  const [editing, setEditing] = useState(false);
+  const [editState, editAction, editPending] = useActionState(editPost, initialEditState);
+  const isEditing = editing && !editState?.success;
 
   useEffect(() => {
     function onBoosted(e: Event) {
@@ -90,7 +101,8 @@ export function PostActions({
   const iconClass = "transition-all duration-200 ease-out hover:text-zinc-100";
 
   return (
-    <div className={`flex items-center justify-between ${compact ? "px-3 py-2" : "px-4 py-2.5"}`}>
+    <div className={compact ? "px-3 py-2" : "px-4 py-2.5"}>
+      <div className="flex items-center justify-between">
       <div className="flex items-center gap-4">
         <button
           type="button"
@@ -116,6 +128,16 @@ export function PostActions({
         >
           <Send size={24} strokeWidth={1.8} />
         </button>
+        {isOwner && canEdit ? (
+          <button
+            type="button"
+            onClick={() => setEditing((v) => !v)}
+            aria-label="Edit post"
+            className={`${iconClass} ${isEditing ? "text-[#22d3ee]" : "text-zinc-300"}`}
+          >
+            <Pencil size={24} strokeWidth={1.8} />
+          </button>
+        ) : null}
       </div>
       <button
         type="button"
@@ -128,6 +150,38 @@ export function PostActions({
       </button>
       <span className="sr-only">{boostCount} boosts</span>
       <span className="sr-only">{threadCount} threads</span>
+      </div>
+
+      {isEditing ? (
+        <div className="mt-3 border-t border-zinc-800 pt-3">
+          <div className="mb-2 flex items-center justify-between">
+            <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-zinc-500">Edit transmission</p>
+            <button type="button" onClick={() => setEditing(false)} className="text-zinc-500 transition-all duration-200 ease-out hover:text-zinc-200" aria-label="Close edit">
+              <X size={14} />
+            </button>
+          </div>
+          <form action={editAction} className="space-y-2">
+            <input type="hidden" name="postId" value={postId} />
+            <textarea
+              name="body"
+              defaultValue={initialBody}
+              rows={4}
+              className="w-full resize-y border border-zinc-800 bg-[#111111] px-3 py-2 text-sm leading-relaxed text-zinc-100 outline-none transition-all duration-200 ease-out placeholder:text-zinc-600 focus:border-[#22d3ee]"
+              placeholder="Update post text..."
+            />
+            {editState?.error ? <p className="font-mono text-[11px] text-red-400">{editState.error}</p> : null}
+            <div className="flex justify-end">
+              <button
+                type="submit"
+                disabled={editPending}
+                className="border border-zinc-700 bg-[#111111] px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.15em] text-[#22d3ee] transition-all duration-200 ease-out hover:border-zinc-600 disabled:opacity-50"
+              >
+                {editPending ? "Saving..." : "Save"}
+              </button>
+            </div>
+          </form>
+        </div>
+      ) : null}
     </div>
   );
 }

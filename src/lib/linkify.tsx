@@ -1,13 +1,14 @@
+import Link from "next/link";
 import type { ReactNode } from "react";
 
-const URL_REGEX = /(https?:\/\/[^\s<]+)/g;
+const TOKEN_REGEX = /(https?:\/\/[^\s<]+|@[a-zA-Z0-9_]+|#[a-zA-Z0-9_]+)/g;
 
-export function renderTextWithLinks(text: string): ReactNode[] {
-  const parts = text.split(URL_REGEX);
+export function parseRichText(text: string): ReactNode[] {
+  const parts = text.split(TOKEN_REGEX);
   return parts.map((part, i) => {
-    if (URL_REGEX.test(part)) {
-      // reset regex lastIndex because of global flag
-      URL_REGEX.lastIndex = 0;
+    if (!part) return <span key={i} />;
+
+    if (/^https?:\/\/[^\s<]+$/.test(part)) {
       const href = part.replace(/[),.;!?]+$/g, "");
       const trailing = part.slice(href.length);
       return (
@@ -24,7 +25,38 @@ export function renderTextWithLinks(text: string): ReactNode[] {
         </span>
       );
     }
-    URL_REGEX.lastIndex = 0;
+
+    if (/^@[a-zA-Z0-9_]+$/.test(part)) {
+      const username = part.slice(1);
+      return (
+        <Link
+          key={i}
+          href={`/u/${username}`}
+          className="text-cyan-400 transition-colors duration-200 ease-out hover:underline"
+        >
+          {part}
+        </Link>
+      );
+    }
+
+    if (/^#[a-zA-Z0-9_]+$/.test(part)) {
+      const tag = part.slice(1);
+      return (
+        <Link
+          key={i}
+          href={`/explore?tag=${encodeURIComponent(tag)}`}
+          className="text-cyan-400 transition-colors duration-200 ease-out hover:underline"
+        >
+          {part}
+        </Link>
+      );
+    }
+
     return <span key={i}>{part}</span>;
   });
+}
+
+// Back-compat alias used by existing code
+export function renderTextWithLinks(text: string): ReactNode[] {
+  return parseRichText(text);
 }

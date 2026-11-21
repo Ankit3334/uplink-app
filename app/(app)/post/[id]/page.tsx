@@ -9,7 +9,7 @@ import { FadeIn } from "@/src/components/fade-in";
 import { requireUser } from "@/src/lib/auth";
 import { createClient } from "@/src/lib/supabase/server";
 import { ThreadComposer } from "./_components/thread-composer";
-import { renderTextWithLinks } from "@/src/lib/linkify";
+import { parseRichText } from "@/src/lib/utils";
 
 type ProfileRef = {
   username: string | null;
@@ -25,6 +25,8 @@ type PostDetail = {
   boost_count: number;
   thread_count: number;
   created_at: string;
+  updated_at: string | null;
+  is_edited: boolean | null;
   profiles: ProfileRef | ProfileRef[];
 };
 
@@ -65,7 +67,7 @@ export default async function PostDetailPage({
   const { data: postData } = await supabase
     .from("posts")
     .select(
-      "id, user_id, image_url, caption, body, boost_count, thread_count, created_at, profiles(username, avatar_url)",
+      "id, user_id, image_url, caption, body, boost_count, thread_count, created_at, updated_at, is_edited, profiles(username, avatar_url)",
     )
     .eq("id", id)
     .maybeSingle();
@@ -133,7 +135,10 @@ export default async function PostDetailPage({
                 <p className="truncate text-sm font-semibold text-zinc-100">{postUsername}</p>
               )}
             </div>
-            <p className="font-mono text-xs text-zinc-500">{formatTimestamp(post.created_at)}</p>
+            <p className="font-mono text-xs text-zinc-500">
+              {formatTimestamp(post.created_at)}
+              {post.is_edited ? <span className="ml-1 normal-case tracking-normal text-zinc-600">(edited)</span> : null}
+            </p>
           </header>
 
           {post.image_url ? (
@@ -155,6 +160,9 @@ export default async function PostDetailPage({
             initialBookmarked={Boolean(bookmarkRow)}
             shareUrl={shareUrl}
             compact
+            isOwner={isOwner}
+            initialBody={post.body ?? ""}
+            canEdit
           />
 
           <div className="px-3 pb-3">
@@ -167,14 +175,14 @@ export default async function PostDetailPage({
                 {!post.image_url ? (
                   <span className="mr-2 font-semibold text-zinc-100">{postUsername}</span>
                 ) : null}
-                {renderTextWithLinks(post.body)}
+                {parseRichText(post.body)}
               </div>
             ) : null}
 
             {post.caption ? (
               <p className="mt-1 text-sm leading-relaxed text-zinc-300">
                 <span className="mr-2 font-semibold text-zinc-100">{postUsername}</span>
-                {renderTextWithLinks(post.caption)}
+                {parseRichText(post.caption)}
               </p>
             ) : null}
             {isOwner ? (
@@ -234,7 +242,7 @@ export default async function PostDetailPage({
                         ) : (
                           <span className="mr-2 font-semibold text-zinc-100">{tUsername}</span>
                         )}
-                        <span>{thread.content}</span>
+                        <span>{parseRichText(thread.content)}</span>
                       </p>
                       <p className="mt-1 font-mono text-[11px] text-zinc-500">
                         {formatTimestamp(thread.created_at)}
