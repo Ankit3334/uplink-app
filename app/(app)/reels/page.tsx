@@ -55,12 +55,12 @@ export default async function ReelsPage() {
     >
       {reels.length === 0 ? (
         <div className="flex h-[calc(100dvh-4rem)] snap-start snap-always items-center justify-center px-6">
-          <div className="w-full max-w-md border-b border-zinc-800 bg-[#050505] p-6 text-center">
-            <p className="font-mono text-xs uppercase tracking-[0.15em] text-zinc-300">
-              No Reel Signal
+          <div className="w-full max-w-md border border-zinc-800 bg-[#050505] p-8 text-center">
+            <p className="font-mono text-xs uppercase tracking-[0.15em] text-zinc-400">
+              {"// NO TRANSMISSIONS FOUND"}
             </p>
-            <p className="mt-2 text-sm leading-relaxed text-zinc-500">
-              No reel transmissions detected. Initiate a REEL uplink to populate the stream.
+            <p className="mt-2 text-xs leading-relaxed text-zinc-500">
+              No reel signals detected. Initiate a REEL uplink.
             </p>
           </div>
         </div>

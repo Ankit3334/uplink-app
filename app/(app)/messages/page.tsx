@@ -86,12 +86,12 @@ export default async function MessagesPage() {
 
       <div className="border-t border-zinc-800 pt-4">
         {rooms.length === 0 ? (
-          <div className="border border-zinc-800 bg-[#0a0a0a] p-5 text-sm text-zinc-400">
-            <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-zinc-300">
-              No Active Channels
+          <div className="border border-zinc-800 bg-[#0a0a0a] p-8 text-center">
+            <p className="font-mono text-xs uppercase tracking-[0.15em] text-zinc-400">
+              {"// NO TRANSMISSIONS FOUND"}
             </p>
             <p className="mt-2 text-xs leading-relaxed text-zinc-500">
-              No direct message rooms detected. Initiate contact from a node profile when available.
+              No direct message channels detected.
             </p>
           </div>
         ) : (

@@ -104,12 +104,12 @@ export default async function NotificationsPage() {
 
       <div className="border-t border-zinc-800 pt-4">
         {notifications.length === 0 ? (
-          <div className="animate-fade-in border border-zinc-800 bg-[#0a0a0a] p-5 text-sm text-zinc-400">
-            <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-zinc-300">
-              No Notifications
+          <div className="animate-fade-in border border-zinc-800 bg-[#0a0a0a] p-8 text-center">
+            <p className="font-mono text-xs uppercase tracking-[0.15em] text-zinc-400">
+              {"// NO TRANSMISSIONS FOUND"}
             </p>
             <p className="mt-2 text-xs leading-relaxed text-zinc-500">
-              Activity feed is clear. New boosts, follows, and threads will appear here.
+              Activity feed is clear. New signals will appear here.
             </p>
           </div>
         ) : (

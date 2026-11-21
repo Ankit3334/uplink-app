@@ -208,9 +208,9 @@ async function FeedContent() {
       ) : null}
 
       {posts.length === 0 ? (
-        <div className="px-4 py-10 text-center">
+        <div className="px-4 py-12 text-center">
           <p className="font-mono text-xs uppercase tracking-[0.15em] text-zinc-400">
-            Awaiting Signal
+            {"// NO TRANSMISSIONS FOUND"}
           </p>
           <p className="mt-2 text-sm text-zinc-500">
             {isNetworkEmpty
