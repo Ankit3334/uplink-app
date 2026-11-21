@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Heart, LayoutGrid, Search, Upload, User } from "lucide-react";
+import { Film, Heart, LayoutGrid, Upload, User } from "lucide-react";
 import { cn } from "@/src/lib/utils";
 
 const navItems = [
   { href: "/", label: "Feed", icon: LayoutGrid },
-  { href: "/explore", label: "Explore", icon: Search },
+  { href: "/reels", label: "Reels", icon: Film },
   { href: "/upload", label: "Uplink", icon: Upload, prominent: true },
   { href: "/notifications", label: "Alerts", icon: Heart },
   { href: "/profile", label: "Profile", icon: User },

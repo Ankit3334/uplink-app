@@ -1,12 +1,13 @@
 import { Suspense } from "react";
 import Link from "next/link";
-import { MessageSquare, Terminal } from "lucide-react";
-import { BoostForm } from "./_components/boost-form";
+import { Search, Terminal } from "lucide-react";
 import {
   StoriesBar,
   type StoryItem,
   type StoryUserGroup,
 } from "./_components/stories-bar";
+import { PostActions } from "./_components/post-actions";
+import { DoubleTapBoost } from "./_components/double-tap-boost";
 import { FadeIn } from "@/src/components/fade-in";
 import { requireUser } from "@/src/lib/auth";
 import { createClient } from "@/src/lib/supabase/server";
@@ -56,15 +57,11 @@ function formatTimestamp(iso: string) {
 
 function StoriesSkeleton() {
   return (
-    <div className="border border-zinc-800 bg-[#0a0a0a] p-3">
-      <div className="mb-3 flex items-center justify-between">
-        <div className="h-2 w-28 animate-pulse rounded-none bg-zinc-800" />
-        <div className="h-2 w-16 animate-pulse rounded-none bg-zinc-800" />
-      </div>
-      <div className="flex gap-3 overflow-hidden">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <div key={i} className="flex w-[72px] flex-shrink-0 flex-col items-center gap-2">
-            <div className="h-14 w-14 animate-pulse rounded-none border border-zinc-800 bg-zinc-800" />
+    <div className="border-b border-zinc-800 px-4 py-3">
+      <div className="flex gap-4 overflow-hidden">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="flex w-14 flex-shrink-0 flex-col items-center gap-1.5">
+            <div className="h-14 w-14 animate-pulse rounded-none bg-zinc-800" />
             <div className="h-2 w-10 animate-pulse rounded-none bg-zinc-800" />
           </div>
         ))}
@@ -75,26 +72,17 @@ function StoriesSkeleton() {
 
 function FeedSkeleton() {
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col">
       {Array.from({ length: 3 }).map((_, i) => (
-        <article key={i} className="border border-zinc-800 bg-[#0a0a0a]">
-          <header className="flex items-center gap-3 border-b border-zinc-800 p-4">
-            <div className="h-10 w-10 animate-pulse rounded-none bg-zinc-800" />
-            <div className="flex-1 space-y-2">
-              <div className="h-3 w-28 animate-pulse rounded-none bg-zinc-800" />
-              <div className="h-2 w-20 animate-pulse rounded-none bg-zinc-800" />
-            </div>
-          </header>
-          <div className="p-4">
-            <div className="aspect-square w-full animate-pulse rounded-none border border-zinc-800 bg-zinc-800" />
+        <article key={i} className="border-b border-zinc-800 pb-3">
+          <div className="flex items-center gap-3 px-4 py-3">
+            <div className="h-8 w-8 animate-pulse rounded-none bg-zinc-800" />
+            <div className="h-3 w-24 animate-pulse rounded-none bg-zinc-800" />
           </div>
-          <div className="space-y-2 px-4 pb-4">
+          <div className="aspect-square w-full animate-pulse rounded-none bg-zinc-800" />
+          <div className="space-y-2 px-4 pt-3">
+            <div className="h-3 w-20 animate-pulse rounded-none bg-zinc-800" />
             <div className="h-3 w-full animate-pulse rounded-none bg-zinc-800" />
-            <div className="h-3 w-4/5 animate-pulse rounded-none bg-zinc-800" />
-          </div>
-          <div className="flex gap-2 border-t border-zinc-800 p-4">
-            <div className="h-9 w-24 animate-pulse rounded-none bg-zinc-800" />
-            <div className="h-9 w-24 animate-pulse rounded-none bg-zinc-800" />
           </div>
         </article>
       ))}
@@ -150,8 +138,6 @@ async function StoriesSection() {
     }
   }
 
-  const groups = Array.from(byUser.values());
-
   return (
     <StoriesBar
       currentUser={{
@@ -159,7 +145,7 @@ async function StoriesSection() {
         username: profile?.username ?? "unknown_node",
         avatarUrl: profile?.avatar_url ?? null,
       }}
-      groups={groups}
+      groups={Array.from(byUser.values())}
     />
   );
 }
@@ -177,7 +163,6 @@ async function FeedContent() {
   const isNetworkEmpty = followingIds.length === 0;
 
   let posts: FeedPost[] = [];
-
   if (isNetworkEmpty) {
     const { data } = await supabase
       .from("posts")
@@ -199,39 +184,51 @@ async function FeedContent() {
     posts = (data ?? []) as FeedPost[];
   }
 
+  const postIds = posts.map((p) => p.id);
+  const [{ data: boosts }, { data: bookmarks }] = postIds.length
+    ? await Promise.all([
+        supabase.from("boosts").select("post_id").eq("user_id", user.id).in("post_id", postIds),
+        supabase.from("bookmarks").select("post_id").eq("user_id", user.id).in("post_id", postIds),
+      ])
+    : [{ data: [] }, { data: [] }];
+
+  const boostedSet = new Set((boosts ?? []).map((b) => b.post_id as string));
+  const bookmarkedSet = new Set((bookmarks ?? []).map((b) => b.post_id as string));
+
   return (
     <>
       {isNetworkEmpty ? (
-        <div className="border border-zinc-700 bg-[#111111] p-4 font-mono text-[10px] uppercase tracking-[0.15em] text-zinc-300">
-          NETWORK EMPTY. FOLLOW NODES TO CURATE YOUR STREAM.
+        <div className="border-b border-zinc-800 px-4 py-3 font-mono text-xs uppercase tracking-[0.12em] text-zinc-400">
+          Network empty. Follow nodes to curate your stream.
         </div>
       ) : null}
 
       {posts.length === 0 ? (
-        <div className="border border-zinc-800 bg-[#0a0a0a] p-6 text-sm text-zinc-400">
-          <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-zinc-300">
-            Status: Awaiting Signal
+        <div className="px-4 py-10 text-center">
+          <p className="font-mono text-xs uppercase tracking-[0.15em] text-zinc-400">
+            Awaiting Signal
           </p>
-          <p className="mt-3 leading-relaxed">
+          <p className="mt-2 text-sm text-zinc-500">
             {isNetworkEmpty
-              ? "No uplinks detected in the global network. Initiate a transmission to populate the stream."
-              : "No transmissions detected from followed nodes. Follow more nodes or wait for new uplinks."}
+              ? "No uplinks detected. Initiate a transmission to populate the stream."
+              : "No transmissions from followed nodes yet."}
           </p>
         </div>
       ) : (
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col">
           {posts.map((post, index) => {
             const profile = Array.isArray(post.profiles)
               ? (post.profiles[0] ?? null)
               : post.profiles;
             const username = profile?.username ?? "unknown_node";
             const avatarUrl = profile?.avatar_url ?? null;
+            const shareUrl = `/post/${post.id}`;
 
             return (
-              <FadeIn key={post.id} delay={index * 0.04}>
-                <article className="border border-zinc-800 bg-[#0a0a0a]">
-                  <header className="flex items-center gap-3 border-b border-zinc-800 p-4">
-                    <div className="flex h-10 w-10 items-center justify-center border border-zinc-800 bg-[#111111] text-zinc-400">
+              <FadeIn key={post.id} delay={index * 0.03}>
+                <article className="border-b border-zinc-800 bg-[#050505]">
+                  <header className="flex items-center gap-3 px-4 py-3">
+                    <div className="flex h-8 w-8 items-center justify-center border border-zinc-800 bg-[#0a0a0a] text-zinc-400">
                       {avatarUrl ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
@@ -240,67 +237,62 @@ async function FeedContent() {
                           className="h-full w-full object-cover"
                         />
                       ) : (
-                        <Terminal size={18} strokeWidth={1.8} />
+                        <Terminal size={14} strokeWidth={1.8} />
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
                       {profile?.username ? (
                         <Link
                           href={`/u/${profile.username}`}
-                          className="block truncate text-sm font-semibold uppercase tracking-[0.08em] text-zinc-100 transition-colors hover:text-[#22d3ee]"
+                          className="block truncate text-sm font-semibold text-zinc-100 transition-colors hover:text-[#22d3ee]"
                         >
-                          @{username}
+                          {username}
                         </Link>
                       ) : (
-                        <p className="truncate text-sm font-semibold uppercase tracking-[0.08em] text-zinc-100">
-                          @{username}
-                        </p>
+                        <p className="truncate text-sm font-semibold text-zinc-100">{username}</p>
                       )}
-                      <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-zinc-500">
-                        {formatTimestamp(post.created_at)}
-                      </p>
                     </div>
-                    <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-zinc-600">
-                      PKT
-                    </span>
+                    <p className="font-mono text-xs text-zinc-500">{formatTimestamp(post.created_at)}</p>
                   </header>
 
-                  <div className="p-4">
+                  <DoubleTapBoost postId={post.id}>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={post.image_url}
-                      alt={
-                        post.caption ? post.caption : `Transmission by ${username}`
-                      }
-                      className="w-full rounded-none border border-zinc-800 object-cover"
+                      alt={post.caption ? post.caption : `Transmission by ${username}`}
+                      className="w-full object-cover"
                       loading="lazy"
                     />
-                  </div>
+                  </DoubleTapBoost>
 
-                  {post.caption ? (
-                    <div className="px-4 pb-4">
-                      <p className="whitespace-pre-wrap border-l border-zinc-700 pl-4 font-mono text-sm leading-relaxed text-zinc-300">
+                  <PostActions
+                    postId={post.id}
+                    initialBoosted={boostedSet.has(post.id)}
+                    initialBoostCount={post.boost_count ?? 0}
+                    threadCount={post.thread_count ?? 0}
+                    initialBookmarked={bookmarkedSet.has(post.id)}
+                    shareUrl={shareUrl}
+                  />
+
+                  <div className="px-4 pb-3">
+                    <p className="text-sm font-semibold text-zinc-100">
+                      {post.boost_count ?? 0} {(post.boost_count ?? 0) === 1 ? "boost" : "boosts"}
+                    </p>
+                    {post.caption ? (
+                      <p className="mt-1 text-sm leading-relaxed text-zinc-300">
+                        <span className="mr-2 font-semibold text-zinc-100">{username}</span>
                         {post.caption}
                       </p>
-                    </div>
-                  ) : null}
-
-                  <footer className="flex items-center gap-2 border-t border-zinc-800 p-4">
-                    <BoostForm postId={post.id} count={post.boost_count ?? 0} />
-                    <Link
-                      href={`/post/${post.id}`}
-                      className="group flex items-center gap-2 border border-zinc-800 bg-transparent px-3 py-2 text-xs uppercase tracking-[0.15em] text-zinc-400 transition-colors hover:border-zinc-700 hover:text-zinc-200 focus-visible:border-[#22d3ee] focus-visible:text-[#22d3ee] focus-visible:outline-none"
-                    >
-                      <MessageSquare
-                        size={15}
-                        className="transition-colors duration-200 ease-in-out group-hover:text-zinc-200 group-focus-visible:text-[#22d3ee]"
-                      />
-                      <span>Thread</span>
-                      <span className="font-mono text-zinc-500 group-hover:text-zinc-300 group-focus-visible:text-[#22d3ee]">
-                        [{post.thread_count ?? 0}]
-                      </span>
-                    </Link>
-                  </footer>
+                    ) : null}
+                    {post.thread_count > 0 ? (
+                      <Link
+                        href={`/post/${post.id}`}
+                        className="mt-1 block text-sm text-zinc-500 transition-colors hover:text-zinc-300"
+                      >
+                        View all {post.thread_count} threads
+                      </Link>
+                    ) : null}
+                  </div>
                 </article>
               </FadeIn>
             );
@@ -313,20 +305,31 @@ async function FeedContent() {
 
 export default function FeedPage() {
   return (
-    <section className="mx-auto flex min-h-[calc(100vh-6rem)] w-full max-w-md flex-col gap-4 px-4 pt-6 pb-24">
-      <header className="border border-zinc-800 bg-[#0a0a0a] p-4">
-        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
-          Channel // 01
-        </p>
-        <h1 className="mt-2 text-xl font-bold uppercase tracking-wider text-zinc-100">
-          Feed
-        </h1>
-        <p className="mt-2 text-xs leading-relaxed text-zinc-400">
-          Live data stream. Incoming transmissions decoded below.
-        </p>
+    <section className="mx-auto flex min-h-[calc(100vh-6rem)] w-full max-w-md flex-col px-4 pt-6 pb-24">
+      <header className="border-b border-zinc-800 pb-4">
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
+              Channel // 01
+            </p>
+            <h1 className="mt-1 text-xl font-bold uppercase tracking-wider text-zinc-100">
+              Feed
+            </h1>
+            <p className="mt-1 text-xs leading-relaxed text-zinc-400">
+              Live data stream. Incoming transmissions decoded below.
+            </p>
+          </div>
+          <Link
+            href="/explore"
+            aria-label="Explore and search nodes"
+            className="inline-flex h-9 w-9 flex-shrink-0 items-center justify-center border border-zinc-800 bg-[#0a0a0a] text-zinc-400 transition-colors hover:border-zinc-700 hover:text-[#22d3ee] focus-visible:border-[#22d3ee] focus-visible:text-[#22d3ee] focus-visible:outline-none"
+          >
+            <Search size={16} strokeWidth={1.8} />
+          </Link>
+        </div>
       </header>
 
-      <div className="flex flex-col gap-4 border-t border-zinc-800 pt-4">
+      <div className="flex flex-col">
         <Suspense fallback={<StoriesSkeleton />}>
           <StoriesSection />
         </Suspense>

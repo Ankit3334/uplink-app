@@ -75,10 +75,15 @@ export async function transmitPost(
   redirect("/");
 }
 
-export async function toggleBoost(formData: FormData): Promise<void> {
-  const postId = formData.get("postId");
-  if (typeof postId !== "string" || !postId) {
-    return;
+export type ToggleBoostResult = {
+  boosted: boolean;
+  boostCount: number;
+  error?: string;
+};
+
+export async function toggleBoostPost(postId: string): Promise<ToggleBoostResult> {
+  if (!postId) {
+    return { boosted: false, boostCount: 0, error: "Missing post." };
   }
 
   const supabase = await createClient();
@@ -88,19 +93,17 @@ export async function toggleBoost(formData: FormData): Promise<void> {
   } = await supabase.auth.getUser();
 
   if (userError || !user) {
-    redirect("/auth");
+    return { boosted: false, boostCount: 0, error: "Authentication required." };
   }
 
-  const { data: existingBoost, error: existingError } = await supabase
+  const { data: existingBoost } = await supabase
     .from("boosts")
     .select("id")
     .eq("user_id", user.id)
     .eq("post_id", postId)
     .maybeSingle();
 
-  if (existingError) {
-    return;
-  }
+  let boosted = false;
 
   if (existingBoost) {
     const { error: deleteError } = await supabase
@@ -109,28 +112,27 @@ export async function toggleBoost(formData: FormData): Promise<void> {
       .eq("id", existingBoost.id)
       .eq("user_id", user.id);
 
-    if (deleteError) {
-      return;
-    }
-
-    const { error: rpcError } = await supabase.rpc("adjust_post_boost_count", {
-      p_post_id: postId,
-      p_delta: -1,
-    });
-
-    if (rpcError) {
-      // Fallback: may fail under RLS if user is not post owner; count kept best-effort.
-      const { data: post } = await supabase
-        .from("posts")
-        .select("boost_count")
-        .eq("id", postId)
-        .maybeSingle();
-      if (post) {
-        await supabase
+    if (!deleteError) {
+      boosted = false;
+      const { error: rpcError } = await supabase.rpc("adjust_post_boost_count", {
+        p_post_id: postId,
+        p_delta: -1,
+      });
+      if (rpcError) {
+        const { data: post } = await supabase
           .from("posts")
-          .update({ boost_count: Math.max((post.boost_count ?? 1) - 1, 0) })
-          .eq("id", postId);
+          .select("boost_count")
+          .eq("id", postId)
+          .maybeSingle();
+        if (post) {
+          await supabase
+            .from("posts")
+            .update({ boost_count: Math.max((post.boost_count ?? 1) - 1, 0) })
+            .eq("id", postId);
+        }
       }
+    } else {
+      boosted = true;
     }
   } else {
     const { error: insertError } = await supabase.from("boosts").insert({
@@ -138,46 +140,178 @@ export async function toggleBoost(formData: FormData): Promise<void> {
       post_id: postId,
     });
 
-    if (insertError) {
-      return;
-    }
+    if (!insertError) {
+      boosted = true;
+      const { error: rpcError } = await supabase.rpc("adjust_post_boost_count", {
+        p_post_id: postId,
+        p_delta: 1,
+      });
+      if (rpcError) {
+        const { data: post } = await supabase
+          .from("posts")
+          .select("boost_count")
+          .eq("id", postId)
+          .maybeSingle();
+        if (post) {
+          await supabase
+            .from("posts")
+            .update({ boost_count: (post.boost_count ?? 0) + 1 })
+            .eq("id", postId);
+        }
+      }
 
-    const { error: rpcError } = await supabase.rpc("adjust_post_boost_count", {
-      p_post_id: postId,
-      p_delta: 1,
-    });
-
-    if (rpcError) {
       const { data: post } = await supabase
         .from("posts")
-        .select("boost_count")
+        .select("user_id")
         .eq("id", postId)
         .maybeSingle();
-      if (post) {
-        await supabase
-          .from("posts")
-          .update({ boost_count: (post.boost_count ?? 0) + 1 })
-          .eq("id", postId);
+      if (post?.user_id && post.user_id !== user.id) {
+        await supabase.from("notifications").insert({
+          user_id: post.user_id,
+          actor_id: user.id,
+          type: "boost",
+          post_id: postId,
+        });
       }
-    }
-
-    const { data: post } = await supabase
-      .from("posts")
-      .select("user_id")
-      .eq("id", postId)
-      .maybeSingle();
-    if (post?.user_id && post.user_id !== user.id) {
-      await supabase.from("notifications").insert({
-        user_id: post.user_id,
-        actor_id: user.id,
-        type: "boost",
-        post_id: postId,
-      });
-      revalidatePath("/notifications");
     }
   }
 
+  const { data: postRow } = await supabase
+    .from("posts")
+    .select("boost_count")
+    .eq("id", postId)
+    .maybeSingle();
+
   revalidatePath("/");
+  revalidatePath(`/post/${postId}`);
+  revalidatePath("/notifications");
+
+  return {
+    boosted,
+    boostCount: postRow?.boost_count ?? 0,
+  };
+}
+
+export async function toggleBoost(formData: FormData): Promise<void> {
+  const postId = formData.get("postId");
+  if (typeof postId !== "string" || !postId) return;
+  await toggleBoostPost(postId);
+}
+
+export type ToggleBookmarkResult = {
+  bookmarked: boolean;
+  error?: string;
+};
+
+export async function toggleBookmark(postId: string): Promise<ToggleBookmarkResult> {
+  if (!postId) return { bookmarked: false, error: "Missing post." };
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    return { bookmarked: false, error: "Authentication required." };
+  }
+
+  const { data: existing } = await supabase
+    .from("bookmarks")
+    .select("id")
+    .eq("user_id", user.id)
+    .eq("post_id", postId)
+    .maybeSingle();
+
+  let bookmarked = false;
+  if (existing) {
+    const { error } = await supabase
+      .from("bookmarks")
+      .delete()
+      .eq("id", existing.id)
+      .eq("user_id", user.id);
+    bookmarked = Boolean(error);
+  } else {
+    const { error } = await supabase.from("bookmarks").insert({
+      user_id: user.id,
+      post_id: postId,
+    });
+    bookmarked = !error;
+  }
+
+  revalidatePath("/");
+  revalidatePath(`/post/${postId}`);
+  revalidatePath("/profile");
+
+  return { bookmarked };
+}
+
+export async function toggleReelBoost(
+  reelId: string,
+): Promise<{ boosted: boolean; boostCount: number; error?: string }> {
+  if (!reelId) return { boosted: false, boostCount: 0, error: "Missing reel." };
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { boosted: false, boostCount: 0, error: "Authentication required." };
+
+  const { data: existing } = await supabase
+    .from("reel_boosts")
+    .select("id")
+    .eq("user_id", user.id)
+    .eq("reel_id", reelId)
+    .maybeSingle();
+
+  let boosted = false;
+  if (existing) {
+    await supabase.from("reel_boosts").delete().eq("id", existing.id).eq("user_id", user.id);
+    boosted = false;
+  } else {
+    const { error } = await supabase.from("reel_boosts").insert({ user_id: user.id, reel_id: reelId });
+    boosted = !error;
+  }
+
+  // Keep reels.boost_count in sync (best-effort count)
+  const { count } = await supabase
+    .from("reel_boosts")
+    .select("id", { count: "exact", head: true })
+    .eq("reel_id", reelId);
+  const boostCount = count ?? 0;
+  await supabase.from("reels").update({ boost_count: boostCount }).eq("id", reelId);
+
+  revalidatePath("/reels");
+  return { boosted, boostCount };
+}
+
+export async function toggleReelBookmark(
+  reelId: string,
+): Promise<{ bookmarked: boolean; error?: string }> {
+  if (!reelId) return { bookmarked: false, error: "Missing reel." };
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { bookmarked: false, error: "Authentication required." };
+
+  const { data: existing } = await supabase
+    .from("reel_bookmarks")
+    .select("id")
+    .eq("user_id", user.id)
+    .eq("reel_id", reelId)
+    .maybeSingle();
+
+  let bookmarked = false;
+  if (existing) {
+    await supabase.from("reel_bookmarks").delete().eq("id", existing.id).eq("user_id", user.id);
+    bookmarked = false;
+  } else {
+    const { error } = await supabase.from("reel_bookmarks").insert({ user_id: user.id, reel_id: reelId });
+    bookmarked = !error;
+  }
+
+  revalidatePath("/reels");
+  return { bookmarked };
 }
 
 export async function addThread(
