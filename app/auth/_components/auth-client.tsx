@@ -1,52 +1,65 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { useFormStatus } from "react-dom";
+import { Loader2 } from "lucide-react";
 import { signIn, signUp, type AuthState } from "@/app/actions/auth";
 
 const initialState: AuthState = {};
 
+function AuthSubmitButton({ isRegister }: { isRegister: boolean }) {
+  const { pending } = useFormStatus();
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      className="mt-2 flex w-full items-center justify-center gap-2 border border-zinc-700 bg-[#111111] px-4 py-3.5 text-sm font-bold uppercase tracking-[0.2em] text-[#22d3ee] transition-colors hover:border-zinc-600 hover:bg-[#161616] focus-visible:border-[#22d3ee] focus-visible:outline-none active:border-[#22d3ee] disabled:cursor-not-allowed disabled:opacity-50"
+    >
+      {pending ? (
+        <>
+          <Loader2 size={16} className="animate-spin" />
+          <span className="text-zinc-200">Processing...</span>
+        </>
+      ) : isRegister ? (
+        "Register Operator"
+      ) : (
+        "Authenticate"
+      )}
+    </button>
+  );
+}
+
 export function AuthClient() {
   const [mode, setMode] = useState<"signin" | "register">("signin");
-  const [signInState, signInAction, signInPending] = useActionState(
-    signIn,
-    initialState,
-  );
-  const [signUpState, signUpAction, signUpPending] = useActionState(
-    signUp,
-    initialState,
-  );
+  const [signInState, signInAction] = useActionState(signIn, initialState);
+  const [signUpState, signUpAction] = useActionState(signUp, initialState);
 
   const isRegister = mode === "register";
   const activeState = isRegister ? signUpState : signInState;
   const activeAction = isRegister ? signUpAction : signInAction;
-  const pending = isRegister ? signUpPending : signInPending;
 
   return (
-    <div className="w-full max-w-md border-2 border-neon-cyan bg-[#0a0a0a] p-6 shadow-[0_0_20px_rgba(0,243,255,0.12)]">
-      <div className="mb-6 border-b border-neon-cyan/30 pb-4">
-        <p className="text-[10px] uppercase tracking-[0.25em] text-[#8a8a8a]">
+    <div className="w-full max-w-md border border-zinc-800 bg-[#0a0a0a] p-6">
+      <div className="mb-6 border-b border-zinc-800 pb-5">
+        <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-zinc-500">
           Secure Terminal // Auth Gate
         </p>
-        <h1 className="mt-2 text-2xl font-bold uppercase tracking-tight text-[#00f3ff]">
+        <h1 className="mt-3 text-2xl font-bold uppercase tracking-tight text-zinc-100">
           INITIATE UPLINK
-          <span
-            aria-hidden="true"
-            className="cursor-blink ml-1 inline-block h-[1em] w-[0.6ch] translate-y-[2px] bg-[#00f3ff] align-baseline"
-          />
         </h1>
-        <p className="mt-2 text-xs text-[#a0a0a0]">
+        <p className="mt-3 text-sm leading-relaxed text-zinc-400">
           Authenticate operator credentials to access the grid.
         </p>
       </div>
 
-      <div className="mb-5 grid grid-cols-2 border border-neon-cyan/30">
+      <div className="mb-6 grid grid-cols-2 border border-zinc-800 bg-[#111111]">
         <button
           type="button"
           onClick={() => setMode("signin")}
-          className={`px-3 py-2 text-xs uppercase tracking-[0.2em] transition-colors ${
+          className={`px-3 py-2.5 font-mono text-xs uppercase tracking-[0.2em] transition-colors ${
             !isRegister
-              ? "bg-[#00f3ff]/10 text-[#00f3ff]"
-              : "bg-transparent text-[#8a8a8a] hover:text-[#e0e0e0]"
+              ? "bg-[#161616] text-zinc-100"
+              : "bg-transparent text-zinc-500 hover:text-zinc-300"
           }`}
           aria-pressed={!isRegister}
         >
@@ -55,10 +68,10 @@ export function AuthClient() {
         <button
           type="button"
           onClick={() => setMode("register")}
-          className={`border-l border-neon-cyan/30 px-3 py-2 text-xs uppercase tracking-[0.2em] transition-colors ${
+          className={`border-l border-zinc-800 px-3 py-2.5 font-mono text-xs uppercase tracking-[0.2em] transition-colors ${
             isRegister
-              ? "bg-[#00f3ff]/10 text-[#00f3ff]"
-              : "bg-transparent text-[#8a8a8a] hover:text-[#e0e0e0]"
+              ? "bg-[#161616] text-zinc-100"
+              : "bg-transparent text-zinc-500 hover:text-zinc-300"
           }`}
           aria-pressed={isRegister}
         >
@@ -66,9 +79,9 @@ export function AuthClient() {
         </button>
       </div>
 
-      <form action={activeAction} className="space-y-4">
+      <form action={activeAction} className="space-y-5">
         <label className="block">
-          <span className="mb-1 block text-[10px] uppercase tracking-[0.2em] text-[#39ff14]">
+          <span className="mb-2 block font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-400">
             &gt; Email_Address
           </span>
           <input
@@ -77,12 +90,12 @@ export function AuthClient() {
             required
             autoComplete="email"
             placeholder="operator@uplink.net"
-            className="w-full border border-neon-cyan/40 bg-[#050505] px-3 py-2 text-sm text-[#e0e0e0] outline-none placeholder:text-[#444] focus:border-[#00f3ff] focus:shadow-[0_0_8px_rgba(0,243,255,0.35)]"
+            className="w-full border border-zinc-800 bg-[#111111] px-3 py-3 text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-[#22d3ee]"
           />
         </label>
 
         <label className="block">
-          <span className="mb-1 block text-[10px] uppercase tracking-[0.2em] text-[#39ff14]">
+          <span className="mb-2 block font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-400">
             &gt; Passphrase
           </span>
           <input
@@ -91,39 +104,29 @@ export function AuthClient() {
             required
             autoComplete={isRegister ? "new-password" : "current-password"}
             placeholder="••••••••"
-            className="w-full border border-neon-cyan/40 bg-[#050505] px-3 py-2 text-sm text-[#e0e0e0] outline-none placeholder:text-[#444] focus:border-[#00f3ff] focus:shadow-[0_0_8px_rgba(0,243,255,0.35)]"
+            className="w-full border border-zinc-800 bg-[#111111] px-3 py-3 text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-[#22d3ee]"
           />
         </label>
 
         {activeState?.error ? (
           <div
             role="alert"
-            className="border border-[#ff00ff]/50 bg-[#ff00ff]/5 px-3 py-2 text-xs text-[#ff4dff]"
+            className="border border-zinc-700 bg-[#111111] px-3 py-3 font-mono text-xs uppercase tracking-[0.08em] text-zinc-300"
           >
             {activeState.error}
           </div>
         ) : null}
 
         {activeState?.message ? (
-          <div className="border border-[#39ff14]/50 bg-[#39ff14]/5 px-3 py-2 text-xs text-[#39ff14]">
+          <div className="border border-zinc-700 bg-[#111111] px-3 py-3 font-mono text-xs uppercase tracking-[0.08em] text-zinc-300">
             {activeState.message}
           </div>
         ) : null}
 
-        <button
-          type="submit"
-          disabled={pending}
-          className="mt-2 w-full border-2 border-[#00f3ff] bg-[#00f3ff]/10 px-4 py-3 text-sm font-bold uppercase tracking-[0.2em] text-[#00f3ff] transition-colors hover:bg-[#00f3ff]/20 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {pending
-            ? "Processing..."
-            : isRegister
-              ? "Register Operator"
-              : "Authenticate"}
-        </button>
+        <AuthSubmitButton isRegister={isRegister} />
       </form>
 
-      <p className="mt-5 border-t border-[#1f1f1f] pt-3 text-[10px] uppercase tracking-[0.15em] text-[#555]">
+      <p className="mt-6 border-t border-zinc-800 pt-4 font-mono text-[10px] uppercase tracking-[0.15em] text-zinc-600">
         Uplink Security Layer v1.0 // Unauthorized access prohibited
       </p>
     </div>

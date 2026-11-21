@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
-import { Trash2 } from "lucide-react";
+import { Trash2, Loader2 } from "lucide-react";
+import { useFormStatus } from "react-dom";
 import { deletePost } from "@/app/actions/posts";
 import { FadeIn } from "@/src/components/fade-in";
 
@@ -8,6 +11,25 @@ export type GridPost = {
   image_url: string;
   caption: string | null;
 };
+
+function DeleteGridButton() {
+  const { pending } = useFormStatus();
+  return (
+    <button
+      type="submit"
+      aria-label="Delete transmission"
+      title="Delete transmission"
+      disabled={pending}
+      className="flex h-7 w-7 items-center justify-center border border-zinc-700 bg-[#111111] text-zinc-300 transition-colors hover:border-zinc-600 hover:text-zinc-100 focus-visible:border-[#22d3ee] focus-visible:text-[#22d3ee] focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+    >
+      {pending ? (
+        <Loader2 size={13} strokeWidth={1.8} className="animate-spin" />
+      ) : (
+        <Trash2 size={13} strokeWidth={1.8} />
+      )}
+    </button>
+  );
+}
 
 export function PostGrid({
   posts,
@@ -20,8 +42,8 @@ export function PostGrid({
 }) {
   if (posts.length === 0) {
     return (
-      <div className="border border-[#1f1f1f] bg-[#0a0a0a] p-6 text-center">
-        <p className="font-mono text-xs uppercase tracking-[0.15em] text-[#666]">
+      <div className="border border-zinc-800 bg-[#0a0a0a] p-6 text-center">
+        <p className="font-mono text-xs uppercase tracking-[0.15em] text-zinc-500">
           {"// NO TRANSMISSIONS ON RECORD"}
         </p>
       </div>
@@ -32,7 +54,7 @@ export function PostGrid({
     <div className="grid grid-cols-3 gap-2">
       {posts.map((post, index) => (
         <FadeIn key={post.id} delay={index * 0.03}>
-          <div className="relative aspect-square border border-neon-cyan/30 bg-[#050505]">
+          <div className="relative aspect-square border border-zinc-800 bg-[#111111]">
             <Link href={`/post/${post.id}`} className="block h-full w-full">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -45,7 +67,7 @@ export function PostGrid({
             {canDelete ? (
               <form
                 action={deletePost}
-                className="absolute right-1 top-1 z-10"
+                className="absolute right-1.5 top-1.5 z-10"
               >
                 <input type="hidden" name="postId" value={post.id} />
                 {deleteRedirectTo ? (
@@ -55,14 +77,7 @@ export function PostGrid({
                     value={deleteRedirectTo}
                   />
                 ) : null}
-                <button
-                  type="submit"
-                  aria-label="Delete transmission"
-                  title="Delete transmission"
-                  className="flex h-7 w-7 items-center justify-center border border-neon-magenta bg-[#050505]/90 text-[#ff00ff] transition-colors hover:bg-[#ff00ff]/20 hover:shadow-[0_0_8px_rgba(255,0,255,0.35)]"
-                >
-                  <Trash2 size={14} />
-                </button>
+                <DeleteGridButton />
               </form>
             ) : null}
           </div>

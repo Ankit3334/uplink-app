@@ -39,7 +39,7 @@ export default function AppLayout({
     <Suspense
       fallback={
         <div className="flex min-h-screen items-center justify-center px-4">
-          <p className="border border-neon-cyan/30 bg-[#0a0a0a] px-4 py-3 text-xs uppercase tracking-[0.2em] text-[#00f3ff]">
+          <p className="border border-zinc-800 bg-[#0a0a0a] px-5 py-4 text-xs uppercase tracking-[0.2em] text-zinc-400">
             Verifying Uplink Access...
           </p>
         </div>

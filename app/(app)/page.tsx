@@ -44,22 +44,22 @@ export default async function FeedPage() {
   const posts = (data ?? []) as FeedPost[];
 
   return (
-    <section className="mx-auto flex min-h-[calc(100vh-6rem)] w-full max-w-md flex-col gap-4 px-4 pt-10">
-      <header className="border border-neon-cyan/30 bg-[#0a0a0a] p-4">
-        <p className="text-[10px] uppercase tracking-[0.2em] text-[#8a8a8a]">
+    <section className="mx-auto flex min-h-[calc(100vh-6rem)] w-full max-w-md flex-col gap-6 px-4 pb-8 pt-10">
+      <header className="border border-zinc-800 bg-[#0a0a0a] p-5">
+        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
           Channel // 01
         </p>
-        <h1 className="mt-2 text-3xl font-bold uppercase tracking-tight glow-cyan">
+        <h1 className="mt-3 text-3xl font-bold uppercase tracking-tight text-zinc-100">
           Feed
         </h1>
-        <p className="mt-2 text-xs text-[#a0a0a0]">
+        <p className="mt-3 text-sm leading-relaxed text-zinc-400">
           Live data stream. Incoming transmissions decoded below.
         </p>
       </header>
 
       {posts.length === 0 ? (
-        <div className="border border-[#1f1f1f] bg-[#0a0a0a] p-6 text-sm text-[#8a8a8a]">
-          <p className="uppercase tracking-[0.15em] text-[#39ff14] glow-green">
+        <div className="border border-zinc-800 bg-[#0a0a0a] p-6 text-sm text-zinc-400">
+          <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-zinc-300">
             Status: Awaiting Signal
           </p>
           <p className="mt-3 leading-relaxed">
@@ -67,7 +67,7 @@ export default async function FeedPage() {
           </p>
         </div>
       ) : (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-6">
           {posts.map((post, index) => {
             const profile = Array.isArray(post.profiles)
               ? (post.profiles[0] ?? null)
@@ -77,9 +77,9 @@ export default async function FeedPage() {
 
             return (
               <FadeIn key={post.id} delay={index * 0.04}>
-                <article className="border border-neon-cyan/20 bg-[#0a0a0a]">
-                  <header className="flex items-center gap-3 border-b border-[#1a1a1a] p-3">
-                    <div className="flex h-9 w-9 items-center justify-center border border-neon-green/40 bg-[#050505] text-[#39ff14]">
+                <article className="border border-zinc-800 bg-[#0a0a0a]">
+                  <header className="flex items-center gap-3 border-b border-zinc-800 p-4">
+                    <div className="flex h-10 w-10 items-center justify-center border border-zinc-800 bg-[#111111] text-zinc-400">
                       {avatarUrl ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
@@ -88,63 +88,63 @@ export default async function FeedPage() {
                           className="h-full w-full object-cover"
                         />
                       ) : (
-                        <Terminal size={18} />
+                        <Terminal size={18} strokeWidth={1.8} />
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
                       {profile?.username ? (
                         <Link
                           href={`/u/${profile.username}`}
-                          className="block truncate text-sm font-bold uppercase tracking-[0.08em] text-[#39ff14] glow-green hover:underline"
+                          className="block truncate text-sm font-semibold uppercase tracking-[0.08em] text-zinc-100 transition-colors hover:text-[#22d3ee]"
                         >
                           @{username}
                         </Link>
                       ) : (
-                        <p className="truncate text-sm font-bold uppercase tracking-[0.08em] text-[#39ff14] glow-green">
+                        <p className="truncate text-sm font-semibold uppercase tracking-[0.08em] text-zinc-100">
                           @{username}
                         </p>
                       )}
-                      <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-[#777]">
+                      <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-zinc-500">
                         {formatTimestamp(post.created_at)}
                       </p>
                     </div>
-                    <span className="text-[10px] uppercase tracking-[0.15em] text-[#444]">
+                    <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-zinc-600">
                       PKT
                     </span>
                   </header>
 
-                  <div className="p-3">
+                  <div className="p-4">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={post.image_url}
                       alt={
                         post.caption ? post.caption : `Transmission by ${username}`
                       }
-                      className="w-full rounded-none border border-cyan-500/30 object-cover"
+                      className="w-full rounded-none border border-zinc-800 object-cover"
                       loading="lazy"
                     />
                   </div>
 
                   {post.caption ? (
-                    <div className="px-3 pb-3">
-                      <p className="whitespace-pre-wrap border-l-2 border-neon-cyan/30 pl-3 font-mono text-sm leading-relaxed text-[#d0d0d0]">
+                    <div className="px-4 pb-4">
+                      <p className="whitespace-pre-wrap border-l border-zinc-700 pl-4 font-mono text-sm leading-relaxed text-zinc-300">
                         {post.caption}
                       </p>
                     </div>
                   ) : null}
 
-                  <footer className="flex items-center gap-2 border-t border-[#1a1a1a] p-3">
+                  <footer className="flex items-center gap-2 border-t border-zinc-800 p-4">
                     <BoostForm postId={post.id} count={post.boost_count ?? 0} />
                     <Link
                       href={`/post/${post.id}`}
-                      className="group flex items-center gap-2 border border-neon-magenta/30 bg-transparent px-3 py-2 text-xs uppercase tracking-[0.15em] text-[#a0a0a0] transition-colors hover:border-[#ff00ff] hover:text-[#ff00ff] hover:shadow-[0_0_10px_rgba(255,0,255,0.2)]"
+                      className="group flex items-center gap-2 border border-zinc-800 bg-transparent px-3 py-2 text-xs uppercase tracking-[0.15em] text-zinc-400 transition-colors hover:border-zinc-700 hover:text-zinc-200 focus-visible:border-[#22d3ee] focus-visible:text-[#22d3ee] focus-visible:outline-none"
                     >
                       <MessageSquare
-                        size={16}
-                        className="transition-colors group-hover:text-[#ff00ff] group-hover:drop-shadow-[0_0_6px_rgba(255,0,255,0.8)]"
+                        size={15}
+                        className="transition-colors duration-200 ease-in-out group-hover:text-zinc-200 group-focus-visible:text-[#22d3ee]"
                       />
                       <span>Thread</span>
-                      <span className="text-[#ff00ff]">
+                      <span className="font-mono text-zinc-500 group-hover:text-zinc-300 group-focus-visible:text-[#22d3ee]">
                         [{post.thread_count ?? 0}]
                       </span>
                     </Link>

@@ -1,10 +1,31 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { useFormStatus } from "react-dom";
 import { Loader2 } from "lucide-react";
 import { updateProfile, type UpdateProfileState } from "@/app/actions/profile";
 
 const initialState: UpdateProfileState = {};
+
+function SaveConfigButton() {
+  const { pending } = useFormStatus();
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      className="flex w-full items-center justify-center gap-2 border border-zinc-700 bg-[#161616] px-4 py-3.5 text-sm font-bold uppercase tracking-[0.2em] text-[#22d3ee] transition-colors hover:border-zinc-600 hover:bg-[#1b1b1b] focus-visible:border-[#22d3ee] focus-visible:outline-none active:border-[#22d3ee] disabled:cursor-not-allowed disabled:opacity-60"
+    >
+      {pending ? (
+        <>
+          <Loader2 size={16} className="animate-spin" />
+          <span className="text-zinc-200">Saving...</span>
+        </>
+      ) : (
+        "SAVE CONFIGURATION"
+      )}
+    </button>
+  );
+}
 
 export function ProfileEditor({
   initialDisplayName,
@@ -14,10 +35,7 @@ export function ProfileEditor({
   initialBio: string;
 }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [state, formAction, pending] = useActionState(
-    updateProfile,
-    initialState,
-  );
+  const [state, formAction] = useActionState(updateProfile, initialState);
   const [ackSuccess, setAckSuccess] = useState<number | null>(null);
 
   if (state?.success && state.success !== ackSuccess) {
@@ -26,32 +44,32 @@ export function ProfileEditor({
   }
 
   return (
-    <div className="border border-neon-green/20 bg-[#0a0a0a] p-4">
+    <div className="border border-zinc-800 bg-[#0a0a0a] p-5">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="text-[10px] uppercase tracking-[0.2em] text-[#777]">
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
             Node Profile Controls
           </p>
-          <p className="mt-1 font-mono text-xs text-[#8a8a8a]">
+          <p className="mt-2 font-mono text-xs leading-relaxed text-zinc-400">
             Modify operator display metadata and bio payload.
           </p>
         </div>
         <button
           type="button"
           onClick={() => setIsOpen((v) => !v)}
-          className="border border-neon-green/40 bg-transparent px-3 py-2 text-[10px] uppercase tracking-[0.18em] text-[#39ff14] transition-colors hover:bg-[#39ff14]/10 hover:shadow-[0_0_10px_rgba(57,255,20,0.2)]"
+          className="border border-zinc-700 bg-[#111111] px-3 py-2 font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-300 transition-colors hover:border-zinc-600 hover:text-zinc-100 focus-visible:border-[#22d3ee] focus-visible:text-[#22d3ee] focus-visible:outline-none"
         >
-          {isOpen ? "Close Config" : "Edit Node Config"}
+          {isOpen ? "Close Config" : "EDIT NODE CONFIG"}
         </button>
       </div>
 
       {isOpen ? (
         <form
           action={formAction}
-          className="mt-4 space-y-4 border border-dashed border-neon-green/40 bg-[#050505] p-4"
+          className="mt-5 space-y-5 border border-dashed border-zinc-700 bg-[#111111] p-4"
         >
           <label className="block">
-            <span className="mb-2 block text-[10px] uppercase tracking-[0.2em] text-[#00f3ff]">
+            <span className="mb-2 block font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-400">
               &gt; Display_Name
             </span>
             <input
@@ -60,13 +78,13 @@ export function ProfileEditor({
               required
               defaultValue={initialDisplayName}
               maxLength={64}
-              className="w-full border border-neon-green/40 bg-[#0a0a0a] px-3 py-2 font-mono text-sm text-[#e0e0e0] outline-none placeholder:text-[#444] focus:border-[#39ff14] focus:shadow-[0_0_8px_rgba(57,255,20,0.25)]"
+              className="w-full border border-zinc-800 bg-[#0a0a0a] px-3 py-3 font-mono text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-[#22d3ee]"
               placeholder="OPERATOR ALIAS"
             />
           </label>
 
           <label className="block">
-            <span className="mb-2 block text-[10px] uppercase tracking-[0.2em] text-[#00f3ff]">
+            <span className="mb-2 block font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-400">
               &gt; Bio
             </span>
             <textarea
@@ -74,7 +92,7 @@ export function ProfileEditor({
               rows={4}
               defaultValue={initialBio}
               maxLength={280}
-              className="w-full resize-y border border-neon-green/40 bg-[#0a0a0a] px-3 py-2 font-mono text-sm text-[#e0e0e0] outline-none placeholder:text-[#444] focus:border-[#39ff14] focus:shadow-[0_0_8px_rgba(57,255,20,0.25)]"
+              className="w-full resize-y border border-zinc-800 bg-[#0a0a0a] px-3 py-3 font-mono text-sm leading-relaxed text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-[#22d3ee]"
               placeholder="NODE BIO / SIGNAL DESCRIPTION..."
             />
           </label>
@@ -82,32 +100,19 @@ export function ProfileEditor({
           {state?.error ? (
             <div
               role="alert"
-              className="border border-[#ff00ff]/50 bg-[#ff00ff]/5 px-3 py-2 text-xs uppercase tracking-[0.1em] text-[#ff4dff]"
+              className="border border-zinc-700 bg-[#0a0a0a] px-3 py-3 font-mono text-xs uppercase tracking-[0.08em] text-zinc-300"
             >
               {state.error}
             </div>
           ) : null}
 
           {state?.success ? (
-            <div className="border border-neon-green/50 bg-[#39ff14]/5 px-3 py-2 text-xs uppercase tracking-[0.1em] text-[#39ff14]">
+            <div className="border border-zinc-700 bg-[#0a0a0a] px-3 py-3 font-mono text-xs uppercase tracking-[0.08em] text-zinc-300">
               Configuration saved.
             </div>
           ) : null}
 
-          <button
-            type="submit"
-            disabled={pending}
-            className="flex w-full items-center justify-center gap-2 border-2 border-[#39ff14] bg-[#39ff14]/10 px-4 py-3 text-sm font-bold uppercase tracking-[0.2em] text-[#39ff14] transition-colors hover:bg-[#39ff14]/20 hover:shadow-[0_0_12px_rgba(57,255,20,0.2)] disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {pending ? (
-              <>
-                <Loader2 size={16} className="animate-spin" />
-                <span>Saving...</span>
-              </>
-            ) : (
-              "Save Configuration"
-            )}
-          </button>
+          <SaveConfigButton />
         </form>
       ) : null}
     </div>

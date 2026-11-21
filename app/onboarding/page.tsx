@@ -26,8 +26,8 @@ async function OnboardingGate() {
   return (
     <div className="flex min-h-screen items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
-        <div className="mb-4 text-center">
-          <p className="text-[10px] uppercase tracking-[0.3em] text-[#555]">
+        <div className="mb-5 text-center">
+          <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-zinc-500">
             UPLINK // System Configuration
           </p>
         </div>
@@ -42,7 +42,7 @@ export default function OnboardingPage() {
     <Suspense
       fallback={
         <div className="flex min-h-screen items-center justify-center px-4">
-          <p className="border border-neon-green/30 bg-[#0a0a0a] px-4 py-3 text-xs uppercase tracking-[0.2em] text-[#39ff14]">
+          <p className="border border-zinc-800 bg-[#0a0a0a] px-5 py-4 text-xs uppercase tracking-[0.2em] text-zinc-400">
             Loading System Configuration...
           </p>
         </div>

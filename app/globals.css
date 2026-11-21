@@ -1,22 +1,19 @@
-@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap");
 @import "tailwindcss";
 
 :root {
   --background: #050505;
-  --foreground: #e0e0e0;
+  --foreground: #f4f4f5;
   --surface: #0a0a0a;
-  --neon-cyan: #00f3ff;
-  --neon-green: #39ff14;
-  --neon-magenta: #ff00ff;
+  --surface-raised: #111111;
+  --border-subtle: #27272a;
+  --accent: #22d3ee;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-surface: var(--surface);
-  --color-neon-cyan: var(--neon-cyan);
-  --color-neon-green: var(--neon-green);
-  --color-neon-magenta: var(--neon-magenta);
+  --color-accent: var(--accent);
   --font-sans: var(--font-jetbrains-mono);
   --font-mono: var(--font-jetbrains-mono);
 }
@@ -34,28 +31,13 @@
   }
 
   body {
-    position: relative;
     background: var(--background);
     color: var(--foreground);
     font-family: var(--font-jetbrains-mono), "JetBrains Mono", ui-monospace,
       SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New",
       monospace;
-  }
-
-  body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: 9999;
-    pointer-events: none;
-    background: repeating-linear-gradient(
-      to bottom,
-      rgba(255, 255, 255, 0.03) 0px,
-      rgba(255, 255, 255, 0.03) 1px,
-      transparent 1px,
-      transparent 3px
-    );
-    opacity: 0.12;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   button,
@@ -67,46 +49,5 @@
 
   a {
     color: inherit;
-  }
-}
-
-@layer utilities {
-  .glow-cyan {
-    color: var(--neon-cyan);
-    text-shadow:
-      0 0 4px rgba(0, 243, 255, 0.7),
-      0 0 10px rgba(0, 243, 255, 0.45),
-      0 0 18px rgba(0, 243, 255, 0.25);
-  }
-
-  .glow-green {
-    color: var(--neon-green);
-    text-shadow:
-      0 0 4px rgba(57, 255, 20, 0.7),
-      0 0 10px rgba(57, 255, 20, 0.45),
-      0 0 18px rgba(57, 255, 20, 0.25);
-  }
-
-  .glow-magenta {
-    color: var(--neon-magenta);
-    text-shadow:
-      0 0 4px rgba(255, 0, 255, 0.7),
-      0 0 10px rgba(255, 0, 255, 0.45),
-      0 0 18px rgba(255, 0, 255, 0.25);
-  }
-
-  .cursor-blink {
-    animation: cursor-blink 1s steps(1, end) infinite;
-  }
-}
-
-@keyframes cursor-blink {
-  0%,
-  50% {
-    opacity: 1;
-  }
-  50.01%,
-  100% {
-    opacity: 0;
   }
 }

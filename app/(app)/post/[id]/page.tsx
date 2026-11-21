@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, MessageSquare, Terminal, Trash2 } from "lucide-react";
+import { ArrowLeft, MessageSquare, Terminal } from "lucide-react";
 import { BoostForm } from "@/app/(app)/_components/boost-form";
 import { deletePost } from "@/app/actions/posts";
+import { DeletePostButton } from "./_components/delete-post-button";
 import { FadeIn } from "@/src/components/fade-in";
 import { createClient } from "@/src/lib/supabase/server";
 import { ThreadComposer } from "./_components/thread-composer";
@@ -86,24 +87,24 @@ export default async function PostDetailPage({
   const threads = (threadData ?? []) as ThreadRow[];
 
   return (
-    <section className="mx-auto flex min-h-[calc(100vh-6rem)] w-full max-w-md flex-col gap-4 px-4 pb-44 pt-6">
+    <section className="mx-auto flex min-h-[calc(100vh-6rem)] w-full max-w-md flex-col gap-6 px-4 pb-48 pt-6">
       <div className="flex items-center gap-3">
         <Link
           href="/"
-          className="flex items-center gap-2 border border-neon-cyan/30 bg-[#0a0a0a] px-3 py-2 text-[10px] uppercase tracking-[0.2em] text-[#00f3ff] transition-colors hover:bg-[#00f3ff]/10"
+          className="flex items-center gap-2 border border-zinc-800 bg-[#0a0a0a] px-3 py-2 text-[10px] uppercase tracking-[0.2em] text-zinc-400 transition-colors hover:border-zinc-700 hover:text-zinc-200"
         >
           <ArrowLeft size={14} />
           Back
         </Link>
-        <p className="text-[10px] uppercase tracking-[0.2em] text-[#666]">
+        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-600">
           Thread Channel // {id.slice(0, 8)}
         </p>
       </div>
 
       <FadeIn>
-        <article className="border border-neon-cyan/20 bg-[#0a0a0a]">
-          <header className="flex items-center gap-3 border-b border-[#1a1a1a] p-3">
-            <div className="flex h-9 w-9 items-center justify-center border border-neon-green/40 bg-[#050505] text-[#39ff14]">
+        <article className="border border-zinc-800 bg-[#0a0a0a]">
+          <header className="flex items-center gap-3 border-b border-zinc-800 p-4">
+            <div className="flex h-10 w-10 items-center justify-center border border-zinc-800 bg-[#111111] text-zinc-400">
               {postAvatar ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -112,32 +113,32 @@ export default async function PostDetailPage({
                   className="h-full w-full object-cover"
                 />
               ) : (
-                <Terminal size={18} />
+                <Terminal size={18} strokeWidth={1.8} />
               )}
             </div>
             <div className="min-w-0 flex-1">
               {postProfile?.username ? (
                 <Link
                   href={`/u/${postProfile.username}`}
-                  className="block truncate text-sm font-bold uppercase tracking-[0.08em] text-[#39ff14] glow-green hover:underline"
+                  className="block truncate text-sm font-semibold uppercase tracking-[0.08em] text-zinc-100 transition-colors hover:text-[#22d3ee]"
                 >
                   @{postUsername}
                 </Link>
               ) : (
-                <p className="truncate text-sm font-bold uppercase tracking-[0.08em] text-[#39ff14] glow-green">
+                <p className="truncate text-sm font-semibold uppercase tracking-[0.08em] text-zinc-100">
                   @{postUsername}
                 </p>
               )}
-              <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-[#777]">
+              <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-zinc-500">
                 {formatTimestamp(post.created_at)}
               </p>
             </div>
-            <span className="text-[10px] uppercase tracking-[0.15em] text-[#444]">
+            <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-zinc-600">
               PKT
             </span>
           </header>
 
-          <div className="p-3">
+          <div className="p-4">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={post.image_url}
@@ -146,24 +147,24 @@ export default async function PostDetailPage({
                   ? post.caption
                   : `Transmission by ${postUsername}`
               }
-              className="w-full rounded-none border border-cyan-500/30 object-cover"
+              className="w-full rounded-none border border-zinc-800 object-cover"
             />
           </div>
 
           {post.caption ? (
-            <div className="px-3 pb-3">
-              <p className="whitespace-pre-wrap border-l-2 border-neon-cyan/30 pl-3 font-mono text-sm leading-relaxed text-[#d0d0d0]">
+            <div className="px-4 pb-4">
+              <p className="whitespace-pre-wrap border-l border-zinc-700 pl-4 font-mono text-sm leading-relaxed text-zinc-300">
                 {post.caption}
               </p>
             </div>
           ) : null}
 
-          <footer className="flex items-center gap-2 border-t border-[#1a1a1a] p-3">
+          <footer className="flex flex-wrap items-center gap-2 border-t border-zinc-800 p-4">
             <BoostForm postId={post.id} count={post.boost_count ?? 0} />
-            <div className="flex items-center gap-2 border border-neon-magenta/30 bg-transparent px-3 py-2 text-xs uppercase tracking-[0.15em] text-[#a0a0a0]">
-              <MessageSquare size={16} className="text-[#ff00ff]" />
+            <div className="flex items-center gap-2 border border-zinc-800 bg-transparent px-3 py-2 text-xs uppercase tracking-[0.15em] text-zinc-400">
+              <MessageSquare size={15} className="text-zinc-400" />
               <span>Thread</span>
-              <span className="text-[#ff00ff]">
+              <span className="font-mono text-zinc-500">
                 [{post.thread_count ?? threads.length}]
               </span>
             </div>
@@ -171,36 +172,29 @@ export default async function PostDetailPage({
               <form action={deletePost} className="ml-auto">
                 <input type="hidden" name="postId" value={post.id} />
                 <input type="hidden" name="redirectTo" value="/profile" />
-                <button
-                  type="submit"
-                  aria-label="Delete transmission"
-                  title="Delete transmission"
-                  className="flex h-9 w-9 items-center justify-center border border-neon-magenta bg-transparent text-[#ff00ff] transition-colors hover:bg-[#ff00ff]/15 hover:shadow-[0_0_10px_rgba(255,0,255,0.3)]"
-                >
-                  <Trash2 size={16} />
-                </button>
+                <DeletePostButton />
               </form>
             ) : null}
           </footer>
         </article>
       </FadeIn>
 
-      <div className="mt-2">
-        <div className="mb-3 flex items-center justify-between border-b border-[#1f1f1f] pb-2">
-          <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-[#ff00ff] glow-magenta">
+      <div className="mt-1">
+        <div className="mb-3 flex items-center justify-between border-b border-zinc-800 pb-3">
+          <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-100">
             Thread Log
           </h2>
-          <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-[#666]">
+          <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-zinc-500">
             {threads.length} entries
           </span>
         </div>
 
         {threads.length === 0 ? (
-          <div className="border border-dashed border-neon-magenta/30 bg-[#0a0a0a] p-4 text-xs text-[#777]">
-            <p className="uppercase tracking-[0.15em] text-[#ff00ff]">
+          <div className="border border-dashed border-zinc-800 bg-[#0a0a0a] p-5 text-sm text-zinc-400">
+            <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-zinc-300">
               No Thread Data
             </p>
-            <p className="mt-2 font-mono">
+            <p className="mt-2 font-mono text-xs leading-relaxed text-zinc-500">
               Channel silent. Inject the first data packet below.
             </p>
           </div>
@@ -211,25 +205,25 @@ export default async function PostDetailPage({
               const tUsername = tProfile?.username ?? "unknown_node";
               return (
                 <FadeIn key={thread.id} delay={index * 0.04}>
-                  <li className="border border-[#1a1a1a] border-l-2 border-l-magenta-500/50 bg-[#0a0a0a] p-3">
+                  <li className="border border-zinc-800 border-l-2 border-l-zinc-700 bg-[#0a0a0a] p-4">
                     <div className="mb-2 flex items-center justify-between gap-2">
                       {tProfile?.username ? (
                         <Link
                           href={`/u/${tProfile.username}`}
-                          className="truncate font-mono text-[11px] uppercase tracking-[0.12em] text-[#39ff14] glow-green hover:underline"
+                          className="truncate font-mono text-[11px] uppercase tracking-[0.12em] text-zinc-200 transition-colors hover:text-[#22d3ee]"
                         >
                           @{tUsername}
                         </Link>
                       ) : (
-                        <p className="truncate font-mono text-[11px] uppercase tracking-[0.12em] text-[#39ff14] glow-green">
+                        <p className="truncate font-mono text-[11px] uppercase tracking-[0.12em] text-zinc-200">
                           @{tUsername}
                         </p>
                       )}
-                      <p className="shrink-0 font-mono text-[10px] uppercase tracking-[0.1em] text-[#666]">
+                      <p className="shrink-0 font-mono text-[10px] uppercase tracking-[0.1em] text-zinc-500">
                         {formatTimestamp(thread.created_at)}
                       </p>
                     </div>
-                    <p className="whitespace-pre-wrap font-mono text-sm leading-relaxed text-[#d0d0d0]">
+                    <p className="whitespace-pre-wrap font-mono text-sm leading-relaxed text-zinc-300">
                       {thread.content}
                     </p>
                   </li>

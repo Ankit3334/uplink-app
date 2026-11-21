@@ -53,22 +53,22 @@ export default async function PublicProfilePage({
   const bio = profile.bio ?? null;
 
   return (
-    <section className="mx-auto flex min-h-[calc(100vh-6rem)] w-full max-w-md flex-col gap-4 px-4 pt-10">
-      <header className="border border-neon-green/30 bg-[#0a0a0a] p-4">
-        <p className="text-[10px] uppercase tracking-[0.2em] text-[#8a8a8a]">
+    <section className="mx-auto flex min-h-[calc(100vh-6rem)] w-full max-w-md flex-col gap-6 px-4 pb-8 pt-10">
+      <header className="border border-zinc-800 bg-[#0a0a0a] p-5">
+        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
           Node Profile // Public
         </p>
-        <h1 className="mt-2 text-3xl font-bold uppercase tracking-tight glow-green">
+        <h1 className="mt-3 text-3xl font-bold uppercase tracking-tight text-zinc-100">
           Operator Record
         </h1>
-        <p className="mt-2 text-xs text-[#a0a0a0]">
+        <p className="mt-3 text-sm leading-relaxed text-zinc-400">
           Scanning transmissions and identity metadata.
         </p>
       </header>
 
-      <div className="border border-neon-green/20 bg-[#0a0a0a] p-4">
+      <div className="border border-zinc-800 bg-[#0a0a0a] p-5">
         <div className="flex items-center gap-4">
-          <div className="flex h-20 w-20 items-center justify-center border border-neon-green/40 bg-[#050505] text-[#39ff14]">
+          <div className="flex h-20 w-20 items-center justify-center border border-zinc-800 bg-[#111111] text-zinc-400">
             {avatarUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -77,56 +77,54 @@ export default async function PublicProfilePage({
                 className="h-full w-full object-cover"
               />
             ) : (
-              <Terminal size={36} />
+              <Terminal size={32} strokeWidth={1.6} />
             )}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-xl font-bold uppercase tracking-[0.08em] text-[#39ff14] glow-green">
+            <p className="truncate text-xl font-bold uppercase tracking-[0.08em] text-zinc-100">
               @{profile.username}
             </p>
-            <p className="mt-1 truncate text-sm uppercase tracking-[0.12em] text-[#d0d0d0]">
+            <p className="mt-1 truncate text-sm uppercase tracking-[0.12em] text-zinc-300">
               {displayName}
             </p>
-            <p className="mt-2 whitespace-pre-wrap font-mono text-xs leading-relaxed text-[#8a8a8a]">
+            <p className="mt-3 whitespace-pre-wrap font-mono text-xs leading-relaxed text-zinc-500">
               {bio || "No bio data written to node."}
             </p>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-2">
-        <div className="border border-neon-cyan/30 bg-[#0a0a0a] p-3">
-          <p className="text-[9px] uppercase tracking-[0.18em] text-[#777]">
+      <div className="grid grid-cols-3 gap-3">
+        <div className="border border-zinc-800 bg-[#0a0a0a] p-4">
+          <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-zinc-500">
             Transmissions
           </p>
-          <p className="mt-2 text-xl font-bold text-[#00f3ff] glow-cyan">
+          <p className="mt-3 text-xl font-bold text-zinc-100">
             {transmissionsCount}
           </p>
         </div>
-        <div className="border border-neon-green/30 bg-[#0a0a0a] p-3">
-          <p className="text-[9px] uppercase tracking-[0.18em] text-[#777]">
+        <div className="border border-zinc-800 bg-[#0a0a0a] p-4">
+          <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-zinc-500">
             Total Boosts
           </p>
-          <p className="mt-2 text-xl font-bold text-[#39ff14] glow-green">
-            {totalBoosts}
-          </p>
+          <p className="mt-3 text-xl font-bold text-zinc-100">{totalBoosts}</p>
         </div>
-        <div className="border border-neon-magenta/30 bg-[#0a0a0a] p-3">
-          <p className="text-[9px] uppercase tracking-[0.18em] text-[#777]">
+        <div className="border border-zinc-800 bg-[#0a0a0a] p-4">
+          <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-zinc-500">
             Node Level
           </p>
-          <p className="mt-2 inline-block border border-neon-magenta/50 bg-[#ff00ff]/10 px-2 py-0.5 text-lg font-bold text-[#ff00ff]">
+          <p className="mt-3 inline-block border border-zinc-700 bg-[#111111] px-2 py-0.5 font-mono text-lg font-bold text-[#22d3ee]">
             1
           </p>
         </div>
       </div>
 
       <div>
-        <div className="mb-3 flex items-center justify-between border-b border-[#1f1f1f] pb-2">
-          <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-[#00f3ff]">
+        <div className="mb-3 flex items-center justify-between border-b border-zinc-800 pb-3">
+          <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-100">
             Transmission Grid
           </h2>
-          <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-[#666]">
+          <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-zinc-500">
             {transmissionsCount} records
           </span>
         </div>
