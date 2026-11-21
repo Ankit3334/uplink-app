@@ -1,8 +1,9 @@
-import { Terminal } from "lucide-react";
+﻿import { Terminal } from "lucide-react";
 import { signOut } from "@/app/actions/auth";
 import { requireUser } from "@/src/lib/auth";
 import { PostGrid } from "@/src/components/post-grid";
 import { createClient } from "@/src/lib/supabase/server";
+import { AvatarUploader } from "./_components/avatar-uploader";
 import { ProfileEditor } from "./_components/profile-editor";
 import {
   SignOutButton,
@@ -13,17 +14,19 @@ export default async function ProfilePage() {
   const user = await requireUser();
   const supabase = await createClient();
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("id, username, display_name, avatar_url, bio")
-    .eq("id", user.id)
-    .maybeSingle();
-
-  const { data: postsData } = await supabase
-    .from("posts")
-    .select("id, image_url, caption, boost_count, created_at")
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: false });
+  const [{ data: profile }, { data: postsData }] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("id, username, display_name, avatar_url, bio")
+      .eq("id", user.id)
+      .maybeSingle(),
+    supabase
+      .from("posts")
+      .select("id, image_url, caption, boost_count, created_at")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(60),
+  ]);
 
   const posts = postsData ?? [];
   const transmissionsCount = posts.length;
@@ -85,6 +88,8 @@ export default async function ProfilePage() {
           </div>
         </div>
       </div>
+
+      <AvatarUploader initialAvatarUrl={avatarUrl} />
 
       <div className="grid grid-cols-3 gap-3">
         <div className="border border-zinc-800 bg-[#0a0a0a] p-4">

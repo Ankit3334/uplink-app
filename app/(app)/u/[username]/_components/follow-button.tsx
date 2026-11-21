@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { toggleFollow } from "@/app/actions/social";
 
@@ -13,6 +14,7 @@ export function FollowButton({
   initialIsFollowing: boolean;
   isSelf: boolean;
 }) {
+  const router = useRouter();
   const [isFollowing, setIsFollowing] = useState(initialIsFollowing);
   const [pending, startTransition] = useTransition();
 
@@ -29,6 +31,7 @@ export function FollowButton({
           const result = await toggleFollow(followingId);
           if (!result.error) {
             setIsFollowing(result.isFollowing);
+            router.refresh();
           }
         });
       }}

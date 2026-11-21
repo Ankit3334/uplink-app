@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { MessageSquare, Terminal } from "lucide-react";
 import { BoostForm } from "./_components/boost-form";
@@ -33,7 +34,36 @@ function formatTimestamp(iso: string) {
   });
 }
 
-export default async function FeedPage() {
+function FeedSkeleton() {
+  return (
+    <div className="flex flex-col gap-6">
+      {Array.from({ length: 3 }).map((_, i) => (
+        <article key={i} className="border border-zinc-800 bg-[#0a0a0a]">
+          <header className="flex items-center gap-3 border-b border-zinc-800 p-4">
+            <div className="h-10 w-10 animate-pulse rounded-none bg-zinc-800" />
+            <div className="flex-1 space-y-2">
+              <div className="h-3 w-28 animate-pulse rounded-none bg-zinc-800" />
+              <div className="h-2 w-20 animate-pulse rounded-none bg-zinc-800" />
+            </div>
+          </header>
+          <div className="p-4">
+            <div className="aspect-square w-full animate-pulse rounded-none border border-zinc-800 bg-zinc-800" />
+          </div>
+          <div className="space-y-2 px-4 pb-4">
+            <div className="h-3 w-full animate-pulse rounded-none bg-zinc-800" />
+            <div className="h-3 w-4/5 animate-pulse rounded-none bg-zinc-800" />
+          </div>
+          <div className="flex gap-2 border-t border-zinc-800 p-4">
+            <div className="h-9 w-24 animate-pulse rounded-none bg-zinc-800" />
+            <div className="h-9 w-24 animate-pulse rounded-none bg-zinc-800" />
+          </div>
+        </article>
+      ))}
+    </div>
+  );
+}
+
+async function FeedContent() {
   const user = await requireUser();
   const supabase = await createClient();
 
@@ -63,24 +93,13 @@ export default async function FeedPage() {
         "id, user_id, image_url, caption, boost_count, thread_count, created_at, profiles(username, avatar_url)",
       )
       .in("user_id", followingIds)
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: false })
+      .limit(50);
     posts = (data ?? []) as FeedPost[];
   }
 
   return (
-    <section className="mx-auto flex min-h-[calc(100vh-6rem)] w-full max-w-md flex-col gap-6 px-4 pb-8 pt-10">
-      <header className="border border-zinc-800 bg-[#0a0a0a] p-5">
-        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
-          Channel // 01
-        </p>
-        <h1 className="mt-3 text-3xl font-bold uppercase tracking-tight text-zinc-100">
-          Feed
-        </h1>
-        <p className="mt-3 text-sm leading-relaxed text-zinc-400">
-          Live data stream. Incoming transmissions decoded below.
-        </p>
-      </header>
-
+    <>
       {isNetworkEmpty ? (
         <div className="border border-zinc-700 bg-[#111111] p-4 font-mono text-[10px] uppercase tracking-[0.15em] text-zinc-300">
           NETWORK EMPTY. FOLLOW NODES TO CURATE YOUR STREAM.
@@ -187,6 +206,28 @@ export default async function FeedPage() {
           })}
         </div>
       )}
+    </>
+  );
+}
+
+export default function FeedPage() {
+  return (
+    <section className="mx-auto flex min-h-[calc(100vh-6rem)] w-full max-w-md flex-col gap-6 px-4 pb-8 pt-10">
+      <header className="border border-zinc-800 bg-[#0a0a0a] p-5">
+        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
+          Channel // 01
+        </p>
+        <h1 className="mt-3 text-3xl font-bold uppercase tracking-tight text-zinc-100">
+          Feed
+        </h1>
+        <p className="mt-3 text-sm leading-relaxed text-zinc-400">
+          Live data stream. Incoming transmissions decoded below.
+        </p>
+      </header>
+
+      <Suspense fallback={<FeedSkeleton />}>
+        <FeedContent />
+      </Suspense>
     </section>
   );
 }

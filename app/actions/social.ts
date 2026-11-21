@@ -6,7 +6,6 @@ import { createClient } from "@/src/lib/supabase/server";
 export type ToggleFollowResult = {
   isFollowing: boolean;
   followersCount: number;
-  followingCount: number;
   error?: string;
 };
 
@@ -16,25 +15,14 @@ export async function toggleFollow(
   const supabase = await createClient();
   const {
     data: { user },
-    error: userError,
   } = await supabase.auth.getUser();
 
-  if (userError || !user) {
-    return {
-      isFollowing: false,
-      followersCount: 0,
-      followingCount: 0,
-      error: "Authentication required.",
-    };
+  if (!user) {
+    return { isFollowing: false, followersCount: 0, error: "Authentication required." };
   }
 
   if (!followingId || followingId === user.id) {
-    return {
-      isFollowing: false,
-      followersCount: 0,
-      followingCount: 0,
-      error: "Invalid target.",
-    };
+    return { isFollowing: false, followersCount: 0, error: "Invalid target." };
   }
 
   const { data: existing } = await supabase
@@ -52,49 +40,25 @@ export async function toggleFollow(
       .delete()
       .eq("id", existing.id)
       .eq("follower_id", user.id);
-    if (!error) {
-      isFollowing = false;
-    } else {
-      isFollowing = true;
-    }
+    isFollowing = Boolean(error);
   } else {
     const { error } = await supabase.from("follows").insert({
       follower_id: user.id,
       following_id: followingId,
     });
-    if (!error) {
-      isFollowing = true;
-    } else {
-      isFollowing = false;
-    }
+    isFollowing = !error;
   }
 
-  const [{ count: followersCount }, { count: followingCount }, { data: target }] =
-    await Promise.all([
-      supabase
-        .from("follows")
-        .select("*", { count: "exact", head: true })
-        .eq("following_id", followingId),
-      supabase
-        .from("follows")
-        .select("*", { count: "exact", head: true })
-        .eq("follower_id", followingId),
-      supabase
-        .from("profiles")
-        .select("username")
-        .eq("id", followingId)
-        .maybeSingle(),
-    ]);
+  const { count: followersCount } = await supabase
+    .from("follows")
+    .select("*", { count: "exact", head: true })
+    .eq("following_id", followingId);
 
   revalidatePath("/");
   revalidatePath("/profile");
-  if (target?.username) {
-    revalidatePath(`/u/${target.username}`);
-  }
 
   return {
     isFollowing,
     followersCount: followersCount ?? 0,
-    followingCount: followingCount ?? 0,
   };
 }

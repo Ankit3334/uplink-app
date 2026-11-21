@@ -1,6 +1,8 @@
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { Terminal } from "lucide-react";
 import { PostGrid } from "@/src/components/post-grid";
+import { getUser } from "@/src/lib/auth";
 import { createClient } from "@/src/lib/supabase/server";
 import { FollowButton } from "./_components/follow-button";
 
@@ -12,22 +14,58 @@ type ProfileRow = {
   bio: string | null;
 };
 
-export default async function PublicProfilePage({
-  params,
-}: {
-  params: Promise<{ username: string }>;
-}) {
-  const { username } = await params;
-  const supabase = await createClient();
-  const {
-    data: { user: currentUser },
-  } = await supabase.auth.getUser();
+function ProfileContentSkeleton() {
+  return (
+    <>
+      <div className="border border-zinc-800 bg-[#0a0a0a] p-5">
+        <div className="flex items-start gap-4">
+          <div className="h-20 w-20 flex-shrink-0 animate-pulse rounded-none bg-zinc-800" />
+          <div className="flex-1 space-y-3 pt-1">
+            <div className="h-5 w-32 animate-pulse rounded-none bg-zinc-800" />
+            <div className="h-4 w-40 animate-pulse rounded-none bg-zinc-800" />
+            <div className="h-3 w-full animate-pulse rounded-none bg-zinc-800" />
+            <div className="h-3 w-2/3 animate-pulse rounded-none bg-zinc-800" />
+          </div>
+        </div>
+      </div>
 
-  const { data: profileData } = await supabase
-    .from("profiles")
-    .select("id, username, display_name, avatar_url, bio")
-    .eq("username", username)
-    .maybeSingle();
+      <div className="grid grid-cols-2 gap-3">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="border border-zinc-800 bg-[#0a0a0a] p-4">
+            <div className="h-2 w-20 animate-pulse rounded-none bg-zinc-800" />
+            <div className="mt-3 h-6 w-12 animate-pulse rounded-none bg-zinc-800" />
+          </div>
+        ))}
+      </div>
+
+      <div>
+        <div className="mb-3 flex items-center justify-between border-b border-zinc-800 pb-3">
+          <div className="h-3 w-32 animate-pulse rounded-none bg-zinc-800" />
+          <div className="h-2 w-20 animate-pulse rounded-none bg-zinc-800" />
+        </div>
+        <div className="grid grid-cols-3 gap-2">
+          {Array.from({ length: 9 }).map((_, i) => (
+            <div
+              key={i}
+              className="aspect-square animate-pulse rounded-none border border-zinc-800 bg-zinc-800"
+            />
+          ))}
+        </div>
+      </div>
+    </>
+  );
+}
+
+async function ProfileContent({ username }: { username: string }) {
+  const supabase = await createClient();
+  const [currentUser, { data: profileData }] = await Promise.all([
+    getUser(),
+    supabase
+      .from("profiles")
+      .select("id, username, display_name, avatar_url, bio")
+      .eq("username", username)
+      .maybeSingle(),
+  ]);
 
   if (!profileData) {
     notFound();
@@ -45,7 +83,8 @@ export default async function PublicProfilePage({
       .from("posts")
       .select("id, image_url, caption, boost_count, created_at")
       .eq("user_id", profile.id)
-      .order("created_at", { ascending: false }),
+      .order("created_at", { ascending: false })
+      .limit(60),
     supabase
       .from("follows")
       .select("*", { count: "exact", head: true })
@@ -79,19 +118,7 @@ export default async function PublicProfilePage({
   const bio = profile.bio ?? null;
 
   return (
-    <section className="mx-auto flex min-h-[calc(100vh-6rem)] w-full max-w-md flex-col gap-6 px-4 pb-8 pt-10">
-      <header className="border border-zinc-800 bg-[#0a0a0a] p-5">
-        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
-          Node Profile // Public
-        </p>
-        <h1 className="mt-3 text-3xl font-bold uppercase tracking-tight text-zinc-100">
-          Operator Record
-        </h1>
-        <p className="mt-3 text-sm leading-relaxed text-zinc-400">
-          Scanning transmissions and identity metadata.
-        </p>
-      </header>
-
+    <>
       <div className="border border-zinc-800 bg-[#0a0a0a] p-5">
         <div className="flex items-start justify-between gap-4">
           <div className="flex min-w-0 flex-1 items-center gap-4">
@@ -182,6 +209,34 @@ export default async function PublicProfilePage({
           canDelete={canDelete}
         />
       </div>
+    </>
+  );
+}
+
+export default async function PublicProfilePage({
+  params,
+}: {
+  params: Promise<{ username: string }>;
+}) {
+  const { username } = await params;
+
+  return (
+    <section className="mx-auto flex min-h-[calc(100vh-6rem)] w-full max-w-md flex-col gap-6 px-4 pb-8 pt-10">
+      <header className="border border-zinc-800 bg-[#0a0a0a] p-5">
+        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
+          Node Profile // Public
+        </p>
+        <h1 className="mt-3 text-3xl font-bold uppercase tracking-tight text-zinc-100">
+          Operator Record
+        </h1>
+        <p className="mt-3 text-sm leading-relaxed text-zinc-400">
+          Scanning transmissions and identity metadata.
+        </p>
+      </header>
+
+      <Suspense fallback={<ProfileContentSkeleton />}>
+        <ProfileContent username={username} />
+      </Suspense>
     </section>
   );
 }
