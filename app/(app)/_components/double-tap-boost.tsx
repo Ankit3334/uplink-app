@@ -52,7 +52,7 @@ export function DoubleTapBoost({
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
           <Heart
             size={72}
-            className="text-white/90 drop-shadow-[0_0_12px_rgba(255,255,255,0.25)] animate-fade-in"
+            className="text-white/90 drop-shadow-[0_0_12px_rgba(255,255,255,0.25)] animate-heart-pop"
             fill="currentColor"
             strokeWidth={0}
           />

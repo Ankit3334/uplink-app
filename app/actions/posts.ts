@@ -30,10 +30,40 @@ export async function transmitPost(
     return { error: "TRANSMISSION FAILED: Authentication required." };
   }
 
-  const file = formData.get("image");
+  const modeRaw = formData.get("mode");
+  const mode = typeof modeRaw === "string" ? modeRaw : "image";
+
   const captionRaw = formData.get("caption");
   const caption = typeof captionRaw === "string" ? captionRaw.trim() : "";
+  const bodyRaw = formData.get("body");
+  const bodyText = typeof bodyRaw === "string" ? bodyRaw.trim() : "";
+  const linkRaw = formData.get("link");
+  const link = typeof linkRaw === "string" ? linkRaw.trim() : "";
 
+  // TEXT post
+  if (mode === "text") {
+    const composedBody = [bodyText, link].filter(Boolean).join("\n\n");
+    if (!composedBody) {
+      return { error: "TRANSMISSION FAILED: Text payload empty." };
+    }
+
+    const { error: insertError } = await supabase.from("posts").insert({
+      user_id: user.id,
+      image_url: null,
+      body: composedBody,
+      caption: caption || null,
+    });
+
+    if (insertError) {
+      return { error: `TRANSMISSION FAILED: ${insertError.message}` };
+    }
+
+    revalidatePath("/");
+    redirect("/");
+  }
+
+  // IMAGE post
+  const file = formData.get("image");
   if (!(file instanceof File) || file.size === 0) {
     return { error: "TRANSMISSION FAILED: No image payload detected." };
   }
@@ -63,6 +93,7 @@ export async function transmitPost(
   const { error: insertError } = await supabase.from("posts").insert({
     user_id: user.id,
     image_url: publicUrl,
+    body: bodyText || null,
     caption: caption || null,
   });
 

@@ -36,7 +36,7 @@ export function BottomNav({ unreadCount = 0 }: { unreadCount?: number }) {
               <Link
                 href={item.href}
                 className={cn(
-                  "flex h-full flex-col items-center justify-center gap-1 border border-transparent px-1 text-[9px] uppercase tracking-[0.14em] transition-colors sm:text-[10px] sm:tracking-[0.18em]",
+                  "flex h-full flex-col items-center justify-center gap-1 border border-transparent px-1 text-[9px] uppercase tracking-[0.14em] transition-all duration-200 ease-out sm:text-[10px] sm:tracking-[0.18em]",
                   isActive
                     ? "text-[#22d3ee]"
                     : "text-zinc-500 hover:text-zinc-200",
@@ -46,7 +46,7 @@ export function BottomNav({ unreadCount = 0 }: { unreadCount?: number }) {
                 )}
                 aria-current={isActive ? "page" : undefined}
               >
-                <span className="relative inline-flex">
+                <span className="relative inline-flex transition-colors duration-200 ease-out">
                   <Icon size={18} strokeWidth={1.8} />
                   {showBadge ? (
                     <span className="absolute -right-2 -top-1.5 flex h-3.5 min-w-3.5 items-center justify-center border border-[#0a0a0a] bg-[#22d3ee] px-0.5 font-mono text-[8px] font-bold leading-none text-[#050505]">
@@ -54,7 +54,7 @@ export function BottomNav({ unreadCount = 0 }: { unreadCount?: number }) {
                     </span>
                   ) : null}
                 </span>
-                <span className="leading-none">{item.label}</span>
+                <span className="leading-none transition-colors duration-200 ease-out">{item.label}</span>
               </Link>
             </li>
           );

@@ -8,8 +8,9 @@ import { FadeIn } from "@/src/components/fade-in";
 
 export type GridPost = {
   id: string;
-  image_url: string;
+  image_url: string | null;
   caption: string | null;
+  body?: string | null;
 };
 
 function DeleteGridButton() {
@@ -55,14 +56,22 @@ export function PostGrid({
       {posts.map((post, index) => (
         <FadeIn key={post.id} delay={index * 0.03}>
           <div className="relative aspect-square border border-zinc-800 bg-[#111111]">
-            <Link href={`/post/${post.id}`} className="block h-full w-full">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={post.image_url}
-                alt={post.caption ? post.caption : "Transmission"}
-                className="h-full w-full rounded-none object-cover"
-                loading="lazy"
-              />
+            <Link href={`/post/${post.id}`} className="block h-full w-full transition-opacity duration-200 ease-out hover:opacity-90">
+              {post.image_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={post.image_url}
+                  alt={post.caption ? post.caption : "Transmission"}
+                  className="h-full w-full rounded-none object-cover"
+                  loading="lazy"
+                />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center bg-[#0a0a0a] p-2">
+                  <p className="line-clamp-4 text-center text-[10px] leading-relaxed text-zinc-300">
+                    {post.body || post.caption || "TEXT"}
+                  </p>
+                </div>
+              )}
             </Link>
             {canDelete ? (
               <form

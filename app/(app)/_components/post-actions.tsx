@@ -87,7 +87,7 @@ export function PostActions({
     }
   };
 
-  const iconClass = "transition-colors hover:text-zinc-100";
+  const iconClass = "transition-all duration-200 ease-out hover:text-zinc-100";
 
   return (
     <div className={`flex items-center justify-between ${compact ? "px-3 py-2" : "px-4 py-2.5"}`}>

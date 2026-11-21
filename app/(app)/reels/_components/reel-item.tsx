@@ -66,7 +66,7 @@ export function ReelItem({
         <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center">
           <Heart
             size={80}
-            className="text-white/90 animate-fade-in"
+            className="text-white/90 animate-heart-pop"
             fill="currentColor"
             strokeWidth={0}
           />

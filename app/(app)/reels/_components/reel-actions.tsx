@@ -54,14 +54,14 @@ function ShareSheet({
       <button
         type="button"
         aria-label="Close share sheet"
-        className="absolute inset-0 bg-black/60"
+        className="absolute inset-0 bg-black/60 animate-fade-in transition-opacity duration-200 ease-out"
         onClick={onClose}
       />
-      <div className="relative w-full max-w-md border border-zinc-800 border-b-0 bg-[#0a0a0a] px-4 pb-6 pt-3 animate-fade-in">
+      <div className="relative w-full max-w-md border border-zinc-800 border-b-0 bg-[#0a0a0a] px-4 pb-6 pt-3 animate-slide-up transition-transform duration-200 ease-out">
         <div className="mx-auto mb-4 h-1 w-10 bg-zinc-700" />
         <div className="mb-3 flex items-center justify-between">
           <p className="font-mono text-xs uppercase tracking-[0.15em] text-zinc-400">Share Reel</p>
-          <button type="button" onClick={onClose} className="text-zinc-500 hover:text-zinc-200">
+          <button type="button" onClick={onClose} className="text-zinc-500 transition-all duration-200 ease-out hover:text-zinc-200">
             <X size={18} />
           </button>
         </div>
@@ -69,28 +69,28 @@ function ShareSheet({
           <button
             type="button"
             onClick={copy}
-            className="flex items-center gap-3 border-b border-zinc-800 py-3 text-left text-sm text-zinc-200 hover:text-[#22d3ee]"
+            className="flex items-center gap-3 border-b border-zinc-800 py-3 text-left text-sm text-zinc-200 transition-all duration-200 ease-out hover:text-[#22d3ee]"
           >
             <Link2 size={18} /> Copy link
           </button>
           <button
             type="button"
             onClick={shareX}
-            className="flex items-center gap-3 border-b border-zinc-800 py-3 text-left text-sm text-zinc-200 hover:text-[#22d3ee]"
+            className="flex items-center gap-3 border-b border-zinc-800 py-3 text-left text-sm text-zinc-200 transition-all duration-200 ease-out hover:text-[#22d3ee]"
           >
             <Send size={18} /> Share to X
           </button>
           <button
             type="button"
             onClick={shareWhatsApp}
-            className="flex items-center gap-3 border-b border-zinc-800 py-3 text-left text-sm text-zinc-200 hover:text-[#22d3ee]"
+            className="flex items-center gap-3 border-b border-zinc-800 py-3 text-left text-sm text-zinc-200 transition-all duration-200 ease-out hover:text-[#22d3ee]"
           >
             <MessageCircle size={18} /> Share via WhatsApp
           </button>
           <button
             type="button"
             onClick={nativeShare}
-            className="flex items-center gap-3 py-3 text-left text-sm text-zinc-200 hover:text-[#22d3ee]"
+            className="flex items-center gap-3 py-3 text-left text-sm text-zinc-200 transition-all duration-200 ease-out hover:text-[#22d3ee]"
           >
             <Send size={18} /> More options
           </button>
@@ -167,13 +167,13 @@ export function ReelActions({
           onClick={onBoost}
           disabled={isPending}
           aria-label="Boost"
-          className="flex flex-col items-center gap-1 text-zinc-100"
+          className="flex flex-col items-center gap-1 text-zinc-100 transition-all duration-200 ease-out"
         >
-          <Heart size={28} strokeWidth={1.8} className={boosted ? "text-[#22d3ee]" : "text-white"} fill={boosted ? "currentColor" : "none"} />
+          <Heart size={28} strokeWidth={1.8} className={`transition-colors duration-200 ease-out ${boosted ? "text-[#22d3ee]" : "text-white"}`} fill={boosted ? "currentColor" : "none"} />
           <span className="font-mono text-[11px] text-zinc-200">{count}</span>
         </button>
 
-        <div className="flex flex-col items-center gap-1 text-zinc-100">
+        <div className="flex flex-col items-center gap-1 text-zinc-100 transition-all duration-200 ease-out">
           <MessageCircle size={28} strokeWidth={1.8} className="text-white" />
           <span className="font-mono text-[11px] text-zinc-200">{commentCount}</span>
         </div>
@@ -182,7 +182,7 @@ export function ReelActions({
           type="button"
           onClick={() => setShareOpen(true)}
           aria-label="Share"
-          className="flex flex-col items-center gap-1 text-white"
+          className="flex flex-col items-center gap-1 text-white transition-all duration-200 ease-out hover:text-[#22d3ee]"
         >
           <Send size={28} strokeWidth={1.8} />
         </button>
@@ -192,9 +192,9 @@ export function ReelActions({
           onClick={onBookmark}
           disabled={isPending}
           aria-label="Bookmark"
-          className="flex flex-col items-center gap-1 text-white"
+          className="flex flex-col items-center gap-1 text-white transition-all duration-200 ease-out"
         >
-          <Bookmark size={28} strokeWidth={1.8} className={bookmarked ? "text-[#22d3ee]" : "text-white"} fill={bookmarked ? "currentColor" : "none"} />
+          <Bookmark size={28} strokeWidth={1.8} className={`transition-colors duration-200 ease-out ${bookmarked ? "text-[#22d3ee]" : "text-white"}`} fill={bookmarked ? "currentColor" : "none"} />
         </button>
       </div>
 

@@ -41,7 +41,7 @@ export default async function ProfilePage() {
   const bio = profile?.bio ?? null;
 
   return (
-    <section className="mx-auto flex min-h-[calc(100vh-6rem)] w-full max-w-md flex-col gap-4 px-4 pt-6 pb-24">
+    <section className="mx-auto flex min-h-[calc(100vh-6rem)] w-full max-w-md flex-col gap-4 px-4 pt-6 pb-24 animate-fade-in-up">
       <header className="border border-zinc-800 bg-[#0a0a0a] p-4">
         <div className="flex items-start justify-between gap-4">
           <div>

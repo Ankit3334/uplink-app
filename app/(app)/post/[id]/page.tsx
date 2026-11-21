@@ -9,6 +9,7 @@ import { FadeIn } from "@/src/components/fade-in";
 import { requireUser } from "@/src/lib/auth";
 import { createClient } from "@/src/lib/supabase/server";
 import { ThreadComposer } from "./_components/thread-composer";
+import { renderTextWithLinks } from "@/src/lib/linkify";
 
 type ProfileRef = {
   username: string | null;
@@ -18,8 +19,9 @@ type ProfileRef = {
 type PostDetail = {
   id: string;
   user_id: string;
-  image_url: string;
+  image_url: string | null;
   caption: string | null;
+  body: string | null;
   boost_count: number;
   thread_count: number;
   created_at: string;
@@ -63,7 +65,7 @@ export default async function PostDetailPage({
   const { data: postData } = await supabase
     .from("posts")
     .select(
-      "id, user_id, image_url, caption, boost_count, thread_count, created_at, profiles(username, avatar_url)",
+      "id, user_id, image_url, caption, body, boost_count, thread_count, created_at, profiles(username, avatar_url)",
     )
     .eq("id", id)
     .maybeSingle();
@@ -90,7 +92,7 @@ export default async function PostDetailPage({
   const shareUrl = `/post/${post.id}`;
 
   return (
-    <section className="mx-auto flex min-h-[calc(100vh-6rem)] w-full max-w-md flex-col px-4 pt-6 pb-28">
+    <section className="mx-auto flex min-h-[calc(100vh-6rem)] w-full max-w-md flex-col px-4 pt-6 pb-28 animate-fade-in-up">
       <div className="mb-3 flex items-center gap-3 border-b border-zinc-800 pb-3">
         <Link
           href="/"
@@ -134,14 +136,16 @@ export default async function PostDetailPage({
             <p className="font-mono text-xs text-zinc-500">{formatTimestamp(post.created_at)}</p>
           </header>
 
-          <DoubleTapBoost postId={post.id}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={post.image_url}
-              alt={post.caption ? post.caption : `Transmission by ${postUsername}`}
-              className="w-full object-cover"
-            />
-          </DoubleTapBoost>
+          {post.image_url ? (
+            <DoubleTapBoost postId={post.id}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={post.image_url}
+                alt={post.caption ? post.caption : `Transmission by ${postUsername}`}
+                className="w-full object-cover"
+              />
+            </DoubleTapBoost>
+          ) : null}
 
           <PostActions
             postId={post.id}
@@ -157,10 +161,20 @@ export default async function PostDetailPage({
             <p className="text-sm font-semibold text-zinc-100">
               {post.boost_count ?? 0} {(post.boost_count ?? 0) === 1 ? "boost" : "boosts"}
             </p>
+
+            {post.body ? (
+              <div className="mt-2 text-base leading-relaxed text-zinc-100 whitespace-pre-wrap break-words">
+                {!post.image_url ? (
+                  <span className="mr-2 font-semibold text-zinc-100">{postUsername}</span>
+                ) : null}
+                {renderTextWithLinks(post.body)}
+              </div>
+            ) : null}
+
             {post.caption ? (
               <p className="mt-1 text-sm leading-relaxed text-zinc-300">
                 <span className="mr-2 font-semibold text-zinc-100">{postUsername}</span>
-                {post.caption}
+                {renderTextWithLinks(post.caption)}
               </p>
             ) : null}
             {isOwner ? (

@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
-import { Film, ImagePlus, Loader2 } from "lucide-react";
+import { Film, ImagePlus, Loader2, Type } from "lucide-react";
 import {
   transmitPost,
   uploadReel,
@@ -13,18 +13,23 @@ import {
 const initialPostState: TransmitPostState = {};
 const initialReelState: UploadReelState = {};
 
-type Mode = "post" | "reel";
+type Mode = "image" | "reel" | "text";
 
 function SubmitButton({ mode }: { mode: Mode }) {
   const { pending } = useFormStatus();
   const label =
-    mode === "reel" ? "INITIATE REEL TRANSMISSION" : "INITIATE TRANSMISSION";
-  const pendingLabel = mode === "reel" ? "Transmitting Reel..." : "Transmitting...";
+    mode === "reel"
+      ? "INITIATE REEL TRANSMISSION"
+      : mode === "text"
+        ? "INITIATE TEXT TRANSMISSION"
+        : "INITIATE TRANSMISSION";
+  const pendingLabel =
+    mode === "reel" ? "Transmitting Reel..." : "Transmitting...";
   return (
     <button
       type="submit"
       disabled={pending}
-      className="relative flex w-full items-center justify-center gap-2 overflow-hidden border border-zinc-700 bg-[#111111] px-4 py-3.5 text-sm font-bold uppercase tracking-[0.2em] transition-colors hover:border-zinc-600 hover:bg-[#161616] focus-visible:border-[#22d3ee] focus-visible:outline-none active:border-[#22d3ee] disabled:cursor-not-allowed disabled:opacity-60"
+      className="relative flex w-full items-center justify-center gap-2 overflow-hidden border border-zinc-700 bg-[#111111] px-4 py-3.5 text-sm font-bold uppercase tracking-[0.2em] transition-all duration-200 ease-out hover:border-zinc-600 hover:bg-[#161616] focus-visible:border-[#22d3ee] focus-visible:outline-none active:border-[#22d3ee] disabled:cursor-not-allowed disabled:opacity-60"
     >
       {pending ? (
         <>
@@ -45,22 +50,27 @@ function ModeToggle({
   mode: Mode;
   onChange: (m: Mode) => void;
 }) {
+  const tabs: { key: Mode; label: string }[] = [
+    { key: "image", label: "[ IMAGE ]" },
+    { key: "reel", label: "[ REEL ]" },
+    { key: "text", label: "[ TEXT ]" },
+  ];
   return (
-    <div className="grid grid-cols-2 border border-zinc-800 bg-[#0a0a0a]">
-      {(["post", "reel"] as const).map((m) => {
-        const active = mode === m;
+    <div className="grid grid-cols-3 border border-zinc-800 bg-[#0a0a0a]">
+      {tabs.map((tab) => {
+        const active = mode === tab.key;
         return (
           <button
-            key={m}
+            key={tab.key}
             type="button"
-            onClick={() => onChange(m)}
+            onClick={() => onChange(tab.key)}
             className={
               active
-                ? "border-b-2 border-[#22d3ee] bg-[#111111] px-3 py-2.5 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-[#22d3ee]"
-                : "border-b-2 border-transparent px-3 py-2.5 font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500 transition-colors hover:text-zinc-200"
+                ? "border-b-2 border-[#22d3ee] bg-[#111111] px-3 py-2.5 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-[#22d3ee] transition-all duration-200 ease-out"
+                : "border-b-2 border-transparent px-3 py-2.5 font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500 transition-all duration-200 ease-out hover:text-zinc-200"
             }
           >
-            {m === "post" ? "[ POST ]" : "[ REEL ]"}
+            {tab.label}
           </button>
         );
       })}
@@ -68,7 +78,7 @@ function ModeToggle({
   );
 }
 
-function PostUploadForm() {
+function ImageUploadForm() {
   const [state, formAction] = useActionState(transmitPost, initialPostState);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
@@ -116,6 +126,7 @@ function PostUploadForm() {
       </div>
 
       <form action={formAction} className="space-y-4">
+        <input type="hidden" name="mode" value="image" />
         <div>
           <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-400">
             &gt; Image_Payload
@@ -124,7 +135,7 @@ function PostUploadForm() {
             htmlFor="image"
             onDrop={onDrop}
             onDragOver={(e) => e.preventDefault()}
-            className="group relative flex min-h-60 w-full cursor-pointer flex-col items-center justify-center overflow-hidden border border-dashed border-zinc-700 bg-[#111111] p-4 text-center transition-colors hover:border-zinc-600 hover:bg-[#151515]"
+            className="group relative flex min-h-60 w-full cursor-pointer flex-col items-center justify-center overflow-hidden border border-dashed border-zinc-700 bg-[#111111] p-4 text-center transition-all duration-200 ease-out hover:border-zinc-600 hover:bg-[#151515]"
           >
             {previewUrl ? (
               <>
@@ -146,7 +157,7 @@ function PostUploadForm() {
                 <ImagePlus
                   size={32}
                   strokeWidth={1.6}
-                  className="text-zinc-500 transition-colors duration-200 ease-in-out group-hover:text-zinc-300"
+                  className="text-zinc-500 transition-colors duration-200 ease-out group-hover:text-zinc-300"
                 />
                 <div>
                   <p className="text-xs uppercase tracking-[0.2em] text-zinc-300">
@@ -182,7 +193,7 @@ function PostUploadForm() {
             name="caption"
             rows={4}
             placeholder="ENTER TRANSMISSION TEXT..."
-            className="w-full resize-y border border-zinc-800 bg-[#111111] px-3 py-2.5 font-mono text-sm leading-relaxed text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-[#22d3ee]"
+            className="w-full resize-y border border-zinc-800 bg-[#111111] px-3 py-2.5 font-mono text-sm leading-relaxed text-zinc-100 outline-none transition-all duration-200 ease-out placeholder:text-zinc-600 focus:border-[#22d3ee]"
           />
         </label>
 
@@ -195,7 +206,7 @@ function PostUploadForm() {
           </div>
         ) : null}
 
-        <SubmitButton mode="post" />
+        <SubmitButton mode="image" />
       </form>
     </div>
   );
@@ -257,7 +268,7 @@ function ReelUploadForm() {
             htmlFor="video"
             onDrop={onDrop}
             onDragOver={(e) => e.preventDefault()}
-            className="group relative flex min-h-60 w-full cursor-pointer flex-col items-center justify-center overflow-hidden border border-dashed border-zinc-700 bg-[#111111] p-4 text-center transition-colors hover:border-zinc-600 hover:bg-[#151515]"
+            className="group relative flex min-h-60 w-full cursor-pointer flex-col items-center justify-center overflow-hidden border border-dashed border-zinc-700 bg-[#111111] p-4 text-center transition-all duration-200 ease-out hover:border-zinc-600 hover:bg-[#151515]"
           >
             {previewUrl ? (
               <>
@@ -281,7 +292,7 @@ function ReelUploadForm() {
                 <Film
                   size={32}
                   strokeWidth={1.6}
-                  className="text-zinc-500 transition-colors duration-200 ease-in-out group-hover:text-zinc-300"
+                  className="text-zinc-500 transition-colors duration-200 ease-out group-hover:text-zinc-300"
                 />
                 <div>
                   <p className="text-xs uppercase tracking-[0.2em] text-zinc-300">
@@ -317,7 +328,7 @@ function ReelUploadForm() {
             name="caption"
             rows={4}
             placeholder="ENTER REEL TRANSMISSION TEXT..."
-            className="w-full resize-y border border-zinc-800 bg-[#111111] px-3 py-2.5 font-mono text-sm leading-relaxed text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-[#22d3ee]"
+            className="w-full resize-y border border-zinc-800 bg-[#111111] px-3 py-2.5 font-mono text-sm leading-relaxed text-zinc-100 outline-none transition-all duration-200 ease-out placeholder:text-zinc-600 focus:border-[#22d3ee]"
           />
         </label>
 
@@ -336,13 +347,71 @@ function ReelUploadForm() {
   );
 }
 
-export function UploadClient() {
-  const [mode, setMode] = useState<Mode>("post");
+function TextUploadForm() {
+  const [state, formAction] = useActionState(transmitPost, initialPostState);
 
   return (
-    <div className="space-y-4">
+    <div className="border border-zinc-800 bg-[#0a0a0a] p-4">
+      <div className="mb-4 border-b border-zinc-800 pb-3">
+        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
+          System Transmission // Text Payload
+        </p>
+        <p className="mt-2 text-xs leading-relaxed text-zinc-400">
+          Broadcast a text signal to the grid. Links are optional.
+        </p>
+      </div>
+
+      <form action={formAction} className="space-y-4">
+        <input type="hidden" name="mode" value="text" />
+        <label className="block">
+          <span className="mb-2 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-400">
+            <Type size={12} /> &gt; Text_Payload
+          </span>
+          <textarea
+            name="body"
+            rows={7}
+            required
+            placeholder="What's happening in the grid?"
+            className="w-full resize-y border-0 bg-transparent px-0 py-2 text-base leading-relaxed text-zinc-100 outline-none transition-all duration-200 ease-out placeholder:text-zinc-600 focus:ring-0"
+          />
+        </label>
+
+        <label className="block border-t border-zinc-800 pt-4">
+          <span className="mb-2 block font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
+            &gt; Attach Link (optional)
+          </span>
+          <input
+            name="link"
+            type="url"
+            placeholder="https://..."
+            className="w-full border border-zinc-800 bg-[#111111] px-3 py-2.5 font-mono text-sm text-zinc-100 outline-none transition-all duration-200 ease-out placeholder:text-zinc-600 focus:border-[#22d3ee]"
+          />
+        </label>
+
+        {state?.error ? (
+          <div
+            role="alert"
+            className="border border-zinc-700 bg-[#111111] px-3 py-3 font-mono text-xs uppercase tracking-[0.08em] text-zinc-300"
+          >
+            {state.error}
+          </div>
+        ) : null}
+
+        <SubmitButton mode="text" />
+      </form>
+    </div>
+  );
+}
+
+export function UploadClient() {
+  const [mode, setMode] = useState<Mode>("image");
+
+  return (
+    <div className="space-y-4 animate-fade-in-up">
       <ModeToggle mode={mode} onChange={setMode} />
-      {mode === "post" ? <PostUploadForm /> : <ReelUploadForm />}
+      {mode === "image" ? <ImageUploadForm /> : null}
+      {mode === "reel" ? <ReelUploadForm /> : null}
+      {mode === "text" ? <TextUploadForm /> : null}
     </div>
   );
 }

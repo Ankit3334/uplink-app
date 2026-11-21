@@ -9,6 +9,7 @@ import {
 import { PostActions } from "./_components/post-actions";
 import { DoubleTapBoost } from "./_components/double-tap-boost";
 import { FadeIn } from "@/src/components/fade-in";
+import { renderTextWithLinks } from "@/src/lib/linkify";
 import { requireUser } from "@/src/lib/auth";
 import { createClient } from "@/src/lib/supabase/server";
 
@@ -20,8 +21,9 @@ type FeedProfile = {
 type FeedPost = {
   id: string;
   user_id: string;
-  image_url: string;
+  image_url: string | null;
   caption: string | null;
+  body: string | null;
   boost_count: number;
   thread_count: number;
   created_at: string;
@@ -167,7 +169,7 @@ async function FeedContent() {
     const { data } = await supabase
       .from("posts")
       .select(
-        "id, user_id, image_url, caption, boost_count, thread_count, created_at, profiles(username, avatar_url)",
+        "id, user_id, image_url, caption, body, boost_count, thread_count, created_at, profiles(username, avatar_url)",
       )
       .order("created_at", { ascending: false })
       .limit(20);
@@ -176,7 +178,7 @@ async function FeedContent() {
     const { data } = await supabase
       .from("posts")
       .select(
-        "id, user_id, image_url, caption, boost_count, thread_count, created_at, profiles(username, avatar_url)",
+        "id, user_id, image_url, caption, body, boost_count, thread_count, created_at, profiles(username, avatar_url)",
       )
       .in("user_id", followingIds)
       .order("created_at", { ascending: false })
@@ -255,15 +257,17 @@ async function FeedContent() {
                     <p className="font-mono text-xs text-zinc-500">{formatTimestamp(post.created_at)}</p>
                   </header>
 
-                  <DoubleTapBoost postId={post.id}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={post.image_url}
-                      alt={post.caption ? post.caption : `Transmission by ${username}`}
-                      className="w-full object-cover"
-                      loading="lazy"
-                    />
-                  </DoubleTapBoost>
+                  {post.image_url ? (
+                    <DoubleTapBoost postId={post.id}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={post.image_url}
+                        alt={post.caption ? post.caption : `Transmission by ${username}`}
+                        className="w-full object-cover"
+                        loading="lazy"
+                      />
+                    </DoubleTapBoost>
+                  ) : null}
 
                   <PostActions
                     postId={post.id}
@@ -278,16 +282,27 @@ async function FeedContent() {
                     <p className="text-sm font-semibold text-zinc-100">
                       {post.boost_count ?? 0} {(post.boost_count ?? 0) === 1 ? "boost" : "boosts"}
                     </p>
+
+                    {post.body ? (
+                      <div className="mt-1 text-base leading-relaxed text-zinc-100 whitespace-pre-wrap break-words">
+                        {!post.image_url ? (
+                          <span className="mr-2 font-semibold text-zinc-100">{username}</span>
+                        ) : null}
+                        {renderTextWithLinks(post.body)}
+                      </div>
+                    ) : null}
+
                     {post.caption ? (
                       <p className="mt-1 text-sm leading-relaxed text-zinc-300">
                         <span className="mr-2 font-semibold text-zinc-100">{username}</span>
-                        {post.caption}
+                        {renderTextWithLinks(post.caption)}
                       </p>
                     ) : null}
+
                     {post.thread_count > 0 ? (
                       <Link
                         href={`/post/${post.id}`}
-                        className="mt-1 block text-sm text-zinc-500 transition-colors hover:text-zinc-300"
+                        className="mt-1 block text-sm text-zinc-500 transition-colors duration-200 ease-out hover:text-zinc-300"
                       >
                         View all {post.thread_count} threads
                       </Link>
@@ -305,7 +320,7 @@ async function FeedContent() {
 
 export default function FeedPage() {
   return (
-    <section className="mx-auto flex min-h-[calc(100vh-6rem)] w-full max-w-md flex-col px-4 pt-6 pb-24">
+    <section className="mx-auto flex min-h-[calc(100vh-6rem)] w-full max-w-md flex-col px-4 pt-6 pb-24 animate-fade-in-up">
       <header className="border-b border-zinc-800 pb-4">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">

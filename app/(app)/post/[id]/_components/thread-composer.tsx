@@ -12,7 +12,7 @@ function PostButton() {
     <button
       type="submit"
       disabled={pending}
-      className="px-2 py-1 text-sm font-semibold text-[#22d3ee] transition-colors hover:text-[#67e8f9] disabled:cursor-not-allowed disabled:opacity-50"
+      className="px-2 py-1 text-sm font-semibold text-[#22d3ee] transition-all duration-200 ease-out hover:text-[#67e8f9] disabled:cursor-not-allowed disabled:opacity-50"
     >
       {pending ? "Posting" : "Post"}
     </button>
@@ -40,7 +40,7 @@ export function ThreadComposer({ postId }: { postId: string }) {
             required
             autoComplete="off"
             placeholder="Add a thread..."
-            className="h-10 flex-1 bg-transparent text-sm text-zinc-100 outline-none placeholder:text-zinc-500"
+            className="h-10 flex-1 bg-transparent text-sm text-zinc-100 outline-none transition-all duration-200 ease-out placeholder:text-zinc-500"
           />
           <PostButton />
         </form>
