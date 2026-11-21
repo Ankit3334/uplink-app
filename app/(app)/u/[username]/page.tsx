@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { Terminal } from "lucide-react";
 import { PostGrid } from "@/src/components/post-grid";
 import { createClient } from "@/src/lib/supabase/server";
+import { FollowButton } from "./_components/follow-button";
 
 type ProfileRow = {
   id: string;
@@ -34,11 +35,34 @@ export default async function PublicProfilePage({
 
   const profile = profileData as ProfileRow;
 
-  const { data: postsData } = await supabase
-    .from("posts")
-    .select("id, image_url, caption, boost_count, created_at")
-    .eq("user_id", profile.id)
-    .order("created_at", { ascending: false });
+  const [
+    { data: postsData },
+    { count: followersCount },
+    { count: followingCount },
+    followRowResult,
+  ] = await Promise.all([
+    supabase
+      .from("posts")
+      .select("id, image_url, caption, boost_count, created_at")
+      .eq("user_id", profile.id)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("follows")
+      .select("*", { count: "exact", head: true })
+      .eq("following_id", profile.id),
+    supabase
+      .from("follows")
+      .select("*", { count: "exact", head: true })
+      .eq("follower_id", profile.id),
+    currentUser && currentUser.id !== profile.id
+      ? supabase
+          .from("follows")
+          .select("id")
+          .eq("follower_id", currentUser.id)
+          .eq("following_id", profile.id)
+          .maybeSingle()
+      : Promise.resolve({ data: null } as { data: { id: string } | null }),
+  ]);
 
   const posts = postsData ?? [];
   const transmissionsCount = posts.length;
@@ -47,7 +71,9 @@ export default async function PublicProfilePage({
     0,
   );
 
-  const canDelete = currentUser?.id === profile.id;
+  const isSelf = currentUser?.id === profile.id;
+  const canDelete = isSelf;
+  const isFollowing = Boolean(followRowResult?.data);
   const displayName = profile.display_name ?? profile.username;
   const avatarUrl = profile.avatar_url ?? null;
   const bio = profile.bio ?? null;
@@ -67,34 +93,45 @@ export default async function PublicProfilePage({
       </header>
 
       <div className="border border-zinc-800 bg-[#0a0a0a] p-5">
-        <div className="flex items-center gap-4">
-          <div className="flex h-20 w-20 items-center justify-center border border-zinc-800 bg-[#111111] text-zinc-400">
-            {avatarUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={avatarUrl}
-                alt={`${profile.username} avatar`}
-                className="h-full w-full object-cover"
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex min-w-0 flex-1 items-center gap-4">
+            <div className="flex h-20 w-20 flex-shrink-0 items-center justify-center border border-zinc-800 bg-[#111111] text-zinc-400">
+              {avatarUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={avatarUrl}
+                  alt={`${profile.username} avatar`}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <Terminal size={32} strokeWidth={1.6} />
+              )}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-xl font-bold uppercase tracking-[0.08em] text-zinc-100">
+                @{profile.username}
+              </p>
+              <p className="mt-1 truncate text-sm uppercase tracking-[0.12em] text-zinc-300">
+                {displayName}
+              </p>
+              <p className="mt-3 whitespace-pre-wrap font-mono text-xs leading-relaxed text-zinc-500">
+                {bio || "No bio data written to node."}
+              </p>
+            </div>
+          </div>
+          {!isSelf && currentUser ? (
+            <div className="flex-shrink-0 pt-1">
+              <FollowButton
+                followingId={profile.id}
+                initialIsFollowing={isFollowing}
+                isSelf={isSelf}
               />
-            ) : (
-              <Terminal size={32} strokeWidth={1.6} />
-            )}
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-xl font-bold uppercase tracking-[0.08em] text-zinc-100">
-              @{profile.username}
-            </p>
-            <p className="mt-1 truncate text-sm uppercase tracking-[0.12em] text-zinc-300">
-              {displayName}
-            </p>
-            <p className="mt-3 whitespace-pre-wrap font-mono text-xs leading-relaxed text-zinc-500">
-              {bio || "No bio data written to node."}
-            </p>
-          </div>
+            </div>
+          ) : null}
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 gap-3">
         <div className="border border-zinc-800 bg-[#0a0a0a] p-4">
           <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-zinc-500">
             Transmissions
@@ -111,10 +148,18 @@ export default async function PublicProfilePage({
         </div>
         <div className="border border-zinc-800 bg-[#0a0a0a] p-4">
           <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-zinc-500">
-            Node Level
+            Followers
           </p>
-          <p className="mt-3 inline-block border border-zinc-700 bg-[#111111] px-2 py-0.5 font-mono text-lg font-bold text-[#22d3ee]">
-            1
+          <p className="mt-3 text-xl font-bold text-zinc-100">
+            {followersCount ?? 0}
+          </p>
+        </div>
+        <div className="border border-zinc-800 bg-[#0a0a0a] p-4">
+          <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-zinc-500">
+            Following
+          </p>
+          <p className="mt-3 text-xl font-bold text-zinc-100">
+            {followingCount ?? 0}
           </p>
         </div>
       </div>

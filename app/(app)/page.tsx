@@ -2,6 +2,7 @@ import Link from "next/link";
 import { MessageSquare, Terminal } from "lucide-react";
 import { BoostForm } from "./_components/boost-form";
 import { FadeIn } from "@/src/components/fade-in";
+import { requireUser } from "@/src/lib/auth";
 import { createClient } from "@/src/lib/supabase/server";
 
 type FeedProfile = {
@@ -33,15 +34,38 @@ function formatTimestamp(iso: string) {
 }
 
 export default async function FeedPage() {
+  const user = await requireUser();
   const supabase = await createClient();
-  const { data } = await supabase
-    .from("posts")
-    .select(
-      "id, user_id, image_url, caption, boost_count, thread_count, created_at, profiles(username, avatar_url)",
-    )
-    .order("created_at", { ascending: false });
 
-  const posts = (data ?? []) as FeedPost[];
+  const { data: follows } = await supabase
+    .from("follows")
+    .select("following_id")
+    .eq("follower_id", user.id);
+
+  const followingIds = (follows ?? []).map((f) => f.following_id as string);
+  const isNetworkEmpty = followingIds.length === 0;
+
+  let posts: FeedPost[] = [];
+
+  if (isNetworkEmpty) {
+    const { data } = await supabase
+      .from("posts")
+      .select(
+        "id, user_id, image_url, caption, boost_count, thread_count, created_at, profiles(username, avatar_url)",
+      )
+      .order("created_at", { ascending: false })
+      .limit(20);
+    posts = (data ?? []) as FeedPost[];
+  } else {
+    const { data } = await supabase
+      .from("posts")
+      .select(
+        "id, user_id, image_url, caption, boost_count, thread_count, created_at, profiles(username, avatar_url)",
+      )
+      .in("user_id", followingIds)
+      .order("created_at", { ascending: false });
+    posts = (data ?? []) as FeedPost[];
+  }
 
   return (
     <section className="mx-auto flex min-h-[calc(100vh-6rem)] w-full max-w-md flex-col gap-6 px-4 pb-8 pt-10">
@@ -57,13 +81,21 @@ export default async function FeedPage() {
         </p>
       </header>
 
+      {isNetworkEmpty ? (
+        <div className="border border-zinc-700 bg-[#111111] p-4 font-mono text-[10px] uppercase tracking-[0.15em] text-zinc-300">
+          NETWORK EMPTY. FOLLOW NODES TO CURATE YOUR STREAM.
+        </div>
+      ) : null}
+
       {posts.length === 0 ? (
         <div className="border border-zinc-800 bg-[#0a0a0a] p-6 text-sm text-zinc-400">
           <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-zinc-300">
             Status: Awaiting Signal
           </p>
           <p className="mt-3 leading-relaxed">
-            No uplinks detected. Initiate a transmission to populate the stream.
+            {isNetworkEmpty
+              ? "No uplinks detected in the global network. Initiate a transmission to populate the stream."
+              : "No transmissions detected from followed nodes. Follow more nodes or wait for new uplinks."}
           </p>
         </div>
       ) : (
