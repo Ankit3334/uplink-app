@@ -1,36 +1,167 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# UPLINK
 
-## Getting Started
+```txt
+╔══════════════════════════════════════════════════════════════╗
+║  UPLINK // UNDERGROUND DATA STREAM                           ║
+║  status: ONLINE   mode: CHRONOLOGICAL   ui: TERMINAL/CYBER   ║
+╚══════════════════════════════════════════════════════════════╝
+```
 
-First, run the development server:
+> `// TERMINAL-STYLE SOCIAL NETWORK`  
+> A raw, hacker-aesthetic alternative to sterile, algorithm-driven feeds.  
+> Built with **Next.js (App Router)** + **Supabase**.
+
+---
+
+## // MANIFESTO
+
+Social media didn’t just get cleaner — it got quieter, flatter, and more controlled.
+
+Feeds turned into engagement machines: opaque algorithms, optimized loops, rounded-everything interfaces, and the same sterile tone everywhere. You don’t browse a stream anymore; you get sorted by one.
+
+**UPLINK exists as a counter-signal.**
+
+- **Chronological, not curated by black box** — transmissions appear as a data stream, not as an attention slot machine.
+- **Raw over polished** — neon-on-black, monospace metadata, sharp corners, scanlines, terminal language (`BOOST`, `THREAD`, `BROADCAST`, `UPLINK`).
+- **Intentional interaction** — share image transmissions, boost signals, inject thread data, and view operator nodes without the usual corporate gloss.
+
+It’s not trying to look “friendly.” It’s trying to feel **alive**.
+
+---
+
+## // TECH STACK
+
+```txt
+[ FRONTEND ]  Next.js 16 (App Router) · React 19 · TypeScript
+[ STYLING  ]  Tailwind CSS v4 · JetBrains Mono · custom neon/cyber utilities
+[ MOTION   ]  Framer Motion (subtle fade/transition effects)
+[ BACKEND  ]  Supabase (Auth, Postgres Database, Storage)
+[ SSR/AUTH ]  @supabase/ssr (browser/server clients, cookie-based sessions)
+[ UI ICONS ]  lucide-react
+[ DEPLOY   ]  Vercel-ready (vercel.json, security headers, env template)
+```
+
+Core product modules implemented:
+- Auth (email/password) + mandatory onboarding (username claim)
+- Protected app shell/routes
+- Image upload/transmission to Supabase Storage
+- Chronological feed with boosts and threads
+- Public/own profile nodes, stats, and transmission grids
+
+---
+
+## // LOCAL DEVELOPMENT SETUP
+
+### 1) Prerequisites
+
+```bash
+# required
+node -v   # Node.js 20+ recommended
+npm -v    # npm 10+ recommended
+```
+
+- A [Supabase](https://supabase.com/) project
+- (Optional) [Vercel CLI](https://vercel.com/docs/cli) for deployment workflows
+
+### 2) Clone & install
+
+```bash
+git clone <your-repo-url> uplink-app
+cd uplink-app
+npm install
+```
+
+### 3) Configure environment
+
+```bash
+cp .env.example .env.local
+```
+
+Edit `.env.local` and set:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_public_key
+```
+
+> Get these from: **Supabase Dashboard → Project Settings → API**
+
+### 4) Provision Supabase (database + storage)
+
+1. Open **Supabase Dashboard → SQL Editor**
+2. Run the schema in [`supabase/schema.sql`](./supabase/schema.sql)  
+   - Creates tables: `profiles`, `posts`, `boosts`, `threads`
+   - Enables RLS + policies
+   - Adds helper RPC functions for denormalized counters
+3. Open **Supabase Dashboard → Storage**
+4. Create a bucket named **`uplink-posts`**
+   - Used for image transmissions (`<user_id>_<timestamp>.jpg`)
+   - Configure access/policies so post images can be read as intended by your app
+
+### 5) Run the app
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+```txt
+> LOCAL NODE READY
+> open: http://localhost:3000
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 6) Quality checks
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run lint
+npm run build
+```
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## // DEPLOYMENT (VERCEL)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+This repo includes:
+- [`vercel.json`](./vercel.json) — Next.js build settings + baseline security headers
+- [`.env.example`](./.env.example) — production env var template
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Typical flow:
+1. Push repo to GitHub/GitLab/Bitbucket
+2. Import project in Vercel
+3. Set production env vars (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`)
+4. Deploy
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## // PROJECT STRUCTURE (HIGH-LEVEL)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```txt
+app/
+  (app)/              # protected app routes (feed, upload, profile, posts, users)
+  auth/               # terminal-style auth flow
+  onboarding/         # mandatory username/profile initialization
+  actions/            # server actions (auth, posts, profile)
+src/
+  components/         # shared UI (nav, post grid, fade-in)
+  lib/                # supabase clients, auth helpers, types/utils
+supabase/
+  schema.sql          # database schema, RLS policies, RPC helpers
+```
+
+---
+
+## // SHOUTOUTS
+
+Built with and inspired by excellent tools:
+
+- [Next.js](https://nextjs.org/) — App Router, Server Components/Actions, modern React foundation
+- [Supabase](https://supabase.com/) — Auth, Postgres, Storage, and a great developer workflow
+- [Vercel](https://vercel.com/) — deployment platform and DX
+- [Tailwind CSS](https://tailwindcss.com/) — utility-first styling engine
+- [Framer Motion](https://www.framer.com/motion/) — motion primitives
+- [Lucide](https://lucide.dev/) — icon set
+- [JetBrains Mono](https://www.jetbrains.com/lp/mono/) — monospace type that fits the terminal vibe
+
+```txt
+// END OF FILE
+// KEEP THE SIGNAL CLEAN.
+```
