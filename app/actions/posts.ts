@@ -8,6 +8,10 @@ export type TransmitPostState = {
   error?: string;
 };
 
+export type UploadReelState = {
+  error?: string;
+};
+
 export type AddThreadState = {
   error?: string;
 };
@@ -220,6 +224,67 @@ export async function addThread(
   revalidatePath("/");
   revalidatePath(`/post/${postId}`);
   redirect(`/post/${postId}`);
+}
+
+export async function uploadReel(
+  _prevState: UploadReelState,
+  formData: FormData,
+): Promise<UploadReelState> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    return { error: "TRANSMISSION FAILED: Authentication required." };
+  }
+
+  const file = formData.get("video");
+  const captionRaw = formData.get("caption");
+  const caption = typeof captionRaw === "string" ? captionRaw.trim() : "";
+
+  if (!(file instanceof File) || file.size === 0) {
+    return { error: "TRANSMISSION FAILED: No video payload detected." };
+  }
+
+  if (!file.type.startsWith("video/")) {
+    return { error: "TRANSMISSION FAILED: Payload must be a video file." };
+  }
+
+  const ext = "mp4";
+  const filename = `${user.id}/${Date.now()}.${ext}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from("reel-videos")
+    .upload(filename, file, {
+      contentType: file.type || "video/mp4",
+      cacheControl: "3600",
+      upsert: false,
+    });
+
+  if (uploadError) {
+    return { error: `TRANSMISSION FAILED: ${uploadError.message}` };
+  }
+
+  const {
+    data: { publicUrl },
+  } = supabase.storage.from("reel-videos").getPublicUrl(filename);
+
+  const { error: insertError } = await supabase.from("reels").insert({
+    user_id: user.id,
+    video_url: publicUrl,
+    caption: caption || null,
+  });
+
+  if (insertError) {
+    await supabase.storage.from("reel-videos").remove([filename]);
+    return { error: `TRANSMISSION FAILED: ${insertError.message}` };
+  }
+
+  revalidatePath("/reels");
+  revalidatePath("/");
+  redirect("/reels");
 }
 
 export async function deletePost(formData: FormData): Promise<void> {

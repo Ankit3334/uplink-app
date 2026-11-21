@@ -2,6 +2,11 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { MessageSquare, Terminal } from "lucide-react";
 import { BoostForm } from "./_components/boost-form";
+import {
+  StoriesBar,
+  type StoryItem,
+  type StoryUserGroup,
+} from "./_components/stories-bar";
 import { FadeIn } from "@/src/components/fade-in";
 import { requireUser } from "@/src/lib/auth";
 import { createClient } from "@/src/lib/supabase/server";
@@ -22,6 +27,21 @@ type FeedPost = {
   profiles: FeedProfile | FeedProfile[];
 };
 
+type StoryProfile = {
+  username: string | null;
+  avatar_url: string | null;
+} | null;
+
+type StoryRow = {
+  id: string;
+  user_id: string;
+  media_url: string;
+  media_type: "image" | "video";
+  expires_at: string;
+  created_at: string;
+  profiles: StoryProfile | StoryProfile[];
+};
+
 function formatTimestamp(iso: string) {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;
@@ -32,6 +52,25 @@ function formatTimestamp(iso: string) {
     minute: "2-digit",
     hour12: false,
   });
+}
+
+function StoriesSkeleton() {
+  return (
+    <div className="border border-zinc-800 bg-[#0a0a0a] p-3">
+      <div className="mb-3 flex items-center justify-between">
+        <div className="h-2 w-28 animate-pulse rounded-none bg-zinc-800" />
+        <div className="h-2 w-16 animate-pulse rounded-none bg-zinc-800" />
+      </div>
+      <div className="flex gap-3 overflow-hidden">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div key={i} className="flex w-[72px] flex-shrink-0 flex-col items-center gap-2">
+            <div className="h-14 w-14 animate-pulse rounded-none border border-zinc-800 bg-zinc-800" />
+            <div className="h-2 w-10 animate-pulse rounded-none bg-zinc-800" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 function FeedSkeleton() {
@@ -60,6 +99,68 @@ function FeedSkeleton() {
         </article>
       ))}
     </div>
+  );
+}
+
+async function StoriesSection() {
+  const user = await requireUser();
+  const supabase = await createClient();
+  const nowIso = new Date().toISOString();
+
+  const [{ data: profile }, { data: storiesData }] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("username, avatar_url")
+      .eq("id", user.id)
+      .maybeSingle(),
+    supabase
+      .from("stories")
+      .select(
+        "id, user_id, media_url, media_type, expires_at, created_at, profiles(username, avatar_url)",
+      )
+      .gt("expires_at", nowIso)
+      .order("created_at", { ascending: true }),
+  ]);
+
+  const rows = (storiesData ?? []) as StoryRow[];
+  const byUser = new Map<string, StoryUserGroup>();
+
+  for (const row of rows) {
+    const p = Array.isArray(row.profiles) ? (row.profiles[0] ?? null) : row.profiles;
+    const username = p?.username ?? "unknown_node";
+    const avatarUrl = p?.avatar_url ?? null;
+    const item: StoryItem = {
+      id: row.id,
+      user_id: row.user_id,
+      media_url: row.media_url,
+      media_type: row.media_type,
+      expires_at: row.expires_at,
+      created_at: row.created_at,
+    };
+    const existing = byUser.get(row.user_id);
+    if (existing) {
+      existing.stories.push(item);
+    } else {
+      byUser.set(row.user_id, {
+        userId: row.user_id,
+        username,
+        avatarUrl,
+        stories: [item],
+      });
+    }
+  }
+
+  const groups = Array.from(byUser.values());
+
+  return (
+    <StoriesBar
+      currentUser={{
+        id: user.id,
+        username: profile?.username ?? "unknown_node",
+        avatarUrl: profile?.avatar_url ?? null,
+      }}
+      groups={groups}
+    />
   );
 }
 
@@ -224,6 +325,10 @@ export default function FeedPage() {
           Live data stream. Incoming transmissions decoded below.
         </p>
       </header>
+
+      <Suspense fallback={<StoriesSkeleton />}>
+        <StoriesSection />
+      </Suspense>
 
       <Suspense fallback={<FeedSkeleton />}>
         <FeedContent />

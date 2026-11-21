@@ -24,7 +24,7 @@ async function AppGate({
 
   return (
     <div className="min-h-full flex flex-col">
-      <main className="flex-1 pb-24">{children}</main>
+      <main className="flex-1 pb-24 has-[data-immersive]:pb-0">{children}</main>
       <BottomNav />
     </div>
   );
