@@ -160,6 +160,21 @@ export async function toggleBoost(formData: FormData): Promise<void> {
           .eq("id", postId);
       }
     }
+
+    const { data: post } = await supabase
+      .from("posts")
+      .select("user_id")
+      .eq("id", postId)
+      .maybeSingle();
+    if (post?.user_id && post.user_id !== user.id) {
+      await supabase.from("notifications").insert({
+        user_id: post.user_id,
+        actor_id: user.id,
+        type: "boost",
+        post_id: postId,
+      });
+      revalidatePath("/notifications");
+    }
   }
 
   revalidatePath("/");
@@ -219,6 +234,21 @@ export async function addThread(
         .update({ thread_count: (post.thread_count ?? 0) + 1 })
         .eq("id", postId);
     }
+  }
+
+  const { data: post } = await supabase
+    .from("posts")
+    .select("user_id")
+    .eq("id", postId)
+    .maybeSingle();
+  if (post?.user_id && post.user_id !== user.id) {
+    await supabase.from("notifications").insert({
+      user_id: post.user_id,
+      actor_id: user.id,
+      type: "thread",
+      post_id: postId,
+    });
+    revalidatePath("/notifications");
   }
 
   revalidatePath("/");

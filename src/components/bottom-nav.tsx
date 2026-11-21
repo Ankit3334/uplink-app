@@ -2,18 +2,18 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Film, LayoutGrid, Radio, Upload, User } from "lucide-react";
+import { Heart, LayoutGrid, Search, Upload, User } from "lucide-react";
 import { cn } from "@/src/lib/utils";
 
 const navItems = [
   { href: "/", label: "Feed", icon: LayoutGrid },
-  { href: "/reels", label: "Reels", icon: Film },
+  { href: "/explore", label: "Explore", icon: Search },
   { href: "/upload", label: "Uplink", icon: Upload, prominent: true },
-  { href: "/broadcasts", label: "Broadcasts", icon: Radio },
+  { href: "/notifications", label: "Alerts", icon: Heart },
   { href: "/profile", label: "Profile", icon: User },
 ] as const;
 
-export function BottomNav() {
+export function BottomNav({ unreadCount = 0 }: { unreadCount?: number }) {
   const pathname = usePathname();
 
   return (
@@ -29,6 +29,7 @@ export function BottomNav() {
               ? pathname === "/"
               : pathname === item.href || pathname.startsWith(`${item.href}/`);
           const isProminent = "prominent" in item && item.prominent;
+          const showBadge = item.href === "/notifications" && unreadCount > 0;
 
           return (
             <li key={item.href} className="h-full">
@@ -45,7 +46,14 @@ export function BottomNav() {
                 )}
                 aria-current={isActive ? "page" : undefined}
               >
-                <Icon size={18} strokeWidth={1.8} />
+                <span className="relative inline-flex">
+                  <Icon size={18} strokeWidth={1.8} />
+                  {showBadge ? (
+                    <span className="absolute -right-2 -top-1.5 flex h-3.5 min-w-3.5 items-center justify-center border border-[#0a0a0a] bg-[#22d3ee] px-0.5 font-mono text-[8px] font-bold leading-none text-[#050505]">
+                      {unreadCount > 9 ? "9+" : unreadCount}
+                    </span>
+                  ) : null}
+                </span>
                 <span className="leading-none">{item.label}</span>
               </Link>
             </li>

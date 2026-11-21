@@ -46,7 +46,19 @@ export async function toggleFollow(
       follower_id: user.id,
       following_id: followingId,
     });
-    isFollowing = !error;
+    if (!error) {
+      isFollowing = true;
+      if (followingId !== user.id) {
+        await supabase.from("notifications").insert({
+          user_id: followingId,
+          actor_id: user.id,
+          type: "follow",
+          post_id: null,
+        });
+      }
+    } else {
+      isFollowing = false;
+    }
   }
 
   const { count: followersCount } = await supabase
@@ -56,6 +68,7 @@ export async function toggleFollow(
 
   revalidatePath("/");
   revalidatePath("/profile");
+  revalidatePath("/notifications");
 
   return {
     isFollowing,

@@ -22,10 +22,25 @@ async function AppGate({
     redirect("/onboarding");
   }
 
+  const { data: unreadData, error: unreadError } = await supabase.rpc(
+    "get_unread_notification_count",
+    { p_user_id: user.id },
+  );
+
+  let unreadCount = typeof unreadData === "number" ? unreadData : 0;
+  if (unreadError) {
+    const { count } = await supabase
+      .from("notifications")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .eq("is_read", false);
+    unreadCount = count ?? 0;
+  }
+
   return (
     <div className="min-h-full flex flex-col">
       <main className="flex-1 pb-24 has-[data-immersive]:pb-0">{children}</main>
-      <BottomNav />
+      <BottomNav unreadCount={unreadCount} />
     </div>
   );
 }
