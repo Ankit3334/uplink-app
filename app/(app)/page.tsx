@@ -11,6 +11,10 @@ import { PostImage } from "./_components/post-image";
 import { CodeBlock } from "@/src/components/code-block";
 import { FadeIn } from "@/src/components/fade-in";
 import { TechStackBadges } from "@/src/components/tech-stack-badges";
+import {
+  POST_CATEGORY_BADGE_CLASS,
+  categoryLabel,
+} from "@/src/lib/post-categories";
 import { parseRichText } from "@/src/lib/utils";
 import { requireUser } from "@/src/lib/auth";
 import { createClient } from "@/src/lib/supabase/server";
@@ -42,20 +46,6 @@ type FeedPost = {
 
 const FEED_POST_SELECT =
   "id, user_id, image_url, caption, body, category, boost_count, thread_count, created_at, updated_at, is_edited, is_code_block, language, profiles(username, avatar_url, tech_stack, currently_building, open_to_work)";
-
-const CATEGORY_STYLES: Record<string, string> = {
-  general: "bg-zinc-800 text-zinc-300",
-  question: "bg-amber-500/10 text-amber-300",
-  hiring: "bg-emerald-500/10 text-emerald-300",
-  showdev: "bg-cyan-500/10 text-cyan-300",
-};
-
-const CATEGORY_LABELS: Record<string, string> = {
-  general: "General",
-  question: "Question",
-  hiring: "Hiring",
-  showdev: "ShowDev",
-};
 
 type StoryProfile = {
   username: string | null;
@@ -90,8 +80,8 @@ function StoriesSkeleton() {
       <div className="flex gap-4 overflow-hidden">
         {Array.from({ length: 6 }).map((_, i) => (
           <div key={i} className="flex w-14 flex-shrink-0 flex-col items-center gap-1.5">
-            <div className="h-14 w-14 animate-pulse rounded-none bg-zinc-800" />
-            <div className="h-2 w-10 animate-pulse rounded-none bg-zinc-800" />
+            <div className="h-14 w-14 animate-pulse rounded-full bg-zinc-900" />
+            <div className="h-2 w-10 animate-pulse rounded-md bg-zinc-900" />
           </div>
         ))}
       </div>
@@ -103,16 +93,23 @@ function FeedSkeleton() {
   return (
     <div className="flex flex-col">
       {Array.from({ length: 3 }).map((_, i) => (
-        <article key={i} className="border-b border-zinc-800 pb-3">
-          <div className="flex items-center gap-3 px-4 py-3">
-            <div className="h-8 w-8 animate-pulse rounded-none bg-zinc-800" />
-            <div className="h-3 w-24 animate-pulse rounded-none bg-zinc-800" />
+        <article
+          key={i}
+          className="flex flex-col gap-4 border-b border-zinc-800 py-4"
+        >
+          <div className="flex items-center gap-3 px-4">
+            <div className="h-8 w-8 flex-shrink-0 animate-pulse rounded-full bg-zinc-900" />
+            <div className="h-3 w-24 animate-pulse rounded-md bg-zinc-900" />
+            <div className="ml-auto h-3 w-20 animate-pulse rounded-md bg-zinc-900" />
           </div>
-          <div className="aspect-square w-full animate-pulse rounded-none bg-zinc-800" />
-          <div className="space-y-2 px-4 pt-3">
-            <div className="h-3 w-20 animate-pulse rounded-none bg-zinc-800" />
-            <div className="h-3 w-full animate-pulse rounded-none bg-zinc-800" />
+          <div className="h-5 w-20 animate-pulse rounded-md bg-zinc-900" />
+          <div className="aspect-square w-full animate-pulse bg-zinc-900" />
+          <div className="flex flex-col gap-2 px-4">
+            <div className="h-3 w-20 animate-pulse rounded-md bg-zinc-900" />
+            <div className="h-4 w-full animate-pulse rounded-md bg-zinc-900" />
+            <div className="h-4 w-2/3 animate-pulse rounded-md bg-zinc-900" />
           </div>
+          <div className="h-10 w-36 animate-pulse rounded-full bg-zinc-900" />
         </article>
       ))}
     </div>
@@ -235,7 +232,7 @@ async function FeedContent() {
   return (
     <>
       {isNetworkEmpty ? (
-        <div className="border-b border-zinc-800 px-4 py-3 font-mono text-xs uppercase tracking-[0.12em] text-zinc-400">
+        <div className="border-b border-zinc-800 px-4 py-3 text-xs text-zinc-500">
           Your network is empty. Connect with people to curate your feed.
         </div>
       ) : null}
@@ -248,7 +245,7 @@ async function FeedContent() {
           <p className="mt-4 text-base font-semibold text-zinc-100">
             Your feed is quiet
           </p>
-          <p className="mt-2 max-w-xs text-sm leading-relaxed text-zinc-400">
+          <p className="mt-2 max-w-xs text-[15px] leading-relaxed text-zinc-400">
             No transmissions yet. Follow tech builders to see their updates.
           </p>
         </div>
@@ -269,9 +266,9 @@ async function FeedContent() {
 
             return (
               <FadeIn key={post.id} delay={index * 0.03}>
-                <article className="border-b border-zinc-800 bg-[#050505]">
-                  <header className="flex items-center gap-3 px-4 py-3">
-                    <div className="flex h-8 w-8 items-center justify-center border border-zinc-800 bg-[#0a0a0a] text-zinc-400">
+                <article className="flex flex-col gap-4 border-b border-zinc-800 bg-[#050505] py-4">
+                  <header className="flex items-center gap-3 px-4">
+                    <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden rounded-full border border-zinc-800 bg-zinc-900 text-zinc-400">
                       {avatarUrl ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
@@ -280,19 +277,19 @@ async function FeedContent() {
                           className="h-full w-full object-cover"
                         />
                       ) : (
-                        <Terminal size={14} strokeWidth={1.8} />
+                        <Terminal size={15} strokeWidth={1.8} />
                       )}
                     </div>
                     <div className="flex min-w-0 flex-1 items-center gap-2">
                       {profile?.username ? (
                         <Link
                           href={`/u/${profile.username}`}
-                          className="truncate text-sm font-semibold text-zinc-100 transition-colors hover:text-cyan-300"
+                          className="truncate text-[15px] font-semibold text-zinc-100 transition-colors hover:text-cyan-300"
                         >
                           {username}
                         </Link>
                       ) : (
-                        <p className="truncate text-sm font-semibold text-zinc-100">{username}</p>
+                        <p className="truncate text-[15px] font-semibold text-zinc-100">{username}</p>
                       )}
                       {openToWork ? (
                         <span className="inline-flex flex-shrink-0 items-center rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-300">
@@ -300,16 +297,16 @@ async function FeedContent() {
                         </span>
                       ) : null}
                     </div>
-                    <p className="font-mono text-xs text-zinc-500">
+                    <p className="text-xs text-zinc-500">
                       {formatTimestamp(post.created_at)}
-                      {post.is_edited ? <span className="ml-1 normal-case tracking-normal text-zinc-600">(edited)</span> : null}
+                      {post.is_edited ? <span className="ml-1 text-zinc-600">(edited)</span> : null}
                     </p>
                   </header>
 
                   {building || techStack.length > 0 ? (
-                    <div className="flex flex-wrap items-center gap-1.5 px-4 pb-2">
+                    <div className="flex flex-wrap items-center gap-2 px-4">
                       {building ? (
-                        <span className="inline-flex max-w-full items-center gap-1.5 rounded-full bg-emerald-500/10 px-2 py-0.5 font-mono text-[10px] text-emerald-300">
+                        <span className="inline-flex max-w-full items-center gap-1.5 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] text-emerald-300">
                           <span className="h-1.5 w-1.5 flex-shrink-0 animate-pulse rounded-full bg-emerald-400" />
                           <span className="truncate">Building · {building}</span>
                         </span>
@@ -319,24 +316,64 @@ async function FeedContent() {
                   ) : null}
 
                   {post.category ? (
-                    <div className="px-4 pb-2">
-                      <span
-                        className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-medium ${
-                          CATEGORY_STYLES[post.category] ?? CATEGORY_STYLES.general
-                        }`}
-                      >
-                        {CATEGORY_LABELS[post.category] ?? "General"}
+                    <div className="px-4">
+                      <span className={POST_CATEGORY_BADGE_CLASS}>
+                        {categoryLabel(post.category)}
                       </span>
                     </div>
                   ) : null}
 
-                  {post.image_url ? (
-                    <PostImage
-                      postId={post.id}
-                      src={post.image_url}
-                      alt={post.caption ? post.caption : `Transmission by ${username}`}
-                    />
-                  ) : null}
+                  <div className="flex flex-col gap-4">
+                    {post.image_url ? (
+                      <PostImage
+                        postId={post.id}
+                        src={post.image_url}
+                        alt={post.caption ? post.caption : `Transmission by ${username}`}
+                      />
+                    ) : null}
+
+                    <div className="flex flex-col gap-2 px-4">
+                      <p className="text-xs font-medium text-zinc-500">
+                        {post.boost_count ?? 0} {(post.boost_count ?? 0) === 1 ? "boost" : "boosts"}
+                      </p>
+
+                      {post.body ? (
+                        post.is_code_block ? (
+                          <div className="flex flex-col gap-2">
+                            {!post.image_url ? (
+                              <p className="text-[15px] font-semibold text-white">
+                                {username}
+                              </p>
+                            ) : null}
+                            <CodeBlock code={post.body} language={post.language} />
+                          </div>
+                        ) : (
+                          <div className="text-[15px] leading-relaxed text-zinc-100 whitespace-pre-wrap break-words">
+                            {!post.image_url ? (
+                              <span className="mr-2 font-semibold text-white">{username}</span>
+                            ) : null}
+                            {parseRichText(post.body)}
+                          </div>
+                        )
+                      ) : null}
+
+                      {post.caption ? (
+                        <p className="text-[15px] leading-relaxed text-zinc-300">
+                          <span className="mr-2 font-semibold text-white">{username}</span>
+                          {parseRichText(post.caption)}
+                        </p>
+                      ) : null}
+
+                      {post.thread_count > 0 ? (
+                        <Link
+                          href={`/post/${post.id}`}
+                          className="text-xs text-zinc-500 transition-colors hover:text-zinc-300"
+                        >
+                          View all {post.thread_count} threads
+                        </Link>
+                      ) : null}
+                    </div>
+                  </div>
 
                   <PostActions
                     postId={post.id}
@@ -349,48 +386,6 @@ async function FeedContent() {
                     initialBody={post.body ?? ""}
                     canEdit
                   />
-
-                  <div className="px-4 pb-3">
-                    <p className="text-sm font-semibold text-zinc-100">
-                      {post.boost_count ?? 0} {(post.boost_count ?? 0) === 1 ? "boost" : "boosts"}
-                    </p>
-
-                    {post.body ? (
-                      post.is_code_block ? (
-                        <div className="mt-2">
-                          {!post.image_url ? (
-                            <p className="mb-2 text-sm font-semibold text-zinc-100">
-                              {username}
-                            </p>
-                          ) : null}
-                          <CodeBlock code={post.body} language={post.language} />
-                        </div>
-                      ) : (
-                        <div className="mt-1 text-base leading-relaxed text-zinc-100 whitespace-pre-wrap break-words">
-                          {!post.image_url ? (
-                            <span className="mr-2 font-semibold text-zinc-100">{username}</span>
-                          ) : null}
-                          {parseRichText(post.body)}
-                        </div>
-                      )
-                    ) : null}
-
-                    {post.caption ? (
-                      <p className="mt-1 text-sm leading-relaxed text-zinc-300">
-                        <span className="mr-2 font-semibold text-zinc-100">{username}</span>
-                        {parseRichText(post.caption)}
-                      </p>
-                    ) : null}
-
-                    {post.thread_count > 0 ? (
-                      <Link
-                        href={`/post/${post.id}`}
-                        className="mt-1 block text-sm text-zinc-500 transition-colors duration-200 ease-out hover:text-zinc-300"
-                      >
-                        View all {post.thread_count} threads
-                      </Link>
-                    ) : null}
-                  </div>
                 </article>
               </FadeIn>
             );
@@ -413,7 +408,7 @@ export default function FeedPage() {
             <h1 className="mt-1 text-2xl font-semibold tracking-tight text-zinc-50">
               Feed
             </h1>
-            <p className="mt-1 text-xs leading-relaxed text-zinc-400">
+            <p className="mt-1 text-[15px] leading-relaxed text-zinc-400">
               Live data stream. Incoming transmissions decoded below.
             </p>
           </div>

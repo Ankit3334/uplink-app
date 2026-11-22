@@ -75,7 +75,7 @@ export function DeveloperBento({
 
   return (
     <>
-      <div className="col-span-2 rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4">
+      <div className="col-span-2 rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6">
         <div className="flex items-center justify-between gap-3">
           <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-zinc-500">
             Currently building
@@ -83,7 +83,7 @@ export function DeveloperBento({
           <EditButton onClick={openEditor} />
         </div>
         {currentlyBuilding ? (
-          <p className="mt-3 flex items-start gap-2 text-sm leading-relaxed text-zinc-100">
+          <p className="mt-3 flex items-start gap-2 text-[15px] leading-relaxed text-zinc-100">
             <span className="relative mt-1.5 flex h-2 w-2 flex-shrink-0">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
@@ -91,13 +91,13 @@ export function DeveloperBento({
             <span>{currentlyBuilding}</span>
           </p>
         ) : (
-          <p className="mt-3 text-sm leading-relaxed text-zinc-500">
+          <p className="mt-3 text-[15px] leading-relaxed text-zinc-500">
             No active project set. Share what you are shipping.
           </p>
         )}
       </div>
 
-      <div className="col-span-2 rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4">
+      <div className="col-span-2 rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6">
         <div className="flex items-center justify-between gap-3">
           <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-zinc-500">
             Tech stack
@@ -107,7 +107,7 @@ export function DeveloperBento({
         {stack.length > 0 ? (
           <TechStackBadges stack={stack} className="mt-3" />
         ) : (
-          <p className="mt-3 text-sm leading-relaxed text-zinc-500">
+          <p className="mt-3 text-[15px] leading-relaxed text-zinc-500">
             Add the tools you build with to help other builders find you.
           </p>
         )}

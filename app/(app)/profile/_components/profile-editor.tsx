@@ -59,7 +59,7 @@ export function ProfileEditor({
       <div className="flex items-center justify-between gap-3">
         <div>
           <p className="text-sm font-semibold text-zinc-100">Edit profile</p>
-          <p className="mt-1 text-sm leading-relaxed text-zinc-500">
+          <p className="mt-1 text-[15px] leading-relaxed text-zinc-500">
             Update the name, location, and about text on your profile.
           </p>
         </div>
@@ -119,7 +119,7 @@ export function ProfileEditor({
               rows={4}
               defaultValue={initialBio}
               maxLength={280}
-              className="w-full resize-y rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2.5 text-sm leading-relaxed text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-cyan-500"
+              className="w-full resize-y rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2.5 text-[15px] leading-relaxed text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-cyan-500"
               placeholder="A short introduction..."
             />
           </label>

@@ -131,10 +131,11 @@ export function PostActions({
     setEditing((v) => !v);
   };
 
-  const iconClass = "transition-all duration-200 ease-out hover:text-zinc-100";
+  const iconClass =
+    "inline-flex h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-zinc-900 hover:text-zinc-100 focus-visible:bg-zinc-900 focus-visible:text-zinc-100 focus-visible:outline-none";
 
   return (
-    <div className={compact ? "px-3 py-2" : "px-4 py-2.5"}>
+    <div className="px-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <button
@@ -145,7 +146,7 @@ export function PostActions({
             className={`${iconClass} ${boosted ? "text-[#22d3ee]" : "text-zinc-300"}`}
           >
             <Heart
-              size={24}
+              size={compact ? 22 : 24}
               strokeWidth={1.8}
               fill={boosted ? "currentColor" : "none"}
             />
@@ -155,7 +156,7 @@ export function PostActions({
             aria-label="Thread"
             className={`${iconClass} text-zinc-300`}
           >
-            <MessageCircle size={24} strokeWidth={1.8} />
+            <MessageCircle size={compact ? 22 : 24} strokeWidth={1.8} />
           </Link>
           <button
             type="button"
@@ -163,7 +164,7 @@ export function PostActions({
             aria-label="Share"
             className={`${iconClass} text-zinc-300`}
           >
-            <Send size={24} strokeWidth={1.8} />
+            <Send size={compact ? 22 : 24} strokeWidth={1.8} />
           </button>
           {isOwner && canEdit ? (
             <button
@@ -172,7 +173,7 @@ export function PostActions({
               aria-label="Edit post"
               className={`${iconClass} ${isEditing ? "text-[#22d3ee]" : "text-zinc-300"}`}
             >
-              <Pencil size={24} strokeWidth={1.8} />
+              <Pencil size={compact ? 22 : 24} strokeWidth={1.8} />
             </button>
           ) : null}
         </div>
@@ -184,7 +185,7 @@ export function PostActions({
           className={`${iconClass} ${bookmarked ? "text-[#22d3ee]" : "text-zinc-300"}`}
         >
           <Bookmark
-            size={24}
+            size={compact ? 22 : 24}
             strokeWidth={1.8}
             fill={bookmarked ? "currentColor" : "none"}
           />
@@ -208,7 +209,7 @@ export function PostActions({
               name="body"
               defaultValue={initialBody}
               rows={5}
-              className="w-full resize-y rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2.5 text-sm leading-relaxed text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-cyan-500"
+              className="w-full resize-y rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2.5 text-[15px] leading-relaxed text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-cyan-500"
               placeholder="Update your post..."
             />
           </label>
@@ -258,16 +259,16 @@ export function PostActionMeta({
 }) {
   return (
     <div className="px-4 pb-3">
-      <p className="font-mono text-xs text-zinc-300">
+      <p className="text-xs font-medium text-zinc-500">
         {boostCount} {boostCount === 1 ? "boost" : "boosts"}
       </p>
       {caption ? (
-        <p className="mt-1 text-sm leading-relaxed text-zinc-200">
-          <span className="mr-2 font-semibold text-zinc-100">{username}</span>
+        <p className="mt-1 text-[15px] leading-relaxed text-zinc-200">
+          <span className="mr-2 font-semibold text-white">{username}</span>
           <span className="text-zinc-300">{caption}</span>
         </p>
       ) : null}
-      <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.08em] text-zinc-500">
+      <p className="mt-1 text-xs text-zinc-500">
         {createdAt}
       </p>
     </div>

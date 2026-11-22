@@ -119,14 +119,14 @@ export default async function NotificationsPage() {
 
   return (
     <section className="mx-auto flex min-h-[calc(100dvh-6rem)] w-full max-w-md flex-col gap-4 px-4 pt-6 pb-24 animate-fade-in-up">
-      <header className="rounded-3xl border border-white/5 bg-zinc-900/50 p-5 backdrop-blur-xl">
+      <header className="rounded-3xl border border-zinc-800 bg-zinc-900/50 p-6 backdrop-blur-xl">
         <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-zinc-500">
           Network
         </p>
         <h1 className="mt-2 text-xl font-semibold tracking-tight text-zinc-100">
           Notifications
         </h1>
-        <p className="mt-2 text-sm leading-relaxed text-zinc-400">
+        <p className="mt-2 text-[15px] leading-relaxed text-zinc-400">
           Connection requests and activity from your network.
         </p>
       </header>
@@ -137,7 +137,7 @@ export default async function NotificationsPage() {
             <p className="text-xs font-medium uppercase tracking-[0.15em] text-zinc-400">
               All caught up
             </p>
-            <p className="mt-2 text-sm leading-relaxed text-zinc-500">
+            <p className="mt-2 text-[15px] leading-relaxed text-zinc-500">
               New activity will appear here.
             </p>
           </div>
@@ -163,10 +163,10 @@ export default async function NotificationsPage() {
                     ) : null}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm leading-relaxed text-zinc-200">
+                    <p className="text-[15px] leading-relaxed text-zinc-200">
                       {notificationText(notification.type, actorUsername)}
                     </p>
-                    <p className="mt-1 text-[11px] text-zinc-500">
+                    <p className="mt-1 text-xs text-zinc-500">
                       {formatTimestamp(notification.created_at)}
                     </p>
                     {notification.type === "connection_request" && connectionId ? (

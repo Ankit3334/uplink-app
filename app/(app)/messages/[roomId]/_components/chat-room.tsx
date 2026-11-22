@@ -130,14 +130,14 @@ export function ChatRoom({
                   className={`flex ${mine ? "justify-end" : "justify-start"}`}
                 >
                   <div
-                    className={`max-w-[82%] border px-3 py-2 ${
+                    className={`max-w-[82%] rounded-2xl border px-3 py-2 ${
                       mine
                         ? "border-[#22d3ee]/40 bg-[#111111] text-zinc-100"
                         : "border-zinc-800 bg-[#0f0f0f] text-zinc-200"
                     }`}
                   >
                     {msg.content ? (
-                      <p className="whitespace-pre-wrap break-words text-sm leading-relaxed">
+                      <p className="whitespace-pre-wrap break-words text-[15px] leading-relaxed">
                         {msg.content}
                       </p>
                     ) : null}
@@ -147,7 +147,7 @@ export function ChatRoom({
                       </p>
                     ) : null}
                     <p
-                      className={`mt-1 font-mono text-[9px] uppercase tracking-[0.12em] ${
+                      className={`mt-1 text-xs ${
                         mine ? "text-[#22d3ee]/80" : "text-zinc-500"
                       }`}
                     >

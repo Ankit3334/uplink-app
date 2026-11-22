@@ -18,6 +18,21 @@
   --keyboard-inset: 0px;
 }
 
+/* Comfortable reading size for every unstyled paragraph; explicit component
+   classes can still opt into a different scale for headings and metadata. */
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-size: 15px;
+  line-height: 1.625;
+}
+
+/* Text selection uses the cyan accent at a low opacity, matching the app. */
+::selection {
+  background-color: rgb(6 182 212 / 0.2);
+  color: #22d3ee;
+}
+
 html {
   background: #050505;
   /* Locked, app-like scrolling instead of document rubber-banding. */

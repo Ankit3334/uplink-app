@@ -22,24 +22,24 @@ import { ConnectButton } from "./_components/connect-button";
 function ProfileContentSkeleton() {
   return (
     <>
-      <div className="overflow-hidden rounded-3xl border border-white/5 bg-zinc-900/50 p-5">
-        <div className="h-24 animate-pulse rounded-2xl bg-zinc-800" />
-        <div className="-mt-10 h-24 w-24 animate-pulse rounded-full bg-zinc-800" />
+      <div className="overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-950 p-6">
+        <div className="h-24 animate-pulse rounded-2xl bg-zinc-900" />
+        <div className="-mt-10 h-24 w-24 animate-pulse rounded-full bg-zinc-900" />
         <div className="mt-4 space-y-3">
-          <div className="h-5 w-40 animate-pulse rounded bg-zinc-800" />
-          <div className="h-4 w-56 animate-pulse rounded bg-zinc-800" />
-          <div className="h-4 w-32 animate-pulse rounded bg-zinc-800" />
+          <div className="h-5 w-40 animate-pulse rounded-md bg-zinc-900" />
+          <div className="h-4 w-56 animate-pulse rounded-md bg-zinc-900" />
+          <div className="h-4 w-32 animate-pulse rounded-md bg-zinc-900" />
         </div>
       </div>
       {[0, 1, 2].map((item) => (
         <div
           key={item}
-          className="h-36 animate-pulse rounded-3xl border border-white/5 bg-zinc-900/50"
+          className="h-36 animate-pulse rounded-3xl border border-zinc-800 bg-zinc-950"
         />
       ))}
       <div className="grid grid-cols-3 gap-2">
         {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="aspect-square animate-pulse rounded-xl bg-zinc-800" />
+          <div key={i} className="aspect-square animate-pulse border border-zinc-800 bg-zinc-900" />
         ))}
       </div>
     </>
@@ -106,7 +106,7 @@ async function ProfileContent({ username }: { username: string }) {
 
       {bio ? (
         <SectionCard title="About">
-          <p className="whitespace-pre-wrap text-sm leading-relaxed text-zinc-300">
+          <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-zinc-300">
             {bio}
           </p>
         </SectionCard>

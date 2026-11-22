@@ -34,7 +34,7 @@ function StatCard({
   hint?: string;
 }) {
   return (
-    <div className="rounded-2xl border border-white/5 bg-zinc-900/50 p-4 backdrop-blur-xl">
+    <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6 backdrop-blur-xl">
       <div className="flex items-center gap-2 text-zinc-500">
         <Icon size={14} strokeWidth={1.8} />
         <p className="text-[10px] font-medium uppercase tracking-[0.14em]">
@@ -103,7 +103,7 @@ export default async function ProfilePage() {
           <h1 className="mt-1 text-2xl font-semibold tracking-tight text-zinc-50">
             Your profile
           </h1>
-          <p className="mt-1 text-sm leading-relaxed text-zinc-400">
+          <p className="mt-1 text-[15px] leading-relaxed text-zinc-400">
             Build your professional presence on UPLINK.
           </p>
         </div>
@@ -124,7 +124,7 @@ export default async function ProfilePage() {
       />
 
       <SectionCard title="About" description="Your professional summary.">
-        <p className="whitespace-pre-wrap text-sm leading-relaxed text-zinc-300">
+        <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-zinc-300">
           {bio || "Add a short introduction so people know what you do."}
         </p>
       </SectionCard>
@@ -160,7 +160,7 @@ export default async function ProfilePage() {
           icon={FileText}
           hint={`${totalBoosts} boosts received`}
         />
-        <div className="relative overflow-hidden rounded-2xl border border-white/5 bg-zinc-900/50 p-4 backdrop-blur-xl">
+        <div className="relative overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6 backdrop-blur-xl">
           <p className="flex items-center gap-2 text-[10px] font-medium uppercase tracking-[0.14em] text-zinc-500">
             <Sparkles size={14} strokeWidth={1.8} />
             Status

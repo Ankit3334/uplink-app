@@ -377,7 +377,7 @@ function TextUploadForm() {
               isCodeBlock ? "Paste or write your snippet..." : "What's happening in the grid?"
             }
             className={cn(
-              "w-full resize-y border-0 bg-transparent px-0 py-2 text-base leading-relaxed text-zinc-100 outline-none transition-all duration-200 ease-out placeholder:text-zinc-600 focus:ring-0",
+              "w-full resize-y border-0 bg-transparent px-0 py-2 text-[15px] leading-relaxed text-zinc-100 outline-none transition-all duration-200 ease-out placeholder:text-zinc-600 focus:ring-0",
               isCodeBlock &&
                 "rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-3 font-mono text-sm",
             )}
