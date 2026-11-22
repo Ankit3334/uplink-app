@@ -29,11 +29,11 @@ function SubmitButton({ mode }: { mode: Mode }) {
     >
       {pending ? (
         <>
-          <Loader2 size={16} className="animate-spin text-[#22d3ee]" />
+          <Loader2 size={16} className="animate-spin text-cyan-400" />
           <span className="text-zinc-200">Transmitting...</span>
         </>
       ) : (
-        <span className="text-[#22d3ee]">{label}</span>
+        <span className="text-cyan-400">{label}</span>
       )}
     </button>
   );
@@ -61,7 +61,7 @@ function ModeToggle({
             onClick={() => onChange(tab.key)}
             className={
               active
-                ? "rounded-xl bg-zinc-800 px-3 py-2.5 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-300 transition-all duration-200 ease-out"
+                ? "rounded-xl bg-zinc-800 px-3 py-2.5 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-400 transition-all duration-200 ease-out"
                 : "rounded-xl px-3 py-2.5 font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500 transition-all duration-200 ease-out hover:text-zinc-200"
             }
           >
@@ -188,7 +188,7 @@ function ImageUploadForm() {
             name="caption"
             rows={4}
             placeholder="ENTER TRANSMISSION TEXT..."
-            className="w-full resize-y rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2.5 font-mono text-sm leading-relaxed text-zinc-100 outline-none transition-all duration-200 ease-out placeholder:text-zinc-600 focus:border-cyan-500"
+            className="w-full resize-y rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2.5 font-mono text-sm leading-relaxed text-zinc-100 outline-none transition-all duration-200 ease-out placeholder:text-zinc-600 focus:border-cyan-400"
           />
         </label>
 
@@ -334,7 +334,7 @@ function TextUploadForm() {
                 className={cn(
                   "rounded-md px-2 py-1 font-mono text-[11px] transition-colors",
                   isCodeBlock
-                    ? "bg-cyan-500 text-zinc-950"
+                    ? "bg-cyan-400 text-zinc-950"
                     : "text-zinc-300 hover:bg-zinc-800",
                 )}
               >
@@ -346,7 +346,7 @@ function TextUploadForm() {
                     aria-label="Code language"
                     value={language}
                     onChange={(event) => changeLanguage(event.target.value)}
-                    className="rounded-md border border-zinc-800 bg-zinc-900 px-1.5 py-1 font-mono text-[10px] text-zinc-300 outline-none focus:border-cyan-500"
+                    className="rounded-md border border-zinc-800 bg-zinc-900 px-1.5 py-1 font-mono text-[10px] text-zinc-300 outline-none focus:border-cyan-400"
                   >
                     {CODE_LANGUAGES.map((lang) => (
                       <option key={lang} value={lang}>
@@ -393,7 +393,7 @@ function TextUploadForm() {
               name="link"
               type="url"
               placeholder="https://..."
-              className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2.5 font-mono text-sm text-zinc-100 outline-none transition-all duration-200 ease-out placeholder:text-zinc-600 focus:border-cyan-500"
+              className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2.5 font-mono text-sm text-zinc-100 outline-none transition-all duration-200 ease-out placeholder:text-zinc-600 focus:border-cyan-400"
             />
           </label>
         ) : null}
@@ -435,7 +435,7 @@ export function UploadClient() {
             triggerHaptic();
             setOptionsOpen(true);
           }}
-          className="border border-zinc-800 bg-[#0a0a0a] px-3 py-2 font-mono text-[10px] uppercase tracking-[0.15em] text-zinc-300 transition-colors hover:border-zinc-700 hover:text-[#22d3ee]"
+          className="border border-zinc-800 bg-[#0a0a0a] px-3 py-2 font-mono text-[10px] uppercase tracking-[0.15em] text-zinc-300 transition-colors hover:border-zinc-700 hover:text-cyan-400"
         >
           Upload options
         </button>
@@ -460,7 +460,7 @@ export function UploadClient() {
                 type="button"
                 onClick={() => chooseMode(option.key)}
                 className={`flex items-center gap-3 border-b border-zinc-800 px-3 py-4 text-left transition-colors last:border-b-0 ${
-                  active ? "text-[#22d3ee]" : "text-zinc-200 hover:text-[#22d3ee]"
+                  active ? "text-cyan-400" : "text-zinc-200 hover:text-cyan-400"
                 }`}
               >
                 <Icon size={18} strokeWidth={1.8} />

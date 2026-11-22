@@ -44,14 +44,14 @@ export function BottomNav({ unreadCount = 0 }: { unreadCount?: number }) {
                     "relative flex h-12 w-full max-w-[68px] flex-col items-center justify-center gap-1 rounded-2xl transition-colors duration-200 ease-out",
                     isActive
                       ? isCreate
-                        ? "bg-cyan-500 text-zinc-950"
+                        ? "bg-cyan-400 text-zinc-950"
                         : "bg-zinc-800 text-zinc-100"
                       : "text-zinc-400 hover:bg-zinc-900/80 hover:text-zinc-200",
                   )}
                 >
                   <Icon size={18} strokeWidth={1.8} />
                   {showBadge ? (
-                    <span className="absolute -right-1 -top-0.5 flex h-3.5 min-w-3.5 items-center justify-center rounded-full border border-zinc-950 bg-cyan-500 px-0.5 font-mono text-[8px] font-bold leading-none text-zinc-950">
+                    <span className="absolute -right-1 -top-0.5 flex h-3.5 min-w-3.5 items-center justify-center rounded-full border border-zinc-950 bg-cyan-400 px-0.5 font-mono text-[8px] font-bold leading-none text-zinc-950">
                       {unreadCount > 9 ? "9+" : unreadCount}
                     </span>
                   ) : null}

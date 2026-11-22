@@ -33,7 +33,7 @@ function SaveButton() {
       type="submit"
       onClick={triggerHaptic}
       disabled={pending}
-      className="flex w-full items-center justify-center gap-2 rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm font-semibold text-cyan-300 transition-colors hover:border-zinc-600 hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-60"
+      className="flex w-full items-center justify-center gap-2 rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm font-semibold text-cyan-400 transition-colors hover:border-zinc-600 hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-60"
     >
       {pending ? (
         <>
@@ -129,7 +129,7 @@ export function DeveloperBento({
               defaultValue={currentlyBuilding ?? ""}
               maxLength={160}
               placeholder="Real-time collaboration engine in Rust"
-              className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-3 text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-cyan-500"
+              className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-3 text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-cyan-400"
             />
           </label>
 
@@ -142,7 +142,7 @@ export function DeveloperBento({
               rows={3}
               defaultValue={stack.join(", ")}
               placeholder="Next.js, Rust, AI, PostgreSQL"
-              className="w-full resize-y rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-3 text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-cyan-500"
+              className="w-full resize-y rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-3 text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-cyan-400"
             />
             <span className="mt-2 block font-mono text-[10px] text-zinc-500">
               Comma separated. Up to 12 technologies.

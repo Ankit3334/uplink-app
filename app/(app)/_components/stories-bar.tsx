@@ -32,7 +32,7 @@ function UploadButton() {
       type="submit"
       onClick={triggerHaptic}
       disabled={pending}
-      className="flex w-full items-center justify-center gap-2 border border-zinc-700 bg-[#161616] px-4 py-3 text-xs font-bold uppercase tracking-[0.2em] text-[#22d3ee] transition-colors hover:border-zinc-600 hover:bg-[#1b1b1b] focus-visible:border-[#22d3ee] focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+      className="flex w-full items-center justify-center gap-2 border border-zinc-700 bg-[#161616] px-4 py-3 text-xs font-bold uppercase tracking-[0.2em] text-cyan-400 transition-colors hover:border-zinc-600 hover:bg-[#1b1b1b] focus-visible:border-cyan-400 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60"
     >
       {pending ? (
         <>
@@ -214,7 +214,7 @@ function StorySlide({
           {group.stories.map((s, i) => (
             <div key={s.id} className="h-1 flex-1 bg-zinc-800">
               <div
-                className="h-full bg-[#22d3ee]"
+                className="h-full bg-cyan-400"
                 style={{
                   width:
                     i < storyIndex
@@ -393,7 +393,7 @@ export function StoriesBar({
               ) : (
                 <Terminal size={20} strokeWidth={1.6} />
               )}
-              <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center border border-[#050505] bg-[#22d3ee] text-[#050505]">
+              <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center border border-[#050505] bg-cyan-400 text-[#050505]">
                 <Plus size={12} strokeWidth={2.4} />
               </span>
             </div>
@@ -412,7 +412,7 @@ export function StoriesBar({
               }}
               className="flex w-[72px] flex-shrink-0 flex-col items-center gap-2"
             >
-              <div className="border-2 border-[#22d3ee] p-[2px]">
+              <div className="border-2 border-cyan-400 p-[2px]">
                 <div className="flex h-12 w-12 items-center justify-center border border-zinc-800 bg-[#111111] text-zinc-300">
                   {group.avatarUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element

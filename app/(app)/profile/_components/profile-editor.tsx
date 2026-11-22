@@ -91,7 +91,7 @@ export function ProfileEditor({
               required
               defaultValue={initialDisplayName}
               maxLength={64}
-              className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2.5 text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-cyan-500"
+              className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2.5 text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-cyan-400"
               placeholder="Your name"
             />
           </label>
@@ -105,7 +105,7 @@ export function ProfileEditor({
               name="location"
               defaultValue={initialLocation}
               maxLength={120}
-              className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2.5 text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-cyan-500"
+              className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2.5 text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-cyan-400"
               placeholder="San Francisco, CA"
             />
           </label>
@@ -119,7 +119,7 @@ export function ProfileEditor({
               rows={4}
               defaultValue={initialBio}
               maxLength={280}
-              className="w-full resize-y rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2.5 text-[15px] leading-relaxed text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-cyan-500"
+              className="w-full resize-y rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2.5 text-[15px] leading-relaxed text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-cyan-400"
               placeholder="A short introduction..."
             />
           </label>
@@ -137,7 +137,7 @@ export function ProfileEditor({
               type="checkbox"
               name="open_to_work"
               defaultChecked={initialOpenToWork}
-              className="h-4 w-4 flex-shrink-0 rounded border-zinc-700 bg-zinc-900 accent-emerald-400"
+              className="h-4 w-4 flex-shrink-0 rounded border-zinc-700 bg-zinc-900 accent-cyan-400"
             />
           </label>
 

@@ -32,7 +32,7 @@ import { triggerHaptic } from "@/src/lib/utils";
 const initialState: ProfessionalState = {};
 
 const fieldClass =
-  "w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2.5 text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-cyan-500";
+  "w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2.5 text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-cyan-400";
 
 function AddButton({ onClick }: { onClick: () => void }) {
   return (

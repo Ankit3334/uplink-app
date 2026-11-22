@@ -13,7 +13,7 @@ function AuthSubmitButton({ isRegister }: { isRegister: boolean }) {
     <button
       type="submit"
       disabled={pending}
-      className="mt-2 flex w-full items-center justify-center gap-2 border border-zinc-700 bg-[#111111] px-4 py-3.5 text-sm font-bold uppercase tracking-[0.2em] text-[#22d3ee] transition-colors hover:border-zinc-600 hover:bg-[#161616] focus-visible:border-[#22d3ee] focus-visible:outline-none active:border-[#22d3ee] disabled:cursor-not-allowed disabled:opacity-50"
+      className="mt-2 flex w-full items-center justify-center gap-2 border border-zinc-700 bg-[#111111] px-4 py-3.5 text-sm font-bold uppercase tracking-[0.2em] text-cyan-400 transition-colors hover:border-zinc-600 hover:bg-[#161616] focus-visible:border-cyan-400 focus-visible:outline-none active:border-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
     >
       {pending ? (
         <>
@@ -90,7 +90,7 @@ export function AuthClient() {
             required
             autoComplete="email"
             placeholder="operator@uplink.net"
-            className="w-full border border-zinc-800 bg-[#111111] px-3 py-3 text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-[#22d3ee]"
+            className="w-full border border-zinc-800 bg-[#111111] px-3 py-3 text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-cyan-400"
           />
         </label>
 
@@ -104,7 +104,7 @@ export function AuthClient() {
             required
             autoComplete={isRegister ? "new-password" : "current-password"}
             placeholder="••••••••"
-            className="w-full border border-zinc-800 bg-[#111111] px-3 py-3 text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-[#22d3ee]"
+            className="w-full border border-zinc-800 bg-[#111111] px-3 py-3 text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-cyan-400"
           />
         </label>
 

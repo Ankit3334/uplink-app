@@ -144,7 +144,7 @@ export default async function PostDetailPage({
               {postProfile?.username ? (
                 <Link
                   href={`/u/${postProfile.username}`}
-                  className="truncate text-[15px] font-semibold text-zinc-100 transition-colors hover:text-cyan-300"
+                  className="truncate text-[15px] font-semibold text-zinc-100 transition-colors hover:text-cyan-400"
                 >
                   {postUsername}
                 </Link>
@@ -152,7 +152,7 @@ export default async function PostDetailPage({
                 <p className="truncate text-[15px] font-semibold text-zinc-100">{postUsername}</p>
               )}
               {openToWork ? (
-                <span className="inline-flex flex-shrink-0 items-center rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-300">
+                <span className="inline-flex flex-shrink-0 items-center rounded-full border border-cyan-400/20 bg-cyan-400/10 px-2 py-0.5 text-[10px] font-medium text-cyan-400">
                   Open to Work
                 </span>
               ) : null}
@@ -288,7 +288,7 @@ export default async function PostDetailPage({
                         {tProfile?.username ? (
                           <Link
                             href={`/u/${tProfile.username}`}
-                            className="mr-2 font-semibold text-zinc-100 transition-colors hover:text-[#22d3ee]"
+                            className="mr-2 font-semibold text-zinc-100 transition-colors hover:text-cyan-400"
                           >
                             {tUsername}
                           </Link>

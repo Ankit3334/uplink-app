@@ -284,7 +284,7 @@ async function FeedContent() {
                       {profile?.username ? (
                         <Link
                           href={`/u/${profile.username}`}
-                          className="truncate text-[15px] font-semibold text-zinc-100 transition-colors hover:text-cyan-300"
+                          className="truncate text-[15px] font-semibold text-zinc-100 transition-colors hover:text-cyan-400"
                         >
                           {username}
                         </Link>
@@ -292,7 +292,7 @@ async function FeedContent() {
                         <p className="truncate text-[15px] font-semibold text-zinc-100">{username}</p>
                       )}
                       {openToWork ? (
-                        <span className="inline-flex flex-shrink-0 items-center rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-300">
+                        <span className="inline-flex flex-shrink-0 items-center rounded-full border border-cyan-400/20 bg-cyan-400/10 px-2 py-0.5 text-[10px] font-medium text-cyan-400">
                           Open to Work
                         </span>
                       ) : null}
@@ -415,7 +415,7 @@ export default function FeedPage() {
           <Link
             href="/explore"
             aria-label="Explore and search nodes"
-            className="inline-flex h-9 w-9 flex-shrink-0 items-center justify-center border border-zinc-800 bg-[#0a0a0a] text-zinc-400 transition-colors hover:border-zinc-700 hover:text-[#22d3ee] focus-visible:border-[#22d3ee] focus-visible:text-[#22d3ee] focus-visible:outline-none"
+            className="inline-flex h-9 w-9 flex-shrink-0 items-center justify-center border border-zinc-800 bg-[#0a0a0a] text-zinc-400 transition-colors hover:border-zinc-700 hover:text-cyan-400 focus-visible:border-cyan-400 focus-visible:text-cyan-400 focus-visible:outline-none"
           >
             <Search size={16} strokeWidth={1.8} />
           </Link>

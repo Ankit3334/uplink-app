@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useState, useTransition, useActionState } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  useTransition,
+  useActionState,
+} from "react";
 import Link from "next/link";
 import { Bookmark, Heart, MessageCircle, Pencil, Send, X } from "lucide-react";
 import {
@@ -13,6 +19,12 @@ import { BottomSheet } from "@/src/components/bottom-sheet";
 import { triggerHaptic } from "@/src/lib/utils";
 
 const initialEditState: EditPostState = {};
+
+const pillClass =
+  "flex items-center gap-1.5 bg-zinc-900/50 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs font-medium text-zinc-400 hover:bg-zinc-800 hover:text-white transition-all duration-200 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-cyan-400/40";
+
+const activePillClass =
+  "bg-cyan-400/10 border-cyan-400/20 text-cyan-400 hover:bg-cyan-400/10 hover:text-cyan-400";
 
 export function PostActions({
   postId,
@@ -37,10 +49,17 @@ export function PostActions({
   initialBody?: string;
   canEdit?: boolean;
 }) {
+  // Refs keep rapid taps accurate: each click flips the instant state from the
+  // latest value instead of a stale render closure. The server call follows.
+  const boostedRef = useRef(initialBoosted);
+  const bookmarkedRef = useRef(initialBookmarked);
+  const boostRequestRef = useRef(0);
+  const bookmarkRequestRef = useRef(0);
+
   const [boosted, setBoosted] = useState(initialBoosted);
   const [boostCount, setBoostCount] = useState(initialBoostCount);
   const [bookmarked, setBookmarked] = useState(initialBookmarked);
-  const [isPending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
   const [editing, setEditing] = useState(false);
   const [ackEditSuccess, setAckEditSuccess] = useState(false);
   const [editState, editAction, editPending] = useActionState(
@@ -66,6 +85,7 @@ export function PostActions({
         }>
       ).detail;
       if (detail?.postId !== postId) return;
+      boostedRef.current = detail.boosted;
       setBoosted(detail.boosted);
       setBoostCount(detail.boostCount);
     }
@@ -76,15 +96,21 @@ export function PostActions({
 
   const onBoost = () => {
     triggerHaptic();
-    const next = !boosted;
+    const next = !boostedRef.current;
+    boostedRef.current = next;
     setBoosted(next);
     setBoostCount((c) => c + (next ? 1 : -1));
+
+    const requestId = ++boostRequestRef.current;
     startTransition(async () => {
       const res = await toggleBoostPost(postId);
+      if (requestId !== boostRequestRef.current) return;
       if (!res.error) {
+        boostedRef.current = res.boosted;
         setBoosted(res.boosted);
         setBoostCount(res.boostCount);
       } else {
+        boostedRef.current = !next;
         setBoosted(!next);
         setBoostCount((c) => c + (next ? -1 : 1));
       }
@@ -93,13 +119,19 @@ export function PostActions({
 
   const onBookmark = () => {
     triggerHaptic();
-    const next = !bookmarked;
+    const next = !bookmarkedRef.current;
+    bookmarkedRef.current = next;
     setBookmarked(next);
+
+    const requestId = ++bookmarkRequestRef.current;
     startTransition(async () => {
       const res = await toggleBookmark(postId);
+      if (requestId !== bookmarkRequestRef.current) return;
       if (!res.error) {
+        bookmarkedRef.current = res.bookmarked;
         setBookmarked(res.bookmarked);
       } else {
+        bookmarkedRef.current = !next;
         setBookmarked(!next);
       }
     });
@@ -131,67 +163,72 @@ export function PostActions({
     setEditing((v) => !v);
   };
 
-  const iconClass =
-    "inline-flex h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-zinc-900 hover:text-zinc-100 focus-visible:bg-zinc-900 focus-visible:text-zinc-100 focus-visible:outline-none";
+  const iconSize = compact ? 14 : 15;
 
   return (
     <div className="px-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <button
-            type="button"
-            onClick={onBoost}
-            aria-label={boosted ? "Remove boost" : "Boost"}
-            disabled={isPending}
-            className={`${iconClass} ${boosted ? "text-[#22d3ee]" : "text-zinc-300"}`}
-          >
-            <Heart
-              size={compact ? 22 : 24}
-              strokeWidth={1.8}
-              fill={boosted ? "currentColor" : "none"}
-            />
-          </button>
-          <Link
-            href={`/post/${postId}`}
-            aria-label="Thread"
-            className={`${iconClass} text-zinc-300`}
-          >
-            <MessageCircle size={compact ? 22 : 24} strokeWidth={1.8} />
-          </Link>
-          <button
-            type="button"
-            onClick={onShare}
-            aria-label="Share"
-            className={`${iconClass} text-zinc-300`}
-          >
-            <Send size={compact ? 22 : 24} strokeWidth={1.8} />
-          </button>
-          {isOwner && canEdit ? (
-            <button
-              type="button"
-              onClick={openEditor}
-              aria-label="Edit post"
-              className={`${iconClass} ${isEditing ? "text-[#22d3ee]" : "text-zinc-300"}`}
-            >
-              <Pencil size={compact ? 22 : 24} strokeWidth={1.8} />
-            </button>
-          ) : null}
-        </div>
+      <div className="flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          onClick={onBoost}
+          aria-label={boosted ? "Remove boost" : "Boost"}
+          aria-pressed={boosted}
+          className={`${pillClass} ${boosted ? activePillClass : ""}`}
+        >
+          <Heart
+            size={iconSize}
+            strokeWidth={2}
+            fill={boosted ? "currentColor" : "none"}
+          />
+          <span>{boostCount}</span>
+        </button>
+
+        <Link
+          href={`/post/${postId}`}
+          aria-label="Thread"
+          className={pillClass}
+        >
+          <MessageCircle size={iconSize} strokeWidth={2} />
+          <span>{threadCount}</span>
+        </Link>
+
+        <button
+          type="button"
+          onClick={onShare}
+          aria-label="Share"
+          className={pillClass}
+        >
+          <Send size={iconSize} strokeWidth={2} />
+          <span>Share</span>
+        </button>
+
         <button
           type="button"
           onClick={onBookmark}
           aria-label={bookmarked ? "Remove bookmark" : "Bookmark"}
-          disabled={isPending}
-          className={`${iconClass} ${bookmarked ? "text-[#22d3ee]" : "text-zinc-300"}`}
+          aria-pressed={bookmarked}
+          className={`${pillClass} ml-auto ${bookmarked ? activePillClass : ""}`}
         >
           <Bookmark
-            size={compact ? 22 : 24}
-            strokeWidth={1.8}
+            size={iconSize}
+            strokeWidth={2}
             fill={bookmarked ? "currentColor" : "none"}
           />
+          <span>Save</span>
         </button>
-        <span className="sr-only">{boostCount} boosts</span>
-        <span className="sr-only">{threadCount} threads</span>
+
+        {isOwner && canEdit ? (
+          <button
+            type="button"
+            onClick={openEditor}
+            aria-label="Edit post"
+            aria-pressed={isEditing}
+            className={`${pillClass} ${isEditing ? activePillClass : ""}`}
+          >
+            <Pencil size={iconSize} strokeWidth={2} />
+            <span>Edit</span>
+          </button>
+        ) : null}
       </div>
 
       <BottomSheet
@@ -199,7 +236,7 @@ export function PostActions({
         onClose={() => setEditing(false)}
         title="Edit transmission"
       >
-        <form action={editAction} className="relative z-10 space-y-4 bg-zinc-950 p-4">
+        <form action={editAction} className="relative z-10 space-y-4 bg-zinc-950">
           <input type="hidden" name="postId" value={postId} />
           <label className="block">
             <span className="mb-1.5 block text-sm font-medium text-zinc-300">
@@ -209,7 +246,7 @@ export function PostActions({
               name="body"
               defaultValue={initialBody}
               rows={5}
-              className="w-full resize-y rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2.5 text-[15px] leading-relaxed text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-cyan-500"
+              className="w-full resize-y rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2.5 text-[15px] leading-relaxed text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-cyan-400"
               placeholder="Update your post..."
             />
           </label>
@@ -268,9 +305,7 @@ export function PostActionMeta({
           <span className="text-zinc-300">{caption}</span>
         </p>
       ) : null}
-      <p className="mt-1 text-xs text-zinc-500">
-        {createdAt}
-      </p>
+      <p className="mt-1 text-xs text-zinc-500">{createdAt}</p>
     </div>
   );
 }

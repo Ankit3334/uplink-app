@@ -61,7 +61,7 @@ export function ConnectButton({
         <button
           type="button"
           disabled
-          className={`${baseButton} border border-emerald-500/30 bg-emerald-500/10 text-emerald-300`}
+          className={`${baseButton} border border-cyan-400/20 bg-cyan-400/10 text-cyan-400`}
         >
           <Check size={15} strokeWidth={2.2} />
           Connected

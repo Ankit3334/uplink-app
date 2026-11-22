@@ -5,9 +5,9 @@ import { DoubleTapBoost } from "./double-tap-boost";
 
 /**
  * Feed/detail image with native-style interactions: double-tap boosts the
- * post, single tap opens a dedicated preview overlay. The backdrop and the
- * sharp content panel are siblings, so backdrop-blur can never bleed into the
- * image.
+ * post, single tap opens an image preview. The blurred backdrop and the sharp
+ * image panel are siblings, and the panel paints its own solid background, so
+ * backdrop-blur can never bleed into the preview.
  */
 export function PostImage({
   postId,
@@ -47,33 +47,36 @@ export function PostImage({
       </DoubleTapBoost>
 
       {previewOpen ? (
-        <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
+        <div className="isolate fixed inset-0 z-[60] flex items-end justify-center sm:items-center">
           {/* 1. THE BLURRY BACKDROP (Sibling 1) */}
           <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+            className="fixed inset-0 z-0 bg-black/60 backdrop-blur-sm transition-opacity"
             onClick={() => setPreviewOpen(false)}
+            aria-hidden="true"
           />
 
-          {/* 2. THE SHARP CONTENT (Sibling 2 - MUST NOT BE INSIDE THE BACKDROP) */}
+          {/* 2. THE SHARP CONTENT (Sibling 2 - NOT INSIDE THE BACKDROP) */}
           <div
             role="dialog"
             aria-modal="true"
             aria-label="Image preview"
-            className="relative z-50 w-full max-w-lg bg-zinc-950 text-white rounded-t-3xl sm:rounded-3xl border-t border-zinc-800 shadow-2xl max-h-[90vh] overflow-y-auto"
+            className="relative z-[70] w-full max-w-lg rounded-t-3xl border-t border-zinc-800 bg-zinc-950 text-white shadow-2xl sm:rounded-3xl max-h-[85vh] overflow-y-auto"
           >
             {/* Drag Handle */}
-            <div className="sticky top-0 z-10 bg-zinc-950 pt-3 pb-2 flex justify-center border-b border-zinc-900">
-              <div className="w-12 h-1.5 bg-zinc-800 rounded-full" />
+            <div className="sticky top-0 z-10 flex justify-center border-b border-zinc-900 bg-zinc-950 pt-3 pb-2">
+              <div className="h-1.5 w-12 rounded-full bg-zinc-800" />
             </div>
 
-            {/* Actual Content */}
-            <div className="p-6">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={src}
-                alt={alt}
-                className="mx-auto max-h-[72vh] w-auto max-w-full rounded-xl object-contain"
-              />
+            {/* Actual Content: solid surface, never transparent */}
+            <div className="bg-zinc-950 p-6">
+              <div className="flex justify-center bg-zinc-950">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={src}
+                  alt={alt}
+                  className="mx-auto max-h-[70vh] w-auto max-w-full rounded-xl object-contain"
+                />
+              </div>
             </div>
           </div>
         </div>

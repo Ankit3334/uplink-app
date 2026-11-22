@@ -36,7 +36,7 @@ function SendButton() {
       type="submit"
       onClick={triggerHaptic}
       disabled={pending}
-      className="flex h-10 w-10 items-center justify-center border border-zinc-700 bg-[#111111] text-[#22d3ee] transition-colors hover:border-[#22d3ee] hover:bg-[#161616] disabled:cursor-not-allowed disabled:opacity-60"
+      className="flex h-10 w-10 items-center justify-center border border-zinc-700 bg-[#111111] text-cyan-400 transition-colors hover:border-cyan-400 hover:bg-[#161616] disabled:cursor-not-allowed disabled:opacity-60"
       aria-label="Send message"
     >
       {pending ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
@@ -132,7 +132,7 @@ export function ChatRoom({
                   <div
                     className={`max-w-[82%] rounded-2xl border px-3 py-2 ${
                       mine
-                        ? "border-[#22d3ee]/40 bg-[#111111] text-zinc-100"
+                        ? "border-cyan-400/40 bg-[#111111] text-zinc-100"
                         : "border-zinc-800 bg-[#0f0f0f] text-zinc-200"
                     }`}
                   >
@@ -148,7 +148,7 @@ export function ChatRoom({
                     ) : null}
                     <p
                       className={`mt-1 text-xs ${
-                        mine ? "text-[#22d3ee]/80" : "text-zinc-500"
+                        mine ? "text-cyan-400/80" : "text-zinc-500"
                       }`}
                     >
                       {formatTime(msg.created_at)}
@@ -176,7 +176,7 @@ export function ChatRoom({
               autoComplete="off"
               enterKeyHint="send"
               placeholder="ENTER MESSAGE..."
-              className="h-10 flex-1 border border-zinc-800 bg-[#111111] px-3 font-mono text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-[#22d3ee]"
+              className="h-10 flex-1 border border-zinc-800 bg-[#111111] px-3 font-mono text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-cyan-400"
             />
             <SendButton />
           </div>

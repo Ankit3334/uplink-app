@@ -46,7 +46,7 @@ export function ProfileHero({
   action?: ReactNode;
 }) {
   const [isOpenToWork, setIsOpenToWork] = useState(openToWork);
-  const [pending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
   const toggleOpenToWork = () => {
@@ -95,23 +95,22 @@ export function ProfileHero({
             <button
               type="button"
               onClick={toggleOpenToWork}
-              disabled={pending}
               aria-pressed={isOpenToWork}
               className={
                 isOpenToWork
-                  ? "inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/15 px-3 py-1.5 text-xs font-medium text-emerald-300 transition-colors disabled:opacity-60"
+                  ? "inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1.5 text-xs font-medium text-cyan-400 transition-colors hover:bg-cyan-400/15 disabled:opacity-60"
                   : "inline-flex items-center gap-2 rounded-full border border-zinc-700 bg-zinc-800/70 px-3 py-1.5 text-xs font-medium text-zinc-300 transition-colors hover:bg-zinc-800 disabled:opacity-60"
               }
             >
               <span
-                className={`h-1.5 w-1.5 rounded-full ${isOpenToWork ? "bg-emerald-400" : "bg-zinc-500"}`}
+                className={`h-1.5 w-1.5 rounded-full ${isOpenToWork ? "bg-cyan-400" : "bg-zinc-500"}`}
               />
               Open to Work
               {isOpenToWork ? <Check size={12} strokeWidth={2.2} /> : null}
             </button>
           ) : isOpenToWork ? (
-            <span className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/15 px-3 py-1.5 text-xs font-medium text-emerald-300">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+            <span className="inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1.5 text-xs font-medium text-cyan-400">
+              <span className="h-1.5 w-1.5 rounded-full bg-cyan-400" />
               Open to Work
             </span>
           ) : null}

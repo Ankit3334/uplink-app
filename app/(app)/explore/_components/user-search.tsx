@@ -54,7 +54,7 @@ export function UserSearch() {
 
   return (
     <div ref={containerRef} className="relative">
-      <div className="flex items-center border border-zinc-800 bg-[#111111] px-3 py-2.5 focus-within:border-[#22d3ee]">
+      <div className="flex items-center border border-zinc-800 bg-[#111111] px-3 py-2.5 focus-within:border-cyan-400">
         <Search size={16} className="mr-2 flex-shrink-0 text-zinc-500" />
         <input
           type="text"

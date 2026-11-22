@@ -55,7 +55,7 @@ export function parseRichText(text: string): ReactNode[] {
             target: "_blank",
             rel: "noopener noreferrer",
             className:
-              "text-cyan-400 underline underline-offset-2 transition-colors duration-200 ease-out hover:text-cyan-300",
+              "text-cyan-400 underline underline-offset-2 transition-colors duration-200 ease-out hover:text-cyan-400",
           },
           href,
         ),
