@@ -57,10 +57,22 @@ export async function sendMessage(
       return { error: `TRANSMISSION FAILED: ${insertError.message}` };
     }
 
+    // Surface the DM in the recipient's Activity feed. A failed notification
+    // write must never roll back a message that was already delivered.
+    const recipientId =
+      room.user_1_id === user.id ? room.user_2_id : room.user_1_id;
+    await supabase.from("notifications").insert({
+      user_id: recipientId,
+      actor_id: user.id,
+      type: "message",
+    });
+
     await supabase
       .from("message_rooms")
       .update({ last_message_at: new Date().toISOString() })
       .eq("id", roomId);
+
+    revalidatePath("/notifications");
 
     revalidatePath("/messages");
     revalidatePath(`/messages/${roomId}`);

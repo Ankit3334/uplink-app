@@ -10,6 +10,7 @@ type NotificationType =
   | "thread"
   | "story_view"
   | "boost"
+  | "message"
   | "connection_request"
   | "connection_accepted";
 
@@ -55,6 +56,8 @@ function notificationText(type: NotificationType, actorUsername: string) {
       return `@${actorUsername} accepted your connection request`;
     case "thread":
       return `@${actorUsername} commented on your post`;
+    case "message":
+      return `@${actorUsername} sent you a message`;
     case "story_view":
       return `@${actorUsername} viewed your broadcast`;
     default:
@@ -70,6 +73,9 @@ function TypeIcon({ type }: { type: NotificationType }) {
     return <Check size={14} strokeWidth={1.8} />;
   }
   if (type === "thread") return <MessageSquare size={14} strokeWidth={1.8} />;
+  if (type === "message") {
+    return <MessageSquare size={14} strokeWidth={1.8} className="text-cyan-400" />;
+  }
   return <Heart size={14} strokeWidth={1.8} />;
 }
 
@@ -147,7 +153,12 @@ export default async function NotificationsPage() {
               const actor = actorsById.get(notification.actor_id);
               const actorUsername = actor?.username ?? "uplink_user";
               const avatarUrl = actor?.avatar_url ?? null;
-              const href = actor?.username ? `/u/${actor.username}` : undefined;
+              const href =
+                notification.type === "message"
+                  ? "/messages"
+                  : actor?.username
+                    ? `/u/${actor.username}`
+                    : undefined;
               const connectionId = pendingByActor.get(notification.actor_id);
 
               const content = (

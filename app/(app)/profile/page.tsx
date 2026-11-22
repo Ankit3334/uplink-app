@@ -1,4 +1,5 @@
-import { FileText, Sparkles, Users, type LucideIcon } from "lucide-react";
+import Link from "next/link";
+import { FileText, Settings, Sparkles, Users, type LucideIcon } from "lucide-react";
 import { signOut } from "@/app/actions/auth";
 import { requireUser } from "@/src/lib/auth";
 import { PostGrid } from "@/src/components/post-grid";
@@ -107,9 +108,19 @@ export default async function ProfilePage() {
             Build your professional presence on UPLINK.
           </p>
         </div>
-        <form action={signOut}>
-          <SignOutIconButton />
-        </form>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/settings"
+            aria-label="Settings"
+            title="Settings"
+            className="flex h-10 w-10 items-center justify-center border border-zinc-700 bg-[#111111] text-zinc-400 transition-colors hover:border-zinc-600 hover:text-zinc-200 focus-visible:border-cyan-400 focus-visible:text-cyan-400 focus-visible:outline-none"
+          >
+            <Settings size={18} strokeWidth={1.8} />
+          </Link>
+          <form action={signOut}>
+            <SignOutIconButton />
+          </form>
+        </div>
       </header>
 
       <ProfileHero

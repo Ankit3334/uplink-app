@@ -50,11 +50,13 @@ export default async function MessageRoomPage({
       .from("messages")
       .select("id, room_id, sender_id, content, media_url, created_at")
       .eq("room_id", roomId)
-      .order("created_at", { ascending: true })
-      .limit(100),
+      // Fetch the newest 50 with the index-friendly descending order, then
+      // reverse in memory so the thread still renders oldest -> newest.
+      .order("created_at", { ascending: false })
+      .limit(50),
   ]);
 
-  const messages = (messagesData ?? []) as MessageRow[];
+  const messages = ((messagesData ?? []) as MessageRow[]).reverse();
   const username = otherProfile?.username ?? "unknown_node";
   const displayName = otherProfile?.display_name ?? username;
   const avatarUrl = otherProfile?.avatar_url ?? null;
