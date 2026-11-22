@@ -241,7 +241,6 @@ export default async function PostDetailPage({
             threadCount={post.thread_count ?? threads.length}
             initialBookmarked={Boolean(bookmarkRow)}
             shareUrl={shareUrl}
-            compact
             isOwner={isOwner}
             initialBody={post.body ?? ""}
             canEdit

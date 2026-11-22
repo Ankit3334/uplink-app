@@ -21,7 +21,7 @@ import { triggerHaptic } from "@/src/lib/utils";
 const initialEditState: EditPostState = {};
 
 const iconButtonClass =
-  "flex items-center justify-center bg-zinc-900/40 border border-zinc-800 rounded-lg p-2.5 transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-cyan-400/40";
+  "flex items-center justify-center bg-zinc-900/40 border border-zinc-800 rounded-lg p-1.5 transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-cyan-400/40";
 
 const inactiveIconClass = "text-zinc-400 hover:bg-zinc-800 hover:text-white";
 
@@ -35,7 +35,6 @@ export function PostActions({
   threadCount,
   initialBookmarked,
   shareUrl,
-  compact = false,
   isOwner = false,
   initialBody = "",
   canEdit = false,
@@ -46,7 +45,6 @@ export function PostActions({
   threadCount: number;
   initialBookmarked: boolean;
   shareUrl: string;
-  compact?: boolean;
   isOwner?: boolean;
   initialBody?: string;
   canEdit?: boolean;
@@ -165,11 +163,9 @@ export function PostActions({
     setEditing((v) => !v);
   };
 
-  const rowGap = compact ? "gap-3" : "gap-4";
-
   return (
     <div className="px-4">
-      <div className={`flex items-center ${rowGap}`}>
+      <div className="flex items-center gap-2">
         <button
           type="button"
           onClick={onBoost}
@@ -182,8 +178,8 @@ export function PostActions({
           className={`${iconButtonClass} ${boosted ? activeIconClass : inactiveIconClass}`}
         >
           <Heart
-            size={20}
-            className="h-5 w-5"
+            size={16}
+            className="h-4 w-4"
             strokeWidth={1.8}
             fill={boosted ? "currentColor" : "none"}
           />
@@ -194,7 +190,7 @@ export function PostActions({
           aria-label={`View ${threadCount} comments`}
           className={`${iconButtonClass} ${inactiveIconClass}`}
         >
-          <MessageCircle size={20} className="h-5 w-5" strokeWidth={1.8} />
+          <MessageCircle size={16} className="h-4 w-4" strokeWidth={1.8} />
         </Link>
 
         <button
@@ -205,8 +201,8 @@ export function PostActions({
           className={`${iconButtonClass} ${bookmarked ? activeIconClass : inactiveIconClass}`}
         >
           <Bookmark
-            size={20}
-            className="h-5 w-5"
+            size={16}
+            className="h-4 w-4"
             strokeWidth={1.8}
             fill={bookmarked ? "currentColor" : "none"}
           />
@@ -218,7 +214,7 @@ export function PostActions({
           aria-label="Share"
           className={`${iconButtonClass} ${inactiveIconClass}`}
         >
-          <Send size={20} className="h-5 w-5" strokeWidth={1.8} />
+          <Send size={16} className="h-4 w-4" strokeWidth={1.8} />
         </button>
 
         {isOwner && canEdit ? (
@@ -229,7 +225,7 @@ export function PostActions({
             aria-pressed={isEditing}
             className={`${iconButtonClass} ${isEditing ? activeIconClass : inactiveIconClass}`}
           >
-            <Pencil size={20} className="h-5 w-5" strokeWidth={1.8} />
+            <Pencil size={16} className="h-4 w-4" strokeWidth={1.8} />
           </button>
         ) : null}
       </div>

@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import Link from "next/link";
-import { Search, Terminal } from "lucide-react";
+import { MessageSquare, Search, Terminal } from "lucide-react";
 import {
   StoriesBar,
   type StoryItem,
@@ -412,13 +412,22 @@ export default function FeedPage() {
               Live data stream. Incoming transmissions decoded below.
             </p>
           </div>
-          <Link
-            href="/explore"
-            aria-label="Explore and search nodes"
-            className="inline-flex h-9 w-9 flex-shrink-0 items-center justify-center border border-zinc-800 bg-[#0a0a0a] text-zinc-400 transition-colors hover:border-zinc-700 hover:text-cyan-400 focus-visible:border-cyan-400 focus-visible:text-cyan-400 focus-visible:outline-none"
-          >
-            <Search size={16} strokeWidth={1.8} />
-          </Link>
+          <div className="flex flex-shrink-0 items-center gap-2">
+            <Link
+              href="/messages"
+              aria-label="Messages"
+              className="p-2 rounded-lg text-zinc-400 hover:bg-zinc-900 hover:text-white transition-colors"
+            >
+              <MessageSquare size={18} strokeWidth={1.8} />
+            </Link>
+            <Link
+              href="/explore"
+              aria-label="Explore and search nodes"
+              className="inline-flex h-9 w-9 flex-shrink-0 items-center justify-center border border-zinc-800 bg-[#0a0a0a] text-zinc-400 transition-colors hover:border-zinc-700 hover:text-cyan-400 focus-visible:border-cyan-400 focus-visible:text-cyan-400 focus-visible:outline-none"
+            >
+              <Search size={16} strokeWidth={1.8} />
+            </Link>
+          </div>
         </div>
       </header>
 
