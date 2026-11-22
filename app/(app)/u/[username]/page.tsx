@@ -221,7 +221,7 @@ export default async function PublicProfilePage({
   const { username } = await params;
 
   return (
-    <section className="mx-auto flex min-h-[calc(100vh-6rem)] w-full max-w-md flex-col gap-6 px-4 pb-8 pt-10">
+    <section className="mx-auto flex min-h-[calc(100vh-6rem)] w-full max-w-md flex-col gap-6 px-4 pb-8 pt-10 animate-fade-in-up">
       <header className="border border-zinc-800 bg-[#0a0a0a] p-5">
         <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
           Node Profile // Public

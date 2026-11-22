@@ -60,7 +60,7 @@ export default async function MessageRoomPage({
   const avatarUrl = otherProfile?.avatar_url ?? null;
 
   return (
-    <section className="mx-auto flex h-[calc(100dvh-4rem)] w-full max-w-md flex-col px-4 pt-4">
+    <section className="mx-auto flex h-[calc(100dvh-4rem)] w-full max-w-md flex-col px-4 pt-4 animate-fade-in-up">
       <header className="mb-3 border border-zinc-800 bg-[#0a0a0a] p-3">
         <div className="flex items-center gap-3">
           <Link
