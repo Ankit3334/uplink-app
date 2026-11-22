@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { Terminal } from "lucide-react";
 import { PostGrid } from "@/src/components/post-grid";
+import { TechStackBadges } from "@/src/components/tech-stack-badges";
 import { getUser } from "@/src/lib/auth";
 import { createClient } from "@/src/lib/supabase/server";
 import { FollowButton } from "./_components/follow-button";
@@ -12,6 +13,8 @@ type ProfileRow = {
   display_name: string | null;
   avatar_url: string | null;
   bio: string | null;
+  currently_building: string | null;
+  tech_stack: string[] | null;
 };
 
 function ProfileContentSkeleton() {
@@ -62,7 +65,9 @@ async function ProfileContent({ username }: { username: string }) {
     getUser(),
     supabase
       .from("profiles")
-      .select("id, username, display_name, avatar_url, bio")
+      .select(
+        "id, username, display_name, avatar_url, bio, currently_building, tech_stack",
+      )
       .eq("username", username)
       .maybeSingle(),
   ]);
@@ -116,6 +121,7 @@ async function ProfileContent({ username }: { username: string }) {
   const displayName = profile.display_name ?? profile.username;
   const avatarUrl = profile.avatar_url ?? null;
   const bio = profile.bio ?? null;
+  const techStack = Array.isArray(profile.tech_stack) ? profile.tech_stack : [];
 
   return (
     <>
@@ -157,6 +163,30 @@ async function ProfileContent({ username }: { username: string }) {
           ) : null}
         </div>
       </div>
+
+      {profile.currently_building || techStack.length > 0 ? (
+        <div className="grid grid-cols-1 gap-3">
+          {profile.currently_building ? (
+            <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4">
+              <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-zinc-500">
+                Currently building
+              </p>
+              <p className="mt-3 flex items-center gap-2 text-sm leading-relaxed text-zinc-100">
+                <span className="h-2 w-2 flex-shrink-0 animate-pulse rounded-full bg-emerald-400" />
+                {profile.currently_building}
+              </p>
+            </div>
+          ) : null}
+          {techStack.length > 0 ? (
+            <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4">
+              <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-zinc-500">
+                Tech stack
+              </p>
+              <TechStackBadges stack={techStack} className="mt-3" />
+            </div>
+          ) : null}
+        </div>
+      ) : null}
 
       <div className="grid grid-cols-2 gap-3">
         <div className="border border-zinc-800 bg-[#0a0a0a] p-4">

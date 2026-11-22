@@ -11,6 +11,7 @@ import { requireUser } from "@/src/lib/auth";
 import { PostGrid } from "@/src/components/post-grid";
 import { createClient } from "@/src/lib/supabase/server";
 import { AvatarUploader } from "./_components/avatar-uploader";
+import { DeveloperBento } from "./_components/developer-bento";
 import { ProfileEditor } from "./_components/profile-editor";
 import {
   SignOutButton,
@@ -60,7 +61,9 @@ export default async function ProfilePage() {
   ] = await Promise.all([
     supabase
       .from("profiles")
-      .select("id, username, display_name, avatar_url, bio")
+      .select(
+        "id, username, display_name, avatar_url, bio, currently_building, tech_stack",
+      )
       .eq("id", user.id)
       .maybeSingle(),
     supabase
@@ -90,6 +93,13 @@ export default async function ProfilePage() {
   const displayName = profile?.display_name ?? username;
   const avatarUrl = profile?.avatar_url ?? null;
   const bio = profile?.bio ?? null;
+  const currentlyBuilding =
+    typeof profile?.currently_building === "string"
+      ? profile.currently_building
+      : null;
+  const techStack = Array.isArray(profile?.tech_stack)
+    ? (profile.tech_stack as string[])
+    : [];
 
   return (
     <section className="native-scroll mx-auto flex min-h-[calc(100dvh-6rem)] w-full max-w-md flex-col gap-5 px-4 pt-6 pb-28 animate-fade-in-up">
@@ -169,6 +179,11 @@ export default async function ProfilePage() {
             Early operator with priority signal routing.
           </p>
         </div>
+
+        <DeveloperBento
+          currentlyBuilding={currentlyBuilding}
+          techStack={techStack}
+        />
       </div>
 
       <AvatarUploader initialAvatarUrl={avatarUrl} />

@@ -93,3 +93,15 @@ export function parseRichText(text: string): ReactNode[] {
 export function renderTextWithLinks(text: string): ReactNode[] {
   return parseRichText(text);
 }
+
+const FENCED_CODE_REGEX = /^```[^\r\n]*\r?\n([\s\S]*?)\r?\n?```$/;
+
+/**
+ * Code posts are stored without their markdown fence so the feed can render
+ * them directly in a <pre>. This also handles legacy posts saved with fences.
+ */
+export function stripCodeFences(text: string): string {
+  const trimmed = text.trim();
+  const match = trimmed.match(FENCED_CODE_REGEX);
+  return match ? match[1] : trimmed;
+}

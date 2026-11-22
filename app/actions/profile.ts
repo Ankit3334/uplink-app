@@ -19,6 +19,11 @@ export type UpdateAvatarState = {
   avatarUrl?: string;
 };
 
+export type UpdateDeveloperProfileState = {
+  error?: string;
+  success?: number;
+};
+
 export async function completeOnboarding(
   _prevState: OnboardingState,
   formData: FormData,
@@ -115,6 +120,57 @@ export async function updateProfile(
 
   revalidatePath("/profile");
   revalidatePath("/");
+  return { success: Date.now() };
+}
+
+export async function updateDeveloperProfile(
+  _prevState: UpdateDeveloperProfileState,
+  formData: FormData,
+): Promise<UpdateDeveloperProfileState> {
+  const buildingRaw = formData.get("currently_building");
+  const currentlyBuilding =
+    typeof buildingRaw === "string" ? buildingRaw.trim().slice(0, 160) : "";
+
+  const stackRaw = formData.get("tech_stack");
+  const techStack = Array.from(
+    new Set(
+      (typeof stackRaw === "string" ? stackRaw : "")
+        .split(",")
+        .map((item) => item.trim().slice(0, 24))
+        .filter(Boolean),
+    ),
+  ).slice(0, 12);
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    redirect("/auth");
+  }
+
+  const { data: updated, error } = await supabase
+    .from("profiles")
+    .update({
+      currently_building: currentlyBuilding || null,
+      tech_stack: techStack,
+    })
+    .eq("id", user.id)
+    .select("username")
+    .maybeSingle();
+
+  if (error) {
+    return { error: `CONFIG ERROR: ${error.message}` };
+  }
+
+  revalidatePath("/profile");
+  revalidatePath("/");
+  if (updated?.username) {
+    revalidatePath(`/u/${updated.username}`);
+  }
+
   return { success: Date.now() };
 }
 

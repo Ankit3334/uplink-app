@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/src/lib/supabase/server";
+import { stripCodeFences } from "@/src/lib/utils";
 
 export type TransmitPostState = {
   error?: string;
@@ -45,10 +46,23 @@ export async function transmitPost(
     const bodyText = typeof bodyRaw === "string" ? bodyRaw.trim() : "";
     const linkRaw = formData.get("link");
     const link = typeof linkRaw === "string" ? linkRaw.trim() : "";
+    const isCodeBlockRaw = formData.get("is_code_block");
+    const isCodeBlock = isCodeBlockRaw === "true" || isCodeBlockRaw === "on";
+    const languageRaw = formData.get("language");
+    const codeLanguage =
+      typeof languageRaw === "string" && languageRaw.trim()
+        ? languageRaw.trim().slice(0, 32)
+        : null;
 
-    // TEXT post
+    // TEXT post (plain signal or code snippet)
     if (mode === "text") {
-      const composedBody = [bodyText, link].filter(Boolean).join("\n\n");
+      const storedBody = isCodeBlock ? stripCodeFences(bodyText) : bodyText;
+      const composedBody = [
+        storedBody,
+        isCodeBlock ? "" : link,
+      ]
+        .filter(Boolean)
+        .join("\n\n");
       if (!composedBody) {
         return { error: "TRANSMISSION FAILED: Text payload empty." };
       }
@@ -58,6 +72,8 @@ export async function transmitPost(
         image_url: null,
         body: composedBody,
         caption: caption || null,
+        is_code_block: isCodeBlock,
+        language: isCodeBlock ? codeLanguage : null,
       });
 
       if (insertError) {

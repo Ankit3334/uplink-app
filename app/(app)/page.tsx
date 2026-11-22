@@ -8,8 +8,10 @@ import {
 } from "./_components/stories-bar";
 import { PostActions } from "./_components/post-actions";
 import { PostImage } from "./_components/post-image";
+import { CodeBlock } from "@/src/components/code-block";
 import { FadeIn } from "@/src/components/fade-in";
 import { FeedFab } from "@/src/components/feed-fab";
+import { TechStackBadges } from "@/src/components/tech-stack-badges";
 import { parseRichText } from "@/src/lib/utils";
 import { requireUser } from "@/src/lib/auth";
 import { createClient } from "@/src/lib/supabase/server";
@@ -17,6 +19,8 @@ import { createClient } from "@/src/lib/supabase/server";
 type FeedProfile = {
   username: string | null;
   avatar_url: string | null;
+  tech_stack: string[] | null;
+  currently_building: string | null;
 } | null;
 
 type FeedPost = {
@@ -30,8 +34,13 @@ type FeedPost = {
   created_at: string;
   updated_at: string | null;
   is_edited: boolean | null;
+  is_code_block: boolean | null;
+  language: string | null;
   profiles: FeedProfile | FeedProfile[];
 };
+
+const FEED_POST_SELECT =
+  "id, user_id, image_url, caption, body, boost_count, thread_count, created_at, updated_at, is_edited, is_code_block, language, profiles(username, avatar_url, tech_stack, currently_building)";
 
 type StoryProfile = {
   username: string | null;
@@ -171,18 +180,14 @@ async function FeedContent() {
   if (isNetworkEmpty) {
     const { data } = await supabase
       .from("posts")
-      .select(
-        "id, user_id, image_url, caption, body, boost_count, thread_count, created_at, updated_at, is_edited, profiles(username, avatar_url)",
-      )
+      .select(FEED_POST_SELECT)
       .order("created_at", { ascending: false })
       .limit(20);
     posts = (data ?? []) as FeedPost[];
   } else {
     const { data } = await supabase
       .from("posts")
-      .select(
-        "id, user_id, image_url, caption, body, boost_count, thread_count, created_at, updated_at, is_edited, profiles(username, avatar_url)",
-      )
+      .select(FEED_POST_SELECT)
       .in("user_id", followingIds)
       .order("created_at", { ascending: false })
       .limit(50);
@@ -227,6 +232,10 @@ async function FeedContent() {
               : post.profiles;
             const username = profile?.username ?? "unknown_node";
             const avatarUrl = profile?.avatar_url ?? null;
+            const techStack = Array.isArray(profile?.tech_stack)
+              ? profile.tech_stack
+              : [];
+            const building = profile?.currently_building ?? "";
             const shareUrl = `/post/${post.id}`;
 
             return (
@@ -263,6 +272,18 @@ async function FeedContent() {
                     </p>
                   </header>
 
+                  {building || techStack.length > 0 ? (
+                    <div className="flex flex-wrap items-center gap-1.5 px-4 pb-2">
+                      {building ? (
+                        <span className="inline-flex max-w-full items-center gap-1.5 rounded-full bg-emerald-500/10 px-2 py-0.5 font-mono text-[10px] text-emerald-300">
+                          <span className="h-1.5 w-1.5 flex-shrink-0 animate-pulse rounded-full bg-emerald-400" />
+                          <span className="truncate">Building · {building}</span>
+                        </span>
+                      ) : null}
+                      <TechStackBadges stack={techStack} compact />
+                    </div>
+                  ) : null}
+
                   {post.image_url ? (
                     <PostImage
                       postId={post.id}
@@ -289,12 +310,23 @@ async function FeedContent() {
                     </p>
 
                     {post.body ? (
-                      <div className="mt-1 text-base leading-relaxed text-zinc-100 whitespace-pre-wrap break-words">
-                        {!post.image_url ? (
-                          <span className="mr-2 font-semibold text-zinc-100">{username}</span>
-                        ) : null}
-                        {parseRichText(post.body)}
-                      </div>
+                      post.is_code_block ? (
+                        <div className="mt-2">
+                          {!post.image_url ? (
+                            <p className="mb-2 text-sm font-semibold text-zinc-100">
+                              {username}
+                            </p>
+                          ) : null}
+                          <CodeBlock code={post.body} language={post.language} />
+                        </div>
+                      ) : (
+                        <div className="mt-1 text-base leading-relaxed text-zinc-100 whitespace-pre-wrap break-words">
+                          {!post.image_url ? (
+                            <span className="mr-2 font-semibold text-zinc-100">{username}</span>
+                          ) : null}
+                          {parseRichText(post.body)}
+                        </div>
+                      )
                     ) : null}
 
                     {post.caption ? (

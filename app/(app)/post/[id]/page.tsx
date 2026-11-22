@@ -5,7 +5,9 @@ import { deletePost } from "@/app/actions/posts";
 import { DeletePostButton } from "./_components/delete-post-button";
 import { PostActions } from "@/app/(app)/_components/post-actions";
 import { PostImage } from "@/app/(app)/_components/post-image";
+import { CodeBlock } from "@/src/components/code-block";
 import { FadeIn } from "@/src/components/fade-in";
+import { TechStackBadges } from "@/src/components/tech-stack-badges";
 import { requireUser } from "@/src/lib/auth";
 import { createClient } from "@/src/lib/supabase/server";
 import { ThreadComposer } from "./_components/thread-composer";
@@ -14,6 +16,8 @@ import { parseRichText } from "@/src/lib/utils";
 type ProfileRef = {
   username: string | null;
   avatar_url: string | null;
+  tech_stack: string[] | null;
+  currently_building: string | null;
 } | null;
 
 type PostDetail = {
@@ -27,6 +31,8 @@ type PostDetail = {
   created_at: string;
   updated_at: string | null;
   is_edited: boolean | null;
+  is_code_block: boolean | null;
+  language: string | null;
   profiles: ProfileRef | ProfileRef[];
 };
 
@@ -67,7 +73,7 @@ export default async function PostDetailPage({
   const { data: postData } = await supabase
     .from("posts")
     .select(
-      "id, user_id, image_url, caption, body, boost_count, thread_count, created_at, updated_at, is_edited, profiles(username, avatar_url)",
+      "id, user_id, image_url, caption, body, boost_count, thread_count, created_at, updated_at, is_edited, is_code_block, language, profiles(username, avatar_url, tech_stack, currently_building)",
     )
     .eq("id", id)
     .maybeSingle();
@@ -78,6 +84,10 @@ export default async function PostDetailPage({
   const postProfile = pickProfile(post.profiles);
   const postUsername = postProfile?.username ?? "unknown_node";
   const postAvatar = postProfile?.avatar_url ?? null;
+  const techStack = Array.isArray(postProfile?.tech_stack)
+    ? postProfile.tech_stack
+    : [];
+  const building = postProfile?.currently_building ?? "";
   const isOwner = user.id === post.user_id;
 
   const [{ data: threadData }, { data: boostRow }, { data: bookmarkRow }] = await Promise.all([
@@ -141,6 +151,18 @@ export default async function PostDetailPage({
             </p>
           </header>
 
+          {building || techStack.length > 0 ? (
+            <div className="flex flex-wrap items-center gap-1.5 px-3 pb-2">
+              {building ? (
+                <span className="inline-flex max-w-full items-center gap-1.5 rounded-full bg-emerald-500/10 px-2 py-0.5 font-mono text-[10px] text-emerald-300">
+                  <span className="h-1.5 w-1.5 flex-shrink-0 animate-pulse rounded-full bg-emerald-400" />
+                  <span className="truncate">Building · {building}</span>
+                </span>
+              ) : null}
+              <TechStackBadges stack={techStack} compact />
+            </div>
+          ) : null}
+
           {post.image_url ? (
             <PostImage
               postId={post.id}
@@ -168,12 +190,23 @@ export default async function PostDetailPage({
             </p>
 
             {post.body ? (
-              <div className="mt-2 text-base leading-relaxed text-zinc-100 whitespace-pre-wrap break-words">
-                {!post.image_url ? (
-                  <span className="mr-2 font-semibold text-zinc-100">{postUsername}</span>
-                ) : null}
-                {parseRichText(post.body)}
-              </div>
+              post.is_code_block ? (
+                <div className="mt-2">
+                  {!post.image_url ? (
+                    <p className="mb-2 text-sm font-semibold text-zinc-100">
+                      {postUsername}
+                    </p>
+                  ) : null}
+                  <CodeBlock code={post.body} language={post.language} />
+                </div>
+              ) : (
+                <div className="mt-2 text-base leading-relaxed text-zinc-100 whitespace-pre-wrap break-words">
+                  {!post.image_url ? (
+                    <span className="mr-2 font-semibold text-zinc-100">{postUsername}</span>
+                  ) : null}
+                  {parseRichText(post.body)}
+                </div>
+              )
             ) : null}
 
             {post.caption ? (

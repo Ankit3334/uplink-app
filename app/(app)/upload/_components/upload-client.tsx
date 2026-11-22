@@ -10,7 +10,7 @@ import {
   type UploadReelState,
 } from "@/app/actions/posts";
 import { BottomSheet } from "@/src/components/bottom-sheet";
-import { triggerHaptic } from "@/src/lib/utils";
+import { cn, stripCodeFences, triggerHaptic } from "@/src/lib/utils";
 
 const initialPostState: TransmitPostState = {};
 const initialReelState: UploadReelState = {};
@@ -20,7 +20,7 @@ type Mode = "image" | "reel" | "text";
 const modeOptions: { key: Mode; label: string; hint: string }[] = [
   { key: "image", label: "IMAGE PAYLOAD", hint: "Photo transmission with caption" },
   { key: "reel", label: "REEL PAYLOAD", hint: "Vertical video broadcast" },
-  { key: "text", label: "TEXT PAYLOAD", hint: "Plain signal with optional link" },
+  { key: "text", label: "TEXT PAYLOAD", hint: "Plain signal or code snippet" },
 ];
 
 function SubmitButton({ mode }: { mode: Mode }) {
@@ -356,8 +356,57 @@ function ReelUploadForm() {
   );
 }
 
+const CODE_LANGUAGES = [
+  "tsx",
+  "ts",
+  "jsx",
+  "js",
+  "python",
+  "rust",
+  "go",
+  "sql",
+  "bash",
+  "json",
+  "text",
+];
+
 function TextUploadForm() {
   const [state, formAction] = useActionState(transmitPost, initialPostState);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [body, setBody] = useState("");
+  const [isCodeBlock, setIsCodeBlock] = useState(false);
+  const [language, setLanguage] = useState("tsx");
+
+  const enableCodeBlock = () => {
+    triggerHaptic();
+    setIsCodeBlock(true);
+    const el = textareaRef.current;
+    if (!el || body.includes("```")) return;
+
+    const start = el.selectionStart ?? body.length;
+    const end = el.selectionEnd ?? body.length;
+    const selected = body.slice(start, end);
+    const prefix = "```" + language + "\n";
+    const suffix = "\n```";
+
+    setBody(body.slice(0, start) + prefix + selected + suffix + body.slice(end));
+    requestAnimationFrame(() => {
+      el.focus();
+      const cursor = start + prefix.length + selected.length;
+      el.setSelectionRange(cursor, cursor);
+    });
+  };
+
+  const disableCodeBlock = () => {
+    triggerHaptic();
+    setIsCodeBlock(false);
+    setBody((value) => stripCodeFences(value));
+  };
+
+  const changeLanguage = (next: string) => {
+    setLanguage(next);
+    setBody((value) => value.replace(/^```[^\r\n]*/, "```" + next));
+  };
 
   return (
     <div className="border border-zinc-800 bg-[#0a0a0a] p-4">
@@ -366,41 +415,105 @@ function TextUploadForm() {
           System Transmission // Text Payload
         </p>
         <p className="mt-2 text-xs leading-relaxed text-zinc-400">
-          Broadcast a text signal to the grid. Links are optional.
+          Broadcast a text signal or a code snippet to the grid.
         </p>
       </div>
 
       <form action={formAction} className="space-y-4">
         <input type="hidden" name="mode" value="text" />
-        <label className="block">
-          <span className="mb-2 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-400">
-            <Type size={12} /> &gt; Text_Payload
-          </span>
+        <input
+          type="hidden"
+          name="is_code_block"
+          value={isCodeBlock ? "true" : "false"}
+        />
+        <input
+          type="hidden"
+          name="language"
+          value={isCodeBlock ? language : ""}
+        />
+
+        <div className="block">
+          <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+            <span className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-400">
+              <Type size={12} /> &gt; Text_Payload
+            </span>
+            <span className="flex items-center gap-1 rounded-lg border border-zinc-800 bg-zinc-950 p-1">
+              <button
+                type="button"
+                onClick={enableCodeBlock}
+                aria-pressed={isCodeBlock}
+                title="Wrap selection in a code block"
+                className={cn(
+                  "rounded-md px-2 py-1 font-mono text-[11px] transition-colors",
+                  isCodeBlock
+                    ? "bg-cyan-500 text-zinc-950"
+                    : "text-zinc-300 hover:bg-zinc-800",
+                )}
+              >
+                &lt;/&gt;
+              </button>
+              {isCodeBlock ? (
+                <>
+                  <select
+                    aria-label="Code language"
+                    value={language}
+                    onChange={(event) => changeLanguage(event.target.value)}
+                    className="rounded-md border border-zinc-800 bg-zinc-900 px-1.5 py-1 font-mono text-[10px] text-zinc-300 outline-none focus:border-cyan-500"
+                  >
+                    {CODE_LANGUAGES.map((lang) => (
+                      <option key={lang} value={lang}>
+                        {lang}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    type="button"
+                    onClick={disableCodeBlock}
+                    className="rounded-md px-2 py-1 font-mono text-[10px] uppercase tracking-[0.1em] text-zinc-400 transition-colors hover:text-zinc-100"
+                  >
+                    Plain
+                  </button>
+                </>
+              ) : null}
+            </span>
+          </div>
           <textarea
+            ref={textareaRef}
             name="body"
+            aria-label="Post body"
             rows={7}
             required
-            placeholder="What's happening in the grid?"
-            className="w-full resize-y border-0 bg-transparent px-0 py-2 text-base leading-relaxed text-zinc-100 outline-none transition-all duration-200 ease-out placeholder:text-zinc-600 focus:ring-0"
+            value={body}
+            onChange={(event) => setBody(event.target.value)}
+            placeholder={
+              isCodeBlock ? "Paste or write your snippet..." : "What's happening in the grid?"
+            }
+            className={cn(
+              "w-full resize-y border-0 bg-transparent px-0 py-2 text-base leading-relaxed text-zinc-100 outline-none transition-all duration-200 ease-out placeholder:text-zinc-600 focus:ring-0",
+              isCodeBlock &&
+                "rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-3 font-mono text-sm",
+            )}
           />
-        </label>
+        </div>
 
-        <label className="block border-t border-zinc-800 pt-4">
-          <span className="mb-2 block font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
-            &gt; Attach Link (optional)
-          </span>
-          <input
-            name="link"
-            type="url"
-            placeholder="https://..."
-            className="w-full border border-zinc-800 bg-[#111111] px-3 py-2.5 font-mono text-sm text-zinc-100 outline-none transition-all duration-200 ease-out placeholder:text-zinc-600 focus:border-[#22d3ee]"
-          />
-        </label>
+        {!isCodeBlock ? (
+          <label className="block border-t border-zinc-800 pt-4">
+            <span className="mb-2 block font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
+              &gt; Attach Link (optional)
+            </span>
+            <input
+              name="link"
+              type="url"
+              placeholder="https://..."
+              className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2.5 font-mono text-sm text-zinc-100 outline-none transition-all duration-200 ease-out placeholder:text-zinc-600 focus:border-cyan-500"
+            />
+          </label>
+        ) : null}
 
         {state?.error ? (
           <div
             role="alert"
-            className="border border-zinc-700 bg-[#111111] px-3 py-3 font-mono text-xs uppercase tracking-[0.08em] text-zinc-300"
+            className="rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-3 font-mono text-xs text-red-400"
           >
             {state.error}
           </div>
