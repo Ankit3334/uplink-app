@@ -36,6 +36,13 @@ export async function transmitPost(
     const modeRaw = formData.get("mode");
     const mode = typeof modeRaw === "string" ? modeRaw : "image";
 
+    const categoryRaw = formData.get("category");
+    const category =
+      typeof categoryRaw === "string" &&
+      ["general", "question", "hiring", "showdev"].includes(categoryRaw)
+        ? categoryRaw
+        : "general";
+
     const captionRaw = formData.get("caption");
     const caption = typeof captionRaw === "string" ? captionRaw.trim() : "";
     const bodyRaw = formData.get("body");
@@ -63,11 +70,14 @@ export async function transmitPost(
         return { error: "TRANSMISSION FAILED: Text payload empty." };
       }
 
+      // Explicit defaults keep inserts valid even when a column was recently
+      // added and the database has not backfilled a default for old rows.
       const { error: insertError } = await supabase.from("posts").insert({
         user_id: user.id,
         image_url: null,
         body: composedBody,
         caption: caption || null,
+        category,
         is_code_block: isCodeBlock,
         language: isCodeBlock ? codeLanguage : null,
       });
@@ -113,6 +123,9 @@ export async function transmitPost(
       image_url: publicUrl,
       body: bodyText || null,
       caption: caption || null,
+      category,
+      is_code_block: false,
+      language: null,
     });
 
     if (insertError) {
@@ -123,8 +136,10 @@ export async function transmitPost(
     revalidatePath("/");
     redirect("/");
   } catch (error) {
+    // Next.js implements redirect() by throwing; let it through so navigation
+    // still works after a successful upload. Everything else is a soft error.
     if (error instanceof Error && error.message === "NEXT_REDIRECT") throw error;
-    return { error: "TRANSMISSION FAILED: Unexpected system error." };
+    return { error: "Failed to upload" };
   }
 }
 

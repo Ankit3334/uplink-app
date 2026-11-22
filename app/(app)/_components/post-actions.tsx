@@ -198,22 +198,25 @@ export function PostActions({
         onClose={() => setEditing(false)}
         title="Edit transmission"
       >
-        <form action={editAction} className="space-y-3 p-4">
+        <form action={editAction} className="relative z-10 space-y-4 bg-zinc-950 p-4">
           <input type="hidden" name="postId" value={postId} />
           <label className="block">
-            <span className="mb-2 block font-mono text-[10px] uppercase tracking-[0.15em] text-zinc-500">
-              &gt; Transmission body
+            <span className="mb-1.5 block text-sm font-medium text-zinc-300">
+              Post text
             </span>
             <textarea
               name="body"
               defaultValue={initialBody}
               rows={5}
-              className="w-full resize-y border border-zinc-800 bg-[#111111] px-3 py-2 text-sm leading-relaxed text-zinc-100 outline-none transition-all duration-200 ease-out placeholder:text-zinc-600 focus:border-[#22d3ee]"
-              placeholder="Update post text..."
+              className="w-full resize-y rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2.5 text-sm leading-relaxed text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-cyan-500"
+              placeholder="Update your post..."
             />
           </label>
           {editState?.error ? (
-            <p className="font-mono text-[11px] text-red-400">
+            <p
+              role="alert"
+              className="rounded-xl border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-300"
+            >
               {editState.error}
             </p>
           ) : null}
@@ -221,17 +224,17 @@ export function PostActions({
             <button
               type="button"
               onClick={() => setEditing(false)}
-              className="border border-zinc-800 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.15em] text-zinc-400 transition-colors hover:text-zinc-100"
+              className="rounded-full border border-zinc-700 px-4 py-2 text-sm font-medium text-zinc-300 transition-colors hover:bg-zinc-800"
             >
               <span className="inline-flex items-center gap-1.5">
-                <X size={12} /> Cancel
+                <X size={13} /> Cancel
               </span>
             </button>
             <button
               type="submit"
               onClick={triggerHaptic}
               disabled={editPending}
-              className="border border-zinc-700 bg-[#111111] px-3 py-2 font-mono text-[10px] uppercase tracking-[0.15em] text-[#22d3ee] transition-all duration-200 ease-out hover:border-zinc-600 disabled:opacity-50"
+              className="rounded-full bg-zinc-100 px-4 py-2 text-sm font-semibold text-zinc-900 transition-colors hover:bg-white disabled:opacity-50"
             >
               {editPending ? "Saving..." : "Save"}
             </button>

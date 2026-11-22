@@ -77,6 +77,17 @@ html {
   }
 }
 
+/* Bottom sheets stay fully opaque throughout the entrance so their content
+   can never appear hidden behind the blurred backdrop. */
+@keyframes sheet-in {
+  from {
+    transform: translateY(18px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
 @keyframes heart-pop {
   0% {
     opacity: 0;
@@ -111,12 +122,17 @@ html {
   animation: slide-up 0.3s ease-out both;
 }
 
+.animate-sheet-in {
+  animation: sheet-in 0.22s ease-out both;
+}
+
 .animate-heart-pop {
   animation: heart-pop 1s ease-out forwards;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .animate-slide-up,
+  .animate-sheet-in,
   .animate-fade-in-up,
   .animate-fade-in {
     animation-duration: 0.01ms;

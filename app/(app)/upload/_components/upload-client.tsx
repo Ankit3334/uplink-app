@@ -207,6 +207,13 @@ function ImageUploadForm() {
   );
 }
 
+const POST_CATEGORIES = [
+  { value: "general", label: "General" },
+  { value: "question", label: "Question" },
+  { value: "hiring", label: "Hiring" },
+  { value: "showdev", label: "ShowDev" },
+] as const;
+
 const CODE_LANGUAGES = [
   "tsx",
   "ts",
@@ -227,6 +234,7 @@ function TextUploadForm() {
   const [body, setBody] = useState("");
   const [isCodeBlock, setIsCodeBlock] = useState(false);
   const [language, setLanguage] = useState("tsx");
+  const [category, setCategory] = useState<string>("general");
 
   const enableCodeBlock = () => {
     triggerHaptic();
@@ -282,6 +290,35 @@ function TextUploadForm() {
           name="language"
           value={isCodeBlock ? language : ""}
         />
+        <input type="hidden" name="category" value={category} />
+
+        <div>
+          <p className="mb-2 text-sm font-medium text-zinc-300">Category</p>
+          <div className="flex flex-wrap gap-2">
+            {POST_CATEGORIES.map((option) => {
+              const active = category === option.value;
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => {
+                    triggerHaptic();
+                    setCategory(option.value);
+                  }}
+                  aria-pressed={active}
+                  className={cn(
+                    "rounded-full border px-3.5 py-1.5 text-xs font-medium transition-colors",
+                    active
+                      ? "border-zinc-100 bg-zinc-100 text-zinc-900"
+                      : "border-zinc-700 bg-zinc-800/60 text-zinc-300 hover:bg-zinc-800",
+                  )}
+                >
+                  {option.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
 
         <div className="block">
           <div className="mb-2 flex flex-wrap items-center justify-between gap-2">

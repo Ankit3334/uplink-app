@@ -94,13 +94,13 @@ function BottomSheetInner({
       <button
         type="button"
         aria-label="Close sheet"
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in"
+        className="absolute inset-0 z-0 bg-black/70 backdrop-blur-sm animate-fade-in"
         onClick={dismiss}
       />
 
       <div
         className={cn(
-          "safe-area-bottom relative w-full max-w-md overflow-y-auto overscroll-contain rounded-t-3xl border border-white/5 border-b-0 bg-zinc-950 animate-slide-up",
+          "safe-area-bottom relative z-10 flex w-full max-w-md flex-col overflow-y-auto overscroll-contain rounded-t-3xl border border-white/10 border-b-0 bg-zinc-950 shadow-2xl shadow-black/80 animate-sheet-in",
           maxHeightClassName,
           className,
         )}

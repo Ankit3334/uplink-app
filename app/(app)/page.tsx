@@ -10,7 +10,6 @@ import { PostActions } from "./_components/post-actions";
 import { PostImage } from "./_components/post-image";
 import { CodeBlock } from "@/src/components/code-block";
 import { FadeIn } from "@/src/components/fade-in";
-import { FeedFab } from "@/src/components/feed-fab";
 import { TechStackBadges } from "@/src/components/tech-stack-badges";
 import { parseRichText } from "@/src/lib/utils";
 import { requireUser } from "@/src/lib/auth";
@@ -21,6 +20,7 @@ type FeedProfile = {
   avatar_url: string | null;
   tech_stack: string[] | null;
   currently_building: string | null;
+  open_to_work: boolean | null;
 } | null;
 
 type FeedPost = {
@@ -29,6 +29,7 @@ type FeedPost = {
   image_url: string | null;
   caption: string | null;
   body: string | null;
+  category: string | null;
   boost_count: number;
   thread_count: number;
   created_at: string;
@@ -40,7 +41,21 @@ type FeedPost = {
 };
 
 const FEED_POST_SELECT =
-  "id, user_id, image_url, caption, body, boost_count, thread_count, created_at, updated_at, is_edited, is_code_block, language, profiles(username, avatar_url, tech_stack, currently_building)";
+  "id, user_id, image_url, caption, body, category, boost_count, thread_count, created_at, updated_at, is_edited, is_code_block, language, profiles(username, avatar_url, tech_stack, currently_building, open_to_work)";
+
+const CATEGORY_STYLES: Record<string, string> = {
+  general: "bg-zinc-800 text-zinc-300",
+  question: "bg-amber-500/10 text-amber-300",
+  hiring: "bg-emerald-500/10 text-emerald-300",
+  showdev: "bg-cyan-500/10 text-cyan-300",
+};
+
+const CATEGORY_LABELS: Record<string, string> = {
+  general: "General",
+  question: "Question",
+  hiring: "Hiring",
+  showdev: "ShowDev",
+};
 
 type StoryProfile = {
   username: string | null;
@@ -226,14 +241,15 @@ async function FeedContent() {
       ) : null}
 
       {posts.length === 0 ? (
-        <div className="px-4 py-12 text-center">
-          <p className="font-mono text-xs uppercase tracking-[0.15em] text-zinc-400">
-            {"// NO TRANSMISSIONS FOUND"}
+        <div className="flex flex-col items-center px-6 py-16 text-center">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full border border-zinc-800 bg-zinc-900/60 text-zinc-400">
+            <Search size={20} strokeWidth={1.8} />
+          </div>
+          <p className="mt-4 text-base font-semibold text-zinc-100">
+            Your feed is quiet
           </p>
-          <p className="mt-2 text-sm text-zinc-500">
-            {isNetworkEmpty
-              ? "No uplinks detected. Initiate a transmission to populate the stream."
-              : "No posts from your connections yet."}
+          <p className="mt-2 max-w-xs text-sm leading-relaxed text-zinc-400">
+            No transmissions yet. Follow tech builders to see their updates.
           </p>
         </div>
       ) : (
@@ -248,6 +264,7 @@ async function FeedContent() {
               ? profile.tech_stack
               : [];
             const building = profile?.currently_building ?? "";
+            const openToWork = Boolean(profile?.open_to_work);
             const shareUrl = `/post/${post.id}`;
 
             return (
@@ -266,17 +283,22 @@ async function FeedContent() {
                         <Terminal size={14} strokeWidth={1.8} />
                       )}
                     </div>
-                    <div className="min-w-0 flex-1">
+                    <div className="flex min-w-0 flex-1 items-center gap-2">
                       {profile?.username ? (
                         <Link
                           href={`/u/${profile.username}`}
-                          className="block truncate text-sm font-semibold text-zinc-100 transition-colors hover:text-[#22d3ee]"
+                          className="truncate text-sm font-semibold text-zinc-100 transition-colors hover:text-cyan-300"
                         >
                           {username}
                         </Link>
                       ) : (
                         <p className="truncate text-sm font-semibold text-zinc-100">{username}</p>
                       )}
+                      {openToWork ? (
+                        <span className="inline-flex flex-shrink-0 items-center rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-300">
+                          Open to Work
+                        </span>
+                      ) : null}
                     </div>
                     <p className="font-mono text-xs text-zinc-500">
                       {formatTimestamp(post.created_at)}
@@ -293,6 +315,18 @@ async function FeedContent() {
                         </span>
                       ) : null}
                       <TechStackBadges stack={techStack} compact />
+                    </div>
+                  ) : null}
+
+                  {post.category ? (
+                    <div className="px-4 pb-2">
+                      <span
+                        className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-medium ${
+                          CATEGORY_STYLES[post.category] ?? CATEGORY_STYLES.general
+                        }`}
+                      >
+                        {CATEGORY_LABELS[post.category] ?? "General"}
+                      </span>
                     </div>
                   ) : null}
 
@@ -402,8 +436,6 @@ export default function FeedPage() {
           <FeedContent />
         </Suspense>
       </div>
-
-      <FeedFab />
     </section>
   );
 }

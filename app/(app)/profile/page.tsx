@@ -133,6 +133,7 @@ export default async function ProfilePage() {
         initialDisplayName={profile?.display_name ?? ""}
         initialBio={profile?.bio ?? ""}
         initialLocation={profile?.location ?? ""}
+        initialOpenToWork={openToWork}
       />
 
       <ProfessionalManager

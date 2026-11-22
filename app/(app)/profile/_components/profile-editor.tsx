@@ -34,10 +34,12 @@ export function ProfileEditor({
   initialDisplayName,
   initialBio,
   initialLocation,
+  initialOpenToWork,
 }: {
   initialDisplayName: string;
   initialBio: string;
   initialLocation: string;
+  initialOpenToWork: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [state, formAction] = useActionState(updateProfile, initialState);
@@ -119,6 +121,23 @@ export function ProfileEditor({
               maxLength={280}
               className="w-full resize-y rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2.5 text-sm leading-relaxed text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-cyan-500"
               placeholder="A short introduction..."
+            />
+          </label>
+
+          <label className="flex items-center justify-between gap-3 rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-3">
+            <span>
+              <span className="block text-sm font-medium text-zinc-200">
+                Show &ldquo;Open to Work&rdquo; badge
+              </span>
+              <span className="mt-0.5 block text-xs text-zinc-500">
+                Appears beside your name on your profile and in the feed.
+              </span>
+            </span>
+            <input
+              type="checkbox"
+              name="open_to_work"
+              defaultChecked={initialOpenToWork}
+              className="h-4 w-4 flex-shrink-0 rounded border-zinc-700 bg-zinc-900 accent-emerald-400"
             />
           </label>
 

@@ -94,6 +94,7 @@ export async function updateProfile(
   const locationRaw = formData.get("location");
   const location =
     typeof locationRaw === "string" ? locationRaw.trim().slice(0, 120) : "";
+  const openToWork = formData.get("open_to_work") === "on";
 
   if (!displayName) {
     return { error: "CONFIG ERROR: Display name is required." };
@@ -115,6 +116,7 @@ export async function updateProfile(
       display_name: displayName,
       bio: bio || null,
       location: location || null,
+      open_to_work: openToWork,
     })
     .eq("id", user.id)
     .select("username")

@@ -35,9 +35,13 @@ export function PostImage({
         title="Image preview"
         maxHeightClassName="max-h-[90dvh]"
       >
-        <div className="bg-black p-2">
+        <div className="relative z-10 flex justify-center bg-zinc-950 p-3">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={src} alt={alt} className="mx-auto max-h-[76dvh] w-auto object-contain" />
+          <img
+            src={src}
+            alt={alt}
+            className="max-h-[72dvh] w-auto max-w-full rounded-xl object-contain"
+          />
         </div>
       </BottomSheet>
     </>
