@@ -17,6 +17,7 @@ import {
   type ProfileRow,
 } from "@/src/lib/professional-queries";
 import { createClient } from "@/src/lib/supabase/server";
+import { StartChatButton } from "../../messages/_components/start-chat-button";
 import { ConnectButton } from "./_components/connect-button";
 
 function ProfileContentSkeleton() {
@@ -94,12 +95,17 @@ async function ProfileContent({ username }: { username: string }) {
         isSelf={isSelf}
         action={
           currentUser ? (
-            <ConnectButton
-              addresseeId={profile.id}
-              initialStatus={connection.status}
-              initialConnectionId={connection.connectionId}
-              isSelf={isSelf}
-            />
+            <div className="flex flex-col items-end gap-2 sm:flex-row sm:items-center">
+              <ConnectButton
+                addresseeId={profile.id}
+                initialStatus={connection.status}
+                initialConnectionId={connection.connectionId}
+                isSelf={isSelf}
+              />
+              {connection.status === "accepted" ? (
+                <StartChatButton targetUserId={profile.id} />
+              ) : null}
+            </div>
           ) : null
         }
       />
