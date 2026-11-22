@@ -5,6 +5,10 @@ import { requireUser } from "@/src/lib/auth";
 import { PostGrid } from "@/src/components/post-grid";
 import { ProfileHero } from "@/src/components/professional/profile-hero";
 import {
+  ProjectSection,
+  type ProjectCardData,
+} from "@/src/components/professional/project-showcase";
+import {
   SectionCard,
 } from "@/src/components/professional/profile-sections";
 import {
@@ -56,25 +60,35 @@ export default async function ProfilePage() {
   const user = await requireUser();
   const supabase = await createClient();
 
-  const [{ data: profileData }, { data: postsData }] = await Promise.all([
-    supabase
-      .from("profiles")
-      .select(PROFILE_SELECT)
-      .eq("id", user.id)
-      .maybeSingle(),
-    supabase
-      .from("posts")
-      .select("id, image_url, caption, boost_count, created_at")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false })
-      .limit(60),
-  ]);
+  const [{ data: profileData }, { data: postsData }, { data: projectsData }] =
+    await Promise.all([
+      supabase
+        .from("profiles")
+        .select(PROFILE_SELECT)
+        .eq("id", user.id)
+        .maybeSingle(),
+      supabase
+        .from("posts")
+        .select("id, image_url, caption, boost_count, created_at")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(60),
+      supabase
+        .from("projects")
+        .select(
+          "id, title, description, link, tech_stack, image_url",
+        )
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(3),
+    ]);
 
   const profile = profileData as ProfileRow | null;
   const { experiences, education, skills, connectionsCount } =
     await getProfessionalData(user.id);
 
   const posts = postsData ?? [];
+  const projects = (projectsData ?? []) as ProjectCardData[];
   const totalBoosts = posts.reduce(
     (sum, row) => sum + (row.boost_count ?? 0),
     0,
@@ -139,6 +153,8 @@ export default async function ProfilePage() {
           {bio || "Add a short introduction so people know what you do."}
         </p>
       </SectionCard>
+
+      <ProjectSection projects={projects} isSelf />
 
       <ProfileEditor
         initialDisplayName={profile?.display_name ?? ""}

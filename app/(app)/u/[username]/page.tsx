@@ -3,6 +3,10 @@ import { notFound } from "next/navigation";
 import { PostGrid } from "@/src/components/post-grid";
 import { ProfileHero } from "@/src/components/professional/profile-hero";
 import {
+  ProjectSection,
+  type ProjectCardData,
+} from "@/src/components/professional/project-showcase";
+import {
   EducationList,
   ExperienceList,
   SectionCard,
@@ -61,18 +65,26 @@ async function ProfileContent({ username }: { username: string }) {
   const profile = profileData as ProfileRow;
   const isSelf = currentUser?.id === profile.id;
 
-  const [{ data: postsData }, professionalData, connection] = await Promise.all([
-    supabase
-      .from("posts")
-      .select("id, image_url, caption, boost_count, created_at")
-      .eq("user_id", profile.id)
-      .order("created_at", { ascending: false })
-      .limit(60),
-    getProfessionalData(profile.id),
-    getConnectionView(currentUser?.id, profile.id),
-  ]);
+  const [{ data: postsData }, { data: projectsData }, professionalData, connection] =
+    await Promise.all([
+      supabase
+        .from("posts")
+        .select("id, image_url, caption, boost_count, created_at")
+        .eq("user_id", profile.id)
+        .order("created_at", { ascending: false })
+        .limit(60),
+      supabase
+        .from("projects")
+        .select("id, title, description, link, tech_stack, image_url")
+        .eq("user_id", profile.id)
+        .order("created_at", { ascending: false })
+        .limit(3),
+      getProfessionalData(profile.id),
+      getConnectionView(currentUser?.id, profile.id),
+    ]);
 
   const posts = postsData ?? [];
+  const projects = (projectsData ?? []) as ProjectCardData[];
   const { experiences, education, skills, connectionsCount } = professionalData;
 
   const displayName = profile.display_name ?? profile.username;
@@ -117,6 +129,8 @@ async function ProfileContent({ username }: { username: string }) {
           </p>
         </SectionCard>
       ) : null}
+
+      <ProjectSection projects={projects} isSelf={false} />
 
       <SectionCard title="Experience">
         <ExperienceList experiences={experiences} />

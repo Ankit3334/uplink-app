@@ -14,7 +14,10 @@ import { TechStackBadges } from "@/src/components/tech-stack-badges";
 import {
   POST_CATEGORY_BADGE_CLASS,
   categoryLabel,
+  feedTabForCategory,
+  type FeedTabValue,
 } from "@/src/lib/post-categories";
+import { FeedTabs } from "./_components/feed-tabs";
 import { parseRichText } from "@/src/lib/utils";
 import { requireUser } from "@/src/lib/auth";
 import { createClient } from "@/src/lib/supabase/server";
@@ -176,7 +179,7 @@ async function StoriesSection() {
   );
 }
 
-async function FeedContent() {
+async function FeedContent({ activeTab }: { activeTab: FeedTabValue }) {
   const user = await requireUser();
   const supabase = await createClient();
 
@@ -200,23 +203,17 @@ async function FeedContent() {
   ];
   const isNetworkEmpty = connectionIds.length === 0;
 
-  let posts: FeedPost[] = [];
-  if (isNetworkEmpty) {
-    const { data } = await supabase
-      .from("posts")
-      .select(FEED_POST_SELECT)
-      .order("created_at", { ascending: false })
-      .limit(20);
-    posts = (data ?? []) as FeedPost[];
-  } else {
-    const { data } = await supabase
-      .from("posts")
-      .select(FEED_POST_SELECT)
-      .in("user_id", connectionIds)
-      .order("created_at", { ascending: false })
-      .limit(50);
-    posts = (data ?? []) as FeedPost[];
+  let postsQuery = supabase.from("posts").select(FEED_POST_SELECT);
+  if (activeTab !== "all") {
+    postsQuery = postsQuery.eq("category", activeTab);
   }
+  if (!isNetworkEmpty) {
+    postsQuery = postsQuery.in("user_id", connectionIds);
+  }
+  const { data: postsData } = await postsQuery
+    .order("created_at", { ascending: false })
+    .limit(isNetworkEmpty ? 20 : 50);
+  const posts = (postsData ?? []) as FeedPost[];
 
   const postIds = posts.map((p) => p.id);
   const [{ data: boosts }, { data: bookmarks }] = postIds.length
@@ -246,7 +243,9 @@ async function FeedContent() {
             Your feed is quiet
           </p>
           <p className="mt-2 max-w-xs text-[15px] leading-relaxed text-zinc-400">
-            No transmissions yet. Follow tech builders to see their updates.
+            {activeTab === "all"
+              ? "No transmissions yet. Follow tech builders to see their updates."
+              : `No ${categoryLabel(activeTab) ?? activeTab} posts in your network yet.`}
           </p>
         </div>
       ) : (
@@ -396,7 +395,17 @@ async function FeedContent() {
   );
 }
 
-export default function FeedPage() {
+export default async function FeedPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ category?: string | string[] }>;
+}) {
+  const params = await searchParams;
+  const rawCategory = Array.isArray(params.category)
+    ? params.category[0]
+    : params.category;
+  const activeTab = feedTabForCategory(rawCategory);
+
   return (
     <section className="native-scroll mx-auto flex min-h-[calc(100dvh-6rem)] w-full max-w-md flex-col px-4 pt-6 pb-24 animate-fade-in-up">
       <header className="border-b border-zinc-800 pb-4">
@@ -431,13 +440,15 @@ export default function FeedPage() {
         </div>
       </header>
 
+      <FeedTabs key={activeTab} active={activeTab} />
+
       <div className="flex flex-col">
         <Suspense fallback={<StoriesSkeleton />}>
           <StoriesSection />
         </Suspense>
 
         <Suspense fallback={<FeedSkeleton />}>
-          <FeedContent />
+          <FeedContent activeTab={activeTab} />
         </Suspense>
       </div>
     </section>
