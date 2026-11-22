@@ -1,14 +1,6 @@
 "use client";
 
-import {
-  useEffect,
-  useRef,
-  useState,
-  type PointerEvent,
-  type ReactNode,
-} from "react";
-import { X } from "lucide-react";
-import { cn, triggerHaptic } from "@/src/lib/utils";
+import { useEffect, type ReactNode } from "react";
 
 type BottomSheetProps = {
   open: boolean;
@@ -19,33 +11,19 @@ type BottomSheetProps = {
   maxHeightClassName?: string;
 };
 
-/**
- * Native-feeling bottom sheet used for every modal on mobile.
- * Slides up from the bottom, uses a dark surface, sharp top corners, a drag
- * handle and a dimmed backdrop. Dragging the handle down dismisses it.
- */
-export function BottomSheet({ open, ...props }: BottomSheetProps) {
-  // Remount on every open so drag/animation state always starts fresh.
-  if (!open) return null;
-  return <BottomSheetInner open {...props} />;
-}
-
-function BottomSheetInner({
+export function BottomSheet({
   open,
   onClose,
   title = "Options",
   children,
-  className,
-  maxHeightClassName = "max-h-[85dvh]",
 }: BottomSheetProps) {
-  const [dragY, setDragY] = useState(0);
-  const [animated, setAnimated] = useState(true);
-  const startY = useRef<number | null>(null);
-
   useEffect(() => {
+    if (!open) return;
+
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") onClose();
     };
+
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     document.addEventListener("keydown", onKeyDown);
@@ -54,87 +32,32 @@ function BottomSheetInner({
       document.body.style.overflow = previousOverflow;
       document.removeEventListener("keydown", onKeyDown);
     };
-  }, [onClose]);
+  }, [open, onClose]);
 
-  const dismiss = () => {
-    triggerHaptic();
-    onClose();
-  };
-
-  const onPointerDown = (event: PointerEvent<HTMLDivElement>) => {
-    startY.current = event.clientY;
-    setAnimated(false);
-    event.currentTarget.setPointerCapture?.(event.pointerId);
-  };
-
-  const onPointerMove = (event: PointerEvent<HTMLDivElement>) => {
-    if (startY.current === null) return;
-    setDragY(Math.max(0, event.clientY - startY.current));
-  };
-
-  const onPointerEnd = (event: PointerEvent<HTMLDivElement>) => {
-    if (startY.current === null) return;
-    startY.current = null;
-    event.currentTarget.releasePointerCapture?.(event.pointerId);
-    if (dragY > 96) {
-      dismiss();
-      return;
-    }
-    setDragY(0);
-  };
+  if (!open) return null;
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-label={title}
-      aria-hidden={!open ? true : undefined}
-      className="fixed inset-0 z-[100] flex items-end justify-center"
-    >
-      <button
-        type="button"
-        aria-label="Close sheet"
-        className="absolute inset-0 z-0 bg-black/70 backdrop-blur-sm animate-fade-in"
-        onClick={dismiss}
+    <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
+      {/* 1. THE BLURRY BACKDROP (Sibling 1) */}
+      <div
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+        onClick={onClose}
       />
 
+      {/* 2. THE SHARP CONTENT (Sibling 2 - MUST NOT BE INSIDE THE BACKDROP) */}
       <div
-        className={cn(
-          "safe-area-bottom relative z-10 flex w-full max-w-md flex-col overflow-y-auto overscroll-contain rounded-t-3xl border border-white/10 border-b-0 bg-zinc-950 shadow-2xl shadow-black/80 animate-sheet-in",
-          maxHeightClassName,
-          className,
-        )}
-        style={{
-          animation: animated ? undefined : "none",
-          transform: dragY > 0 ? `translateY(${dragY}px)` : undefined,
-        }}
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+        className="relative z-50 w-full max-w-lg bg-zinc-950 text-white rounded-t-3xl sm:rounded-3xl border-t border-zinc-800 shadow-2xl max-h-[90vh] overflow-y-auto"
       >
-        <div
-          aria-hidden="true"
-          className="sticky top-0 z-10 flex touch-none justify-center bg-zinc-950 select-none"
-          onPointerDown={onPointerDown}
-          onPointerMove={onPointerMove}
-          onPointerUp={onPointerEnd}
-          onPointerCancel={onPointerEnd}
-        >
-          <span className="mx-auto mb-4 mt-3 h-1 w-10 cursor-grab rounded-full bg-zinc-800 active:cursor-grabbing" />
+        {/* Drag Handle */}
+        <div className="sticky top-0 z-10 bg-zinc-950 pt-3 pb-2 flex justify-center border-b border-zinc-900">
+          <div className="w-12 h-1.5 bg-zinc-800 rounded-full" />
         </div>
 
-        <div className="flex items-center justify-between gap-3 border-b border-zinc-800 px-4 py-3">
-          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-400">
-            {title}
-          </p>
-          <button
-            type="button"
-            onClick={dismiss}
-            aria-label="Close"
-            className="rounded-full border border-white/10 bg-zinc-900 p-2 text-zinc-400 transition-colors hover:text-zinc-100"
-          >
-            <X size={16} />
-          </button>
-        </div>
-
-        {children}
+        {/* Actual Content */}
+        <div className="p-6">{children}</div>
       </div>
     </div>
   );
