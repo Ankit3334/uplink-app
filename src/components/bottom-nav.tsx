@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Film, Heart, LayoutGrid, User } from "lucide-react";
+import { Bell, House, Plus, Search, User } from "lucide-react";
 import { cn, triggerHaptic } from "@/src/lib/utils";
 
 const navItems = [
-  { href: "/", label: "Feed", icon: LayoutGrid },
-  { href: "/reels", label: "Reels", icon: Film },
-  { href: "/notifications", label: "Alerts", icon: Heart },
+  { href: "/", label: "Home", icon: House },
+  { href: "/explore", label: "Explore", icon: Search },
+  { href: "/upload", label: "Create", icon: Plus },
+  { href: "/notifications", label: "Activity", icon: Bell },
   { href: "/profile", label: "Profile", icon: User },
 ] as const;
 
@@ -20,13 +21,14 @@ export function BottomNav({ unreadCount = 0 }: { unreadCount?: number }) {
       aria-label="Primary"
       className="safe-area-bottom fixed inset-x-0 bottom-0 z-50 border-t border-white/5 bg-black/80 backdrop-blur-xl"
     >
-      <ul className="mx-auto grid h-16 max-w-md grid-cols-4 items-stretch px-2">
+      <ul className="mx-auto grid h-16 max-w-md grid-cols-5 items-stretch gap-0.5 px-2">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive =
             item.href === "/"
               ? pathname === "/"
               : pathname === item.href || pathname.startsWith(`${item.href}/`);
+          const isCreate = item.href === "/upload";
           const showBadge = item.href === "/notifications" && unreadCount > 0;
 
           return (
@@ -39,10 +41,12 @@ export function BottomNav({ unreadCount = 0 }: { unreadCount?: number }) {
               >
                 <span
                   className={cn(
-                    "relative flex h-12 w-full max-w-[76px] flex-col items-center justify-center gap-1 rounded-full transition-colors duration-200 ease-out",
+                    "relative flex h-12 w-full max-w-[68px] flex-col items-center justify-center gap-1 rounded-2xl transition-colors duration-200 ease-out",
                     isActive
-                      ? "bg-zinc-800 text-zinc-100"
-                      : "text-zinc-400 hover:text-zinc-200",
+                      ? isCreate
+                        ? "bg-cyan-500 text-zinc-950"
+                        : "bg-zinc-800 text-zinc-100"
+                      : "text-zinc-400 hover:bg-zinc-900/80 hover:text-zinc-200",
                   )}
                 >
                   <Icon size={18} strokeWidth={1.8} />
@@ -51,7 +55,7 @@ export function BottomNav({ unreadCount = 0 }: { unreadCount?: number }) {
                       {unreadCount > 9 ? "9+" : unreadCount}
                     </span>
                   ) : null}
-                  <span className="text-[9px] uppercase leading-none tracking-[0.12em] sm:text-[10px] sm:tracking-[0.16em]">
+                  <span className="text-[9px] uppercase leading-none tracking-[0.1em] sm:text-[10px] sm:tracking-[0.12em]">
                     {item.label}
                   </span>
                 </span>

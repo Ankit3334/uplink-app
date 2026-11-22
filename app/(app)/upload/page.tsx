@@ -3,7 +3,7 @@ import { UploadClient } from "./_components/upload-client";
 export default function UplinkPage() {
   return (
     <section className="mx-auto flex min-h-[calc(100dvh-6rem)] w-full max-w-md flex-col gap-4 px-4 pt-6 pb-24 animate-fade-in-up">
-      <header className="border border-zinc-800 bg-[#0a0a0a] p-4">
+      <header className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-4 backdrop-blur-xl">
         <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
           Channel // 03
         </p>

@@ -1,5 +1,5 @@
 -- Phase 1: Instagram features schema and storage expansion
--- UPLINK upgrade: stories, reels, DMs, notifications
+-- UPLINK upgrade: stories, DMs, notifications
 
 create extension if not exists "pgcrypto";
 
@@ -19,18 +19,6 @@ create table if not exists public.stories (
   media_url text not null,
   media_type text not null check (media_type in ('image', 'video')),
   expires_at timestamptz not null default (now() + interval '24 hours'),
-  created_at timestamptz not null default now()
-);
-
--- Reels: short-form vertical videos
-create table if not exists public.reels (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references public.profiles(id) on delete cascade,
-  video_url text not null,
-  caption text,
-  audio_url text,
-  boost_count integer not null default 0,
-  comment_count integer not null default 0,
   created_at timestamptz not null default now()
 );
 
@@ -72,9 +60,6 @@ create table if not exists public.notifications (
 create index if not exists stories_user_id_idx on public.stories(user_id);
 create index if not exists stories_created_at_idx on public.stories(created_at desc);
 
-create index if not exists reels_user_id_idx on public.reels(user_id);
-create index if not exists reels_created_at_idx on public.reels(created_at desc);
-
 create index if not exists message_rooms_user_1_id_idx on public.message_rooms(user_1_id);
 create index if not exists message_rooms_user_2_id_idx on public.message_rooms(user_2_id);
 create index if not exists message_rooms_last_message_at_idx on public.message_rooms(last_message_at desc);
@@ -89,7 +74,6 @@ create index if not exists notifications_created_at_idx on public.notifications(
 
 -- Row Level Security
 alter table public.stories enable row level security;
-alter table public.reels enable row level security;
 alter table public.message_rooms enable row level security;
 alter table public.messages enable row level security;
 alter table public.notifications enable row level security;
@@ -112,27 +96,6 @@ create policy "stories_update_own"
 
 create policy "stories_delete_own"
   on public.stories for delete
-  to authenticated
-  using (auth.uid() = user_id);
-
--- Reels policies (public read, owner write)
-create policy "reels_select_public"
-  on public.reels for select
-  using (true);
-
-create policy "reels_insert_own"
-  on public.reels for insert
-  to authenticated
-  with check (auth.uid() = user_id);
-
-create policy "reels_update_own"
-  on public.reels for update
-  to authenticated
-  using (auth.uid() = user_id)
-  with check (auth.uid() = user_id);
-
-create policy "reels_delete_own"
-  on public.reels for delete
   to authenticated
   using (auth.uid() = user_id);
 
@@ -203,7 +166,6 @@ create policy "notifications_delete_recipient"
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values
   ('story-media', 'story-media', true, 52428800, array['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'video/mp4', 'video/webm', 'video/quicktime']),
-  ('reel-videos', 'reel-videos', true, 104857600, array['video/mp4', 'video/webm', 'video/quicktime']),
   ('message-media', 'message-media', true, 52428800, array['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'video/mp4', 'video/webm', 'video/quicktime'])
 on conflict (id) do update
 set public = excluded.public,
@@ -243,43 +205,6 @@ create policy "story_media_delete_own_folder"
   to authenticated
   using (
     bucket_id = 'story-media'
-    and owner = auth.uid()
-    and (storage.foldername(name))[1] = auth.uid()::text
-  );
-
--- Storage policies: reel-videos (public read, authenticated upload to own folders)
-create policy "reel_videos_select_public"
-  on storage.objects for select
-  using (bucket_id = 'reel-videos');
-
-create policy "reel_videos_insert_own_folder"
-  on storage.objects for insert
-  to authenticated
-  with check (
-    bucket_id = 'reel-videos'
-    and owner = auth.uid()
-    and (storage.foldername(name))[1] = auth.uid()::text
-  );
-
-create policy "reel_videos_update_own_folder"
-  on storage.objects for update
-  to authenticated
-  using (
-    bucket_id = 'reel-videos'
-    and owner = auth.uid()
-    and (storage.foldername(name))[1] = auth.uid()::text
-  )
-  with check (
-    bucket_id = 'reel-videos'
-    and owner = auth.uid()
-    and (storage.foldername(name))[1] = auth.uid()::text
-  );
-
-create policy "reel_videos_delete_own_folder"
-  on storage.objects for delete
-  to authenticated
-  using (
-    bucket_id = 'reel-videos'
     and owner = auth.uid()
     and (storage.foldername(name))[1] = auth.uid()::text
   );

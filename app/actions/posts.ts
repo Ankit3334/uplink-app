@@ -9,10 +9,6 @@ export type TransmitPostState = {
   error?: string;
 };
 
-export type UploadReelState = {
-  error?: string;
-};
-
 export type AddThreadState = {
   error?: string;
 };
@@ -303,74 +299,6 @@ export async function toggleBookmark(postId: string): Promise<ToggleBookmarkResu
   return { bookmarked };
 }
 
-export async function toggleReelBoost(
-  reelId: string,
-): Promise<{ boosted: boolean; boostCount: number; error?: string }> {
-  if (!reelId) return { boosted: false, boostCount: 0, error: "Missing reel." };
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { boosted: false, boostCount: 0, error: "Authentication required." };
-
-  const { data: existing } = await supabase
-    .from("reel_boosts")
-    .select("id")
-    .eq("user_id", user.id)
-    .eq("reel_id", reelId)
-    .maybeSingle();
-
-  let boosted = false;
-  if (existing) {
-    await supabase.from("reel_boosts").delete().eq("id", existing.id).eq("user_id", user.id);
-    boosted = false;
-  } else {
-    const { error } = await supabase.from("reel_boosts").insert({ user_id: user.id, reel_id: reelId });
-    boosted = !error;
-  }
-
-  // Keep reels.boost_count in sync (best-effort count)
-  const { count } = await supabase
-    .from("reel_boosts")
-    .select("id", { count: "exact", head: true })
-    .eq("reel_id", reelId);
-  const boostCount = count ?? 0;
-  await supabase.from("reels").update({ boost_count: boostCount }).eq("id", reelId);
-
-  revalidatePath("/reels");
-  return { boosted, boostCount };
-}
-
-export async function toggleReelBookmark(
-  reelId: string,
-): Promise<{ bookmarked: boolean; error?: string }> {
-  if (!reelId) return { bookmarked: false, error: "Missing reel." };
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { bookmarked: false, error: "Authentication required." };
-
-  const { data: existing } = await supabase
-    .from("reel_bookmarks")
-    .select("id")
-    .eq("user_id", user.id)
-    .eq("reel_id", reelId)
-    .maybeSingle();
-
-  let bookmarked = false;
-  if (existing) {
-    await supabase.from("reel_bookmarks").delete().eq("id", existing.id).eq("user_id", user.id);
-    bookmarked = false;
-  } else {
-    const { error } = await supabase.from("reel_bookmarks").insert({ user_id: user.id, reel_id: reelId });
-    bookmarked = !error;
-  }
-
-  revalidatePath("/reels");
-  return { bookmarked };
-}
-
 export async function addThread(
   _prevState: AddThreadState,
   formData: FormData,
@@ -448,72 +376,6 @@ export async function addThread(
   } catch (error) {
     if (error instanceof Error && error.message === "NEXT_REDIRECT") throw error;
     return { error: "THREAD INJECTION FAILED: Unexpected system error." };
-  }
-}
-
-export async function uploadReel(
-  _prevState: UploadReelState,
-  formData: FormData,
-): Promise<UploadReelState> {
-  try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
-
-    if (userError || !user) {
-      return { error: "TRANSMISSION FAILED: Authentication required." };
-    }
-
-    const file = formData.get("video");
-    const captionRaw = formData.get("caption");
-    const caption = typeof captionRaw === "string" ? captionRaw.trim() : "";
-
-    if (!(file instanceof File) || file.size === 0) {
-      return { error: "TRANSMISSION FAILED: No video payload detected." };
-    }
-
-    if (!file.type.startsWith("video/")) {
-      return { error: "TRANSMISSION FAILED: Payload must be a video file." };
-    }
-
-    const ext = "mp4";
-    const filename = `${user.id}/${Date.now()}.${ext}`;
-
-    const { error: uploadError } = await supabase.storage
-      .from("reel-videos")
-      .upload(filename, file, {
-        contentType: file.type || "video/mp4",
-        cacheControl: "3600",
-        upsert: false,
-      });
-
-    if (uploadError) {
-      return { error: `TRANSMISSION FAILED: ${uploadError.message}` };
-    }
-
-    const {
-      data: { publicUrl },
-    } = supabase.storage.from("reel-videos").getPublicUrl(filename);
-
-    const { error: insertError } = await supabase.from("reels").insert({
-      user_id: user.id,
-      video_url: publicUrl,
-      caption: caption || null,
-    });
-
-    if (insertError) {
-      await supabase.storage.from("reel-videos").remove([filename]);
-      return { error: `TRANSMISSION FAILED: ${insertError.message}` };
-    }
-
-    revalidatePath("/reels");
-    revalidatePath("/");
-    redirect("/reels");
-  } catch (error) {
-    if (error instanceof Error && error.message === "NEXT_REDIRECT") throw error;
-    return { error: "TRANSMISSION FAILED: Unexpected system error." };
   }
 }
 
