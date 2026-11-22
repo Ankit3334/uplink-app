@@ -20,10 +20,12 @@ import { triggerHaptic } from "@/src/lib/utils";
 
 const initialEditState: EditPostState = {};
 
-const pillClass =
-  "flex items-center gap-1.5 bg-zinc-900/50 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs font-medium text-zinc-400 hover:bg-zinc-800 hover:text-white transition-all duration-200 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-cyan-400/40";
+const iconButtonClass =
+  "flex items-center justify-center bg-zinc-900/40 border border-zinc-800 rounded-lg p-2.5 transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-cyan-400/40";
 
-const activePillClass =
+const inactiveIconClass = "text-zinc-400 hover:bg-zinc-800 hover:text-white";
+
+const activeIconClass =
   "bg-cyan-400/10 border-cyan-400/20 text-cyan-400 hover:bg-cyan-400/10 hover:text-cyan-400";
 
 export function PostActions({
@@ -163,58 +165,60 @@ export function PostActions({
     setEditing((v) => !v);
   };
 
-  const iconSize = compact ? 14 : 15;
+  const rowGap = compact ? "gap-3" : "gap-4";
 
   return (
     <div className="px-4">
-      <div className="flex flex-wrap items-center gap-2">
+      <div className={`flex items-center ${rowGap}`}>
         <button
           type="button"
           onClick={onBoost}
-          aria-label={boosted ? "Remove boost" : "Boost"}
+          aria-label={
+            boosted
+              ? `Remove boost, ${boostCount} boosts`
+              : `Boost, ${boostCount} boosts`
+          }
           aria-pressed={boosted}
-          className={`${pillClass} ${boosted ? activePillClass : ""}`}
+          className={`${iconButtonClass} ${boosted ? activeIconClass : inactiveIconClass}`}
         >
           <Heart
-            size={iconSize}
-            strokeWidth={2}
+            size={20}
+            className="h-5 w-5"
+            strokeWidth={1.8}
             fill={boosted ? "currentColor" : "none"}
           />
-          <span>{boostCount}</span>
         </button>
 
         <Link
           href={`/post/${postId}`}
-          aria-label="Thread"
-          className={pillClass}
+          aria-label={`View ${threadCount} comments`}
+          className={`${iconButtonClass} ${inactiveIconClass}`}
         >
-          <MessageCircle size={iconSize} strokeWidth={2} />
-          <span>{threadCount}</span>
+          <MessageCircle size={20} className="h-5 w-5" strokeWidth={1.8} />
         </Link>
-
-        <button
-          type="button"
-          onClick={onShare}
-          aria-label="Share"
-          className={pillClass}
-        >
-          <Send size={iconSize} strokeWidth={2} />
-          <span>Share</span>
-        </button>
 
         <button
           type="button"
           onClick={onBookmark}
           aria-label={bookmarked ? "Remove bookmark" : "Bookmark"}
           aria-pressed={bookmarked}
-          className={`${pillClass} ml-auto ${bookmarked ? activePillClass : ""}`}
+          className={`${iconButtonClass} ${bookmarked ? activeIconClass : inactiveIconClass}`}
         >
           <Bookmark
-            size={iconSize}
-            strokeWidth={2}
+            size={20}
+            className="h-5 w-5"
+            strokeWidth={1.8}
             fill={bookmarked ? "currentColor" : "none"}
           />
-          <span>Save</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={onShare}
+          aria-label="Share"
+          className={`${iconButtonClass} ${inactiveIconClass}`}
+        >
+          <Send size={20} className="h-5 w-5" strokeWidth={1.8} />
         </button>
 
         {isOwner && canEdit ? (
@@ -223,10 +227,9 @@ export function PostActions({
             onClick={openEditor}
             aria-label="Edit post"
             aria-pressed={isEditing}
-            className={`${pillClass} ${isEditing ? activePillClass : ""}`}
+            className={`${iconButtonClass} ${isEditing ? activeIconClass : inactiveIconClass}`}
           >
-            <Pencil size={iconSize} strokeWidth={2} />
-            <span>Edit</span>
+            <Pencil size={20} className="h-5 w-5" strokeWidth={1.8} />
           </button>
         ) : null}
       </div>
