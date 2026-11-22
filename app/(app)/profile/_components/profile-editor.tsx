@@ -16,15 +16,15 @@ function SaveConfigButton() {
       type="submit"
       onClick={triggerHaptic}
       disabled={pending}
-      className="flex w-full items-center justify-center gap-2 border border-zinc-700 bg-[#161616] px-4 py-3.5 text-sm font-bold uppercase tracking-[0.2em] text-[#22d3ee] transition-colors hover:border-zinc-600 hover:bg-[#1b1b1b] focus-visible:border-[#22d3ee] focus-visible:outline-none active:border-[#22d3ee] disabled:cursor-not-allowed disabled:opacity-60"
+      className="flex w-full items-center justify-center gap-2 rounded-xl bg-zinc-100 px-4 py-3 text-sm font-semibold text-zinc-900 transition-colors hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
     >
       {pending ? (
         <>
           <Loader2 size={16} className="animate-spin" />
-          <span className="text-zinc-200">Saving...</span>
+          <span>Saving...</span>
         </>
       ) : (
-        "SAVE CONFIGURATION"
+        "Save changes"
       )}
     </button>
   );
@@ -33,9 +33,11 @@ function SaveConfigButton() {
 export function ProfileEditor({
   initialDisplayName,
   initialBio,
+  initialLocation,
 }: {
   initialDisplayName: string;
   initialBio: string;
+  initialLocation: string;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [state, formAction] = useActionState(updateProfile, initialState);
@@ -54,11 +56,9 @@ export function ProfileEditor({
     <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-5">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
-            Node Profile Controls
-          </p>
-          <p className="mt-2 font-mono text-xs leading-relaxed text-zinc-400">
-            Modify operator display metadata and bio payload.
+          <p className="text-sm font-semibold text-zinc-100">Edit profile</p>
+          <p className="mt-1 text-sm leading-relaxed text-zinc-500">
+            Update the name, location, and about text on your profile.
           </p>
         </div>
         <button
@@ -67,21 +67,21 @@ export function ProfileEditor({
             triggerHaptic();
             setIsOpen(true);
           }}
-          className="border border-zinc-700 bg-[#111111] px-3 py-2 font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-300 transition-colors hover:border-zinc-600 hover:text-zinc-100 focus-visible:border-[#22d3ee] focus-visible:text-[#22d3ee] focus-visible:outline-none"
+          className="rounded-full border border-zinc-700 bg-zinc-800/70 px-3.5 py-1.5 text-xs font-medium text-zinc-200 transition-colors hover:bg-zinc-800"
         >
-          EDIT NODE CONFIG
+          Edit details
         </button>
       </div>
 
       <BottomSheet
         open={isOpen}
         onClose={() => setIsOpen(false)}
-        title="Edit node config"
+        title="Edit profile"
       >
-        <form action={formAction} className="space-y-5 p-4">
+        <form action={formAction} className="space-y-4 p-4">
           <label className="block">
-            <span className="mb-2 block font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-400">
-              &gt; Display_Name
+            <span className="mb-1.5 block text-sm font-medium text-zinc-300">
+              Name
             </span>
             <input
               type="text"
@@ -89,38 +89,52 @@ export function ProfileEditor({
               required
               defaultValue={initialDisplayName}
               maxLength={64}
-              className="w-full border border-zinc-800 bg-[#0a0a0a] px-3 py-3 font-mono text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-[#22d3ee]"
-              placeholder="OPERATOR ALIAS"
+              className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2.5 text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-cyan-500"
+              placeholder="Your name"
             />
           </label>
 
           <label className="block">
-            <span className="mb-2 block font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-400">
-              &gt; Bio
+            <span className="mb-1.5 block text-sm font-medium text-zinc-300">
+              Location
+            </span>
+            <input
+              type="text"
+              name="location"
+              defaultValue={initialLocation}
+              maxLength={120}
+              className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2.5 text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-cyan-500"
+              placeholder="San Francisco, CA"
+            />
+          </label>
+
+          <label className="block">
+            <span className="mb-1.5 block text-sm font-medium text-zinc-300">
+              About
             </span>
             <textarea
               name="bio"
               rows={4}
               defaultValue={initialBio}
               maxLength={280}
-              className="w-full resize-y border border-zinc-800 bg-[#0a0a0a] px-3 py-3 font-mono text-sm leading-relaxed text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-[#22d3ee]"
-              placeholder="NODE BIO / SIGNAL DESCRIPTION..."
+              className="w-full resize-y rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2.5 text-sm leading-relaxed text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-cyan-500"
+              placeholder="A short introduction..."
             />
           </label>
 
           {state?.error ? (
-            <div
+            <p
               role="alert"
-              className="border border-zinc-700 bg-[#0a0a0a] px-3 py-3 font-mono text-xs uppercase tracking-[0.08em] text-zinc-300"
+              className="rounded-xl border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-300"
             >
               {state.error}
-            </div>
+            </p>
           ) : null}
 
           {state?.success ? (
-            <div className="border border-zinc-700 bg-[#0a0a0a] px-3 py-3 font-mono text-xs uppercase tracking-[0.08em] text-zinc-300">
-              Configuration saved.
-            </div>
+            <p className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-300">
+              Profile updated.
+            </p>
           ) : null}
 
           <SaveConfigButton />

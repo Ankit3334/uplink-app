@@ -168,13 +168,25 @@ async function FeedContent() {
   const user = await requireUser();
   const supabase = await createClient();
 
-  const { data: follows } = await supabase
-    .from("follows")
-    .select("following_id")
-    .eq("follower_id", user.id);
+  const [{ data: outgoingConnections }, { data: incomingConnections }] =
+    await Promise.all([
+      supabase
+        .from("connections")
+        .select("addressee_id")
+        .eq("requester_id", user.id)
+        .eq("status", "accepted"),
+      supabase
+        .from("connections")
+        .select("requester_id")
+        .eq("addressee_id", user.id)
+        .eq("status", "accepted"),
+    ]);
 
-  const followingIds = (follows ?? []).map((f) => f.following_id as string);
-  const isNetworkEmpty = followingIds.length === 0;
+  const connectionIds = [
+    ...(outgoingConnections ?? []).map((row) => row.addressee_id as string),
+    ...(incomingConnections ?? []).map((row) => row.requester_id as string),
+  ];
+  const isNetworkEmpty = connectionIds.length === 0;
 
   let posts: FeedPost[] = [];
   if (isNetworkEmpty) {
@@ -188,7 +200,7 @@ async function FeedContent() {
     const { data } = await supabase
       .from("posts")
       .select(FEED_POST_SELECT)
-      .in("user_id", followingIds)
+      .in("user_id", connectionIds)
       .order("created_at", { ascending: false })
       .limit(50);
     posts = (data ?? []) as FeedPost[];
@@ -209,7 +221,7 @@ async function FeedContent() {
     <>
       {isNetworkEmpty ? (
         <div className="border-b border-zinc-800 px-4 py-3 font-mono text-xs uppercase tracking-[0.12em] text-zinc-400">
-          Network empty. Follow nodes to curate your stream.
+          Your network is empty. Connect with people to curate your feed.
         </div>
       ) : null}
 
@@ -221,7 +233,7 @@ async function FeedContent() {
           <p className="mt-2 text-sm text-zinc-500">
             {isNetworkEmpty
               ? "No uplinks detected. Initiate a transmission to populate the stream."
-              : "No transmissions from followed nodes yet."}
+              : "No posts from your connections yet."}
           </p>
         </div>
       ) : (

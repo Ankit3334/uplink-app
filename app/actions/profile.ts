@@ -91,6 +91,9 @@ export async function updateProfile(
   const displayName = String(formData.get("display_name") ?? "").trim();
   const bioRaw = formData.get("bio");
   const bio = typeof bioRaw === "string" ? bioRaw.trim() : "";
+  const locationRaw = formData.get("location");
+  const location =
+    typeof locationRaw === "string" ? locationRaw.trim().slice(0, 120) : "";
 
   if (!displayName) {
     return { error: "CONFIG ERROR: Display name is required." };
@@ -106,13 +109,16 @@ export async function updateProfile(
     redirect("/auth");
   }
 
-  const { error } = await supabase
+  const { data: updated, error } = await supabase
     .from("profiles")
     .update({
       display_name: displayName,
       bio: bio || null,
+      location: location || null,
     })
-    .eq("id", user.id);
+    .eq("id", user.id)
+    .select("username")
+    .maybeSingle();
 
   if (error) {
     return { error: `CONFIG ERROR: ${error.message}` };
@@ -120,6 +126,9 @@ export async function updateProfile(
 
   revalidatePath("/profile");
   revalidatePath("/");
+  if (updated?.username) {
+    revalidatePath(`/u/${updated.username}`);
+  }
   return { success: Date.now() };
 }
 

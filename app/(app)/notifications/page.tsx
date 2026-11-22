@@ -1,13 +1,23 @@
 import Link from "next/link";
-import { Heart, MessageSquare, Terminal, UserPlus } from "lucide-react";
+import { Check, Heart, MessageSquare, UserPlus } from "lucide-react";
 import { requireUser } from "@/src/lib/auth";
 import { createClient } from "@/src/lib/supabase/server";
+import { ConnectionRequestActions } from "./_components/connection-request-actions";
+
+type NotificationType =
+  | "like"
+  | "follow"
+  | "thread"
+  | "story_view"
+  | "boost"
+  | "connection_request"
+  | "connection_accepted";
 
 type NotificationRow = {
   id: string;
   user_id: string;
   actor_id: string;
-  type: "like" | "follow" | "thread" | "story_view" | "boost";
+  type: NotificationType;
   post_id: string | null;
   created_at: string;
   is_read: boolean;
@@ -32,27 +42,33 @@ function formatTimestamp(iso: string) {
   });
 }
 
-function notificationText(
-  type: NotificationRow["type"],
-  actorUsername: string,
-) {
+function notificationText(type: NotificationType, actorUsername: string) {
   switch (type) {
     case "boost":
     case "like":
-      return `@${actorUsername} boosted your transmission`;
+      return `@${actorUsername} boosted your post`;
     case "follow":
       return `@${actorUsername} started following you`;
+    case "connection_request":
+      return `@${actorUsername} wants to connect with you`;
+    case "connection_accepted":
+      return `@${actorUsername} accepted your connection request`;
     case "thread":
-      return `@${actorUsername} initiated a thread on your transmission`;
+      return `@${actorUsername} commented on your post`;
     case "story_view":
       return `@${actorUsername} viewed your broadcast`;
     default:
-      return `@${actorUsername} sent a signal`;
+      return `@${actorUsername} sent you an update`;
   }
 }
 
-function TypeIcon({ type }: { type: NotificationRow["type"] }) {
-  if (type === "follow") return <UserPlus size={14} strokeWidth={1.8} />;
+function TypeIcon({ type }: { type: NotificationType }) {
+  if (type === "follow" || type === "connection_request") {
+    return <UserPlus size={14} strokeWidth={1.8} />;
+  }
+  if (type === "connection_accepted") {
+    return <Check size={14} strokeWidth={1.8} />;
+  }
   if (type === "thread") return <MessageSquare size={14} strokeWidth={1.8} />;
   return <Heart size={14} strokeWidth={1.8} />;
 }
@@ -61,14 +77,25 @@ export default async function NotificationsPage() {
   const user = await requireUser();
   const supabase = await createClient();
 
-  const { data: notificationsData } = await supabase
-    .from("notifications")
-    .select("id, user_id, actor_id, type, post_id, created_at, is_read")
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: false })
-    .limit(50);
+  const [{ data: notificationsData }, { data: pendingConnections }] =
+    await Promise.all([
+      supabase
+        .from("notifications")
+        .select("id, user_id, actor_id, type, post_id, created_at, is_read")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(50),
+      supabase
+        .from("connections")
+        .select("id, requester_id")
+        .eq("addressee_id", user.id)
+        .eq("status", "pending"),
+    ]);
 
   const notifications = (notificationsData ?? []) as NotificationRow[];
+  const pendingByActor = new Map(
+    (pendingConnections ?? []).map((row) => [row.requester_id, row.id]),
+  );
 
   const actorIds = Array.from(new Set(notifications.map((n) => n.actor_id)));
   let actorsById = new Map<string, ActorProfile>();
@@ -77,7 +104,9 @@ export default async function NotificationsPage() {
       .from("profiles")
       .select("id, username, display_name, avatar_url")
       .in("id", actorIds);
-    actorsById = new Map(((actors ?? []) as ActorProfile[]).map((a) => [a.id, a]));
+    actorsById = new Map(
+      ((actors ?? []) as ActorProfile[]).map((actor) => [actor.id, actor]),
+    );
   }
 
   if (notifications.some((n) => !n.is_read)) {
@@ -90,40 +119,40 @@ export default async function NotificationsPage() {
 
   return (
     <section className="mx-auto flex min-h-[calc(100dvh-6rem)] w-full max-w-md flex-col gap-4 px-4 pt-6 pb-24 animate-fade-in-up">
-      <header className="border border-zinc-800 bg-[#0a0a0a] p-4">
-        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
-          Channel // Alerts
+      <header className="rounded-3xl border border-white/5 bg-zinc-900/50 p-5 backdrop-blur-xl">
+        <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-zinc-500">
+          Network
         </p>
-        <h1 className="mt-2 text-xl font-bold uppercase tracking-wider text-zinc-100">
+        <h1 className="mt-2 text-xl font-semibold tracking-tight text-zinc-100">
           Notifications
         </h1>
-        <p className="mt-2 text-xs leading-relaxed text-zinc-400">
-          Incoming activity signals from the network.
+        <p className="mt-2 text-sm leading-relaxed text-zinc-400">
+          Connection requests and activity from your network.
         </p>
       </header>
 
       <div className="border-t border-zinc-800 pt-4">
         {notifications.length === 0 ? (
-          <div className="animate-fade-in border border-zinc-800 bg-[#0a0a0a] p-8 text-center">
-            <p className="font-mono text-xs uppercase tracking-[0.15em] text-zinc-400">
-              {"// NO TRANSMISSIONS FOUND"}
+          <div className="rounded-3xl border border-white/5 bg-zinc-900/40 p-8 text-center backdrop-blur-xl">
+            <p className="text-xs font-medium uppercase tracking-[0.15em] text-zinc-400">
+              All caught up
             </p>
-            <p className="mt-2 text-xs leading-relaxed text-zinc-500">
-              Activity feed is clear. New signals will appear here.
+            <p className="mt-2 text-sm leading-relaxed text-zinc-500">
+              New activity will appear here.
             </p>
           </div>
         ) : (
-          <div className="animate-fade-in flex flex-col border border-zinc-800 bg-[#0a0a0a]">
-            {notifications.map((n, idx) => {
-              const actor = actorsById.get(n.actor_id);
-              const actorUsername = actor?.username ?? "unknown_node";
+          <div className="flex animate-fade-in flex-col overflow-hidden rounded-3xl border border-white/5 bg-zinc-900/40 backdrop-blur-xl">
+            {notifications.map((notification, index) => {
+              const actor = actorsById.get(notification.actor_id);
+              const actorUsername = actor?.username ?? "uplink_user";
               const avatarUrl = actor?.avatar_url ?? null;
               const href = actor?.username ? `/u/${actor.username}` : undefined;
-              const text = notificationText(n.type, actorUsername);
+              const connectionId = pendingByActor.get(notification.actor_id);
 
               const content = (
                 <>
-                  <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center border border-zinc-800 bg-[#111111] text-zinc-400">
+                  <div className="h-11 w-11 flex-shrink-0 overflow-hidden rounded-full border border-zinc-700 bg-zinc-800">
                     {avatarUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
@@ -131,33 +160,43 @@ export default async function NotificationsPage() {
                         alt={`${actorUsername} avatar`}
                         className="h-full w-full object-cover"
                       />
-                    ) : (
-                      <Terminal size={16} strokeWidth={1.8} />
-                    )}
+                    ) : null}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm leading-relaxed text-zinc-200">{text}</p>
-                    <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.12em] text-zinc-500">
-                      {formatTimestamp(n.created_at)}
+                    <p className="text-sm leading-relaxed text-zinc-200">
+                      {notificationText(notification.type, actorUsername)}
                     </p>
+                    <p className="mt-1 text-[11px] text-zinc-500">
+                      {formatTimestamp(notification.created_at)}
+                    </p>
+                    {notification.type === "connection_request" && connectionId ? (
+                      <ConnectionRequestActions connectionId={connectionId} />
+                    ) : null}
                   </div>
                   <div className="flex flex-shrink-0 items-center gap-2 text-zinc-500">
-                    <TypeIcon type={n.type} />
-                    {!n.is_read ? (
-                      <span className="h-2 w-2 bg-[#22d3ee]" aria-label="Unread" />
+                    <TypeIcon type={notification.type} />
+                    {!notification.is_read ? (
+                      <span
+                        className="h-2 w-2 rounded-full bg-cyan-400"
+                        aria-label="Unread"
+                      />
                     ) : null}
                   </div>
                 </>
               );
 
-              const rowClass = `flex items-center gap-3 p-4 ${idx > 0 ? "border-t border-zinc-800" : ""} ${!n.is_read ? "bg-[#0f0f0f]" : ""}`;
+              const rowClass = `flex items-start gap-3 p-4 ${
+                index > 0 ? "border-t border-zinc-800/70" : ""
+              } ${!notification.is_read ? "bg-zinc-800/30" : ""}`;
+              const hasActions =
+                notification.type === "connection_request" && Boolean(connectionId);
 
-              if (href) {
+              if (href && !hasActions) {
                 return (
                   <Link
-                    key={n.id}
+                    key={notification.id}
                     href={href}
-                    className={`${rowClass} transition-colors hover:bg-[#111111]`}
+                    className={`${rowClass} transition-colors hover:bg-zinc-800/50`}
                   >
                     {content}
                   </Link>
@@ -165,7 +204,7 @@ export default async function NotificationsPage() {
               }
 
               return (
-                <div key={n.id} className={rowClass}>
+                <div key={notification.id} className={rowClass}>
                   {content}
                 </div>
               );
