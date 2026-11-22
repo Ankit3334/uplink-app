@@ -1,6 +1,13 @@
 import type { Metadata, Viewport } from "next";
-import { JetBrains_Mono } from "next/font/google";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+  display: "swap",
+  preload: true,
+});
 
 const jetBrainsMono = JetBrains_Mono({
   variable: "--font-jetbrains-mono",
@@ -46,9 +53,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${jetBrainsMono.variable} h-full bg-[#050505] antialiased`}
+      className={`${inter.variable} ${jetBrainsMono.variable} h-full bg-[#050505] antialiased`}
     >
-      <body className="safe-area-top min-h-full bg-[#050505] text-[#e0e0e0]">
+      <body className="safe-area-top min-h-full bg-[#050505] font-sans text-[#e0e0e0]">
         {children}
       </body>
     </html>

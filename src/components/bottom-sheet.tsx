@@ -94,13 +94,13 @@ function BottomSheetInner({
       <button
         type="button"
         aria-label="Close sheet"
-        className="absolute inset-0 bg-black/70 animate-fade-in"
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in"
         onClick={dismiss}
       />
 
       <div
         className={cn(
-          "safe-area-bottom relative w-full max-w-md overflow-y-auto overscroll-contain border border-zinc-800 border-b-0 bg-[#0a0a0a] animate-slide-up",
+          "safe-area-bottom relative w-full max-w-md overflow-y-auto overscroll-contain rounded-t-3xl border border-white/5 border-b-0 bg-zinc-950 animate-slide-up",
           maxHeightClassName,
           className,
         )}
@@ -111,13 +111,13 @@ function BottomSheetInner({
       >
         <div
           aria-hidden="true"
-          className="sticky top-0 z-10 flex touch-none justify-center bg-[#0a0a0a] pb-1 pt-2.5 select-none"
+          className="sticky top-0 z-10 flex touch-none justify-center bg-zinc-950 select-none"
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
           onPointerUp={onPointerEnd}
           onPointerCancel={onPointerEnd}
         >
-          <span className="h-1 w-10 cursor-grab bg-zinc-700 active:cursor-grabbing" />
+          <span className="mx-auto mb-4 mt-3 h-1 w-10 cursor-grab rounded-full bg-zinc-800 active:cursor-grabbing" />
         </div>
 
         <div className="flex items-center justify-between gap-3 border-b border-zinc-800 px-4 py-3">
@@ -128,7 +128,7 @@ function BottomSheetInner({
             type="button"
             onClick={dismiss}
             aria-label="Close"
-            className="border border-zinc-800 bg-[#111111] p-2 text-zinc-400 transition-colors hover:border-zinc-700 hover:text-zinc-100"
+            className="rounded-full border border-white/10 bg-zinc-900 p-2 text-zinc-400 transition-colors hover:text-zinc-100"
           >
             <X size={16} />
           </button>

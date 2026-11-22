@@ -1,5 +1,13 @@
 @import "tailwindcss";
 
+@theme {
+  /* Clean sans for headings/body; JetBrains Mono stays for metadata. */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system,
+    BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, Menlo,
+    monospace;
+}
+
 :root {
   --background: #050505;
   --foreground: #f4f4f5;

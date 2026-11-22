@@ -9,6 +9,7 @@ import {
 import { PostActions } from "./_components/post-actions";
 import { PostImage } from "./_components/post-image";
 import { FadeIn } from "@/src/components/fade-in";
+import { FeedFab } from "@/src/components/feed-fab";
 import { parseRichText } from "@/src/lib/utils";
 import { requireUser } from "@/src/lib/auth";
 import { createClient } from "@/src/lib/supabase/server";
@@ -331,7 +332,7 @@ export default function FeedPage() {
             <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
               Channel // 01
             </p>
-            <h1 className="mt-1 text-xl font-bold uppercase tracking-wider text-zinc-100">
+            <h1 className="mt-1 text-2xl font-semibold tracking-tight text-zinc-50">
               Feed
             </h1>
             <p className="mt-1 text-xs leading-relaxed text-zinc-400">
@@ -357,6 +358,8 @@ export default function FeedPage() {
           <FeedContent />
         </Suspense>
       </div>
+
+      <FeedFab />
     </section>
   );
 }

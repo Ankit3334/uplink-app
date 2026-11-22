@@ -98,7 +98,7 @@ export function AvatarUploader({
   const currentAvatarUrl = state?.avatarUrl ?? initialAvatarUrl;
 
   return (
-    <div className="border border-zinc-800 bg-[#0a0a0a] p-5">
+    <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-5">
       <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
         Node Icon
       </p>

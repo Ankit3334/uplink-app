@@ -1,4 +1,11 @@
-import { Terminal } from "lucide-react";
+import {
+  FileText,
+  Sparkles,
+  Terminal,
+  UserCheck,
+  Users,
+  type LucideIcon,
+} from "lucide-react";
 import { signOut } from "@/app/actions/auth";
 import { requireUser } from "@/src/lib/auth";
 import { PostGrid } from "@/src/components/post-grid";
@@ -10,11 +17,47 @@ import {
   SignOutIconButton,
 } from "./_components/sign-out-buttons";
 
+function StatCard({
+  label,
+  value,
+  icon: Icon,
+  hint,
+}: {
+  label: string;
+  value: number;
+  icon: LucideIcon;
+  hint?: string;
+}) {
+  return (
+    <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4">
+      <div className="flex items-center gap-2 text-zinc-500">
+        <Icon size={14} strokeWidth={1.8} />
+        <p className="font-mono text-[10px] uppercase tracking-[0.16em]">
+          {label}
+        </p>
+      </div>
+      <p className="mt-3 text-3xl font-semibold tracking-tight text-zinc-50">
+        {value}
+      </p>
+      {hint ? (
+        <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.1em] text-zinc-500">
+          {hint}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
 export default async function ProfilePage() {
   const user = await requireUser();
   const supabase = await createClient();
 
-  const [{ data: profile }, { data: postsData }] = await Promise.all([
+  const [
+    { data: profile },
+    { data: postsData },
+    { count: followersCount },
+    { count: followingCount },
+  ] = await Promise.all([
     supabase
       .from("profiles")
       .select("id, username, display_name, avatar_url, bio")
@@ -26,6 +69,14 @@ export default async function ProfilePage() {
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
       .limit(60),
+    supabase
+      .from("follows")
+      .select("*", { count: "exact", head: true })
+      .eq("following_id", user.id),
+    supabase
+      .from("follows")
+      .select("*", { count: "exact", head: true })
+      .eq("follower_id", user.id),
   ]);
 
   const posts = postsData ?? [];
@@ -41,111 +92,115 @@ export default async function ProfilePage() {
   const bio = profile?.bio ?? null;
 
   return (
-    <section className="mx-auto flex min-h-[calc(100dvh-6rem)] w-full max-w-md flex-col gap-4 px-4 pt-6 pb-24 animate-fade-in-up">
-      <header className="border border-zinc-800 bg-[#0a0a0a] p-4">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
-              Channel // 04
-            </p>
-            <h1 className="mt-2 text-xl font-bold uppercase tracking-wider text-zinc-100">
-              Node Configuration
-            </h1>
-            <p className="mt-2 text-xs leading-relaxed text-zinc-400">
-              Operator identity, signal metrics, and profile controls.
-            </p>
-          </div>
-          <form action={signOut}>
-            <SignOutIconButton />
-          </form>
+    <section className="native-scroll mx-auto flex min-h-[calc(100dvh-6rem)] w-full max-w-md flex-col gap-5 px-4 pt-6 pb-28 animate-fade-in-up">
+      <header className="flex items-start justify-between gap-4">
+        <div>
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
+            Channel // 04
+          </p>
+          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-zinc-50">
+            Profile
+          </h1>
+          <p className="mt-1 text-sm leading-relaxed text-zinc-400">
+            Your identity, signal metrics, and node controls.
+          </p>
         </div>
+        <form action={signOut}>
+          <SignOutIconButton />
+        </form>
       </header>
 
-      <div className="flex flex-col gap-4 border-t border-zinc-800 pt-4">
-        <div className="border border-zinc-800 bg-[#0a0a0a] p-4">
-          <div className="flex items-center gap-4">
-            <div className="flex h-20 w-20 items-center justify-center border border-zinc-800 bg-[#111111] text-zinc-400">
-              {avatarUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={avatarUrl}
-                  alt={`${username} avatar`}
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <Terminal size={32} strokeWidth={1.6} />
-              )}
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-lg font-bold uppercase tracking-[0.08em] text-zinc-100">
-                @{username}
-              </p>
-              <p className="mt-1 truncate text-xs uppercase tracking-[0.12em] text-zinc-300">
-                {displayName}
-              </p>
-              <p className="mt-2 whitespace-pre-wrap font-mono text-xs leading-relaxed text-zinc-500">
-                {bio || "No bio data written to node."}
-              </p>
-            </div>
+      <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-5">
+        <div className="flex items-center gap-4">
+          <div className="flex h-20 w-20 flex-shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950 text-zinc-400">
+            {avatarUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={avatarUrl}
+                alt={`${username} avatar`}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <Terminal size={32} strokeWidth={1.6} />
+            )}
           </div>
-        </div>
-
-        <AvatarUploader initialAvatarUrl={avatarUrl} />
-
-        <div className="grid grid-cols-3 gap-3">
-          <div className="border border-zinc-800 bg-[#0a0a0a] p-3">
-            <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-zinc-500">
-              Transmissions
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-xl font-semibold tracking-tight text-zinc-50">
+              @{username}
             </p>
-            <p className="mt-2 text-lg font-bold text-zinc-100">
-              {transmissionsCount ?? 0}
+            <p className="mt-0.5 truncate text-sm text-zinc-300">
+              {displayName}
             </p>
-          </div>
-          <div className="border border-zinc-800 bg-[#0a0a0a] p-3">
-            <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-zinc-500">
-              Total Boosts
-            </p>
-            <p className="mt-2 text-lg font-bold text-zinc-100">{totalBoosts}</p>
-          </div>
-          <div className="border border-zinc-800 bg-[#0a0a0a] p-3">
-            <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-zinc-500">
-              Node Level
-            </p>
-            <p className="mt-2 inline-block border border-zinc-700 bg-[#111111] px-2 py-0.5 font-mono text-base font-bold text-[#22d3ee]">
-              1
+            <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-zinc-400">
+              {bio || "No bio data written to node."}
             </p>
           </div>
         </div>
+      </div>
 
-        <ProfileEditor
-          initialDisplayName={profile?.display_name ?? ""}
-          initialBio={profile?.bio ?? ""}
+      <div className="grid grid-cols-2 gap-3">
+        <StatCard
+          label="Followers"
+          value={followersCount ?? 0}
+          icon={Users}
         />
-
-        <div className="flex flex-col gap-3">
-          <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
-            <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-100">
-              Transmission Grid
-            </h2>
-            <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-zinc-500">
-              {transmissionsCount} records
+        <StatCard
+          label="Following"
+          value={followingCount ?? 0}
+          icon={UserCheck}
+        />
+        <StatCard
+          label="Posts"
+          value={transmissionsCount}
+          icon={FileText}
+          hint={`${totalBoosts} total boosts`}
+        />
+        <div className="relative overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4">
+          <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-zinc-500">
+            Status
+          </p>
+          <div className="mt-3">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-cyan-500/20 bg-cyan-500/10 px-2.5 py-1 text-xs font-medium text-cyan-300">
+              <Sparkles size={12} strokeWidth={2} />
+              Pro Node
             </span>
           </div>
-          <PostGrid
-            posts={posts.map((p) => ({
-              id: p.id as string,
-              image_url: p.image_url as string,
-              caption: (p.caption as string | null) ?? null,
-            }))}
-            canDelete
-            deleteRedirectTo="/profile"
-          />
+          <p className="mt-2 text-xs leading-relaxed text-zinc-500">
+            Early operator with priority signal routing.
+          </p>
         </div>
-
-        <form action={signOut}>
-          <SignOutButton />
-        </form>
       </div>
+
+      <AvatarUploader initialAvatarUrl={avatarUrl} />
+
+      <ProfileEditor
+        initialDisplayName={profile?.display_name ?? ""}
+        initialBio={profile?.bio ?? ""}
+      />
+
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
+          <h2 className="text-base font-semibold tracking-tight text-zinc-100">
+            Transmission grid
+          </h2>
+          <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-zinc-500">
+            {transmissionsCount} records
+          </span>
+        </div>
+        <PostGrid
+          posts={posts.map((p) => ({
+            id: p.id as string,
+            image_url: p.image_url as string,
+            caption: (p.caption as string | null) ?? null,
+          }))}
+          canDelete
+          deleteRedirectTo="/profile"
+        />
+      </div>
+
+      <form action={signOut}>
+        <SignOutButton />
+      </form>
     </section>
   );
 }
