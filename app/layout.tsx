@@ -14,9 +14,12 @@ export const metadata: Metadata = {
   description: "Underground signal feed. Boost, thread, broadcast.",
   manifest: "/manifest.json",
   appleWebApp: {
-    capable: true,
     statusBarStyle: "black-translucent",
     title: "UPLINK",
+  },
+  other: {
+    "apple-mobile-web-app-capable": "yes",
+    "mobile-web-app-capable": "yes",
   },
   icons: {
     icon: [
@@ -30,6 +33,9 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: "#050505",
+  colorScheme: "dark",
+  // Required for env(safe-area-inset-*) to resolve on iOS.
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
@@ -38,8 +44,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${jetBrainsMono.variable} h-full antialiased`}>
-      <body className="min-h-full bg-[#050505] text-[#e0e0e0]">
+    <html
+      lang="en"
+      className={`${jetBrainsMono.variable} h-full bg-[#050505] antialiased`}
+    >
+      <body className="safe-area-top min-h-full bg-[#050505] text-[#e0e0e0]">
         {children}
       </body>
     </html>

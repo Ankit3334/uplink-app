@@ -3,7 +3,14 @@
 import { useEffect, useState, useTransition, useActionState } from "react";
 import Link from "next/link";
 import { Bookmark, Heart, MessageCircle, Pencil, Send, X } from "lucide-react";
-import { toggleBookmark, toggleBoostPost, editPost, type EditPostState } from "@/app/actions/posts";
+import {
+  toggleBookmark,
+  toggleBoostPost,
+  editPost,
+  type EditPostState,
+} from "@/app/actions/posts";
+import { BottomSheet } from "@/src/components/bottom-sheet";
+import { triggerHaptic } from "@/src/lib/utils";
 
 const initialEditState: EditPostState = {};
 
@@ -35,21 +42,40 @@ export function PostActions({
   const [bookmarked, setBookmarked] = useState(initialBookmarked);
   const [isPending, startTransition] = useTransition();
   const [editing, setEditing] = useState(false);
-  const [editState, editAction, editPending] = useActionState(editPost, initialEditState);
-  const isEditing = editing && !editState?.success;
+  const [ackEditSuccess, setAckEditSuccess] = useState(false);
+  const [editState, editAction, editPending] = useActionState(
+    editPost,
+    initialEditState,
+  );
+
+  // Close the sheet once the save action succeeds (render-time state adjust).
+  const editSucceeded = Boolean(editState?.success) && !ackEditSuccess;
+  if (editSucceeded) {
+    setAckEditSuccess(true);
+    setEditing(false);
+  }
+  const isEditing = editing && !editSucceeded;
 
   useEffect(() => {
     function onBoosted(e: Event) {
-      const detail = (e as CustomEvent<{ postId: string; boosted: boolean; boostCount: number }>).detail;
+      const detail = (
+        e as CustomEvent<{
+          postId: string;
+          boosted: boolean;
+          boostCount: number;
+        }>
+      ).detail;
       if (detail?.postId !== postId) return;
       setBoosted(detail.boosted);
       setBoostCount(detail.boostCount);
     }
     window.addEventListener("post:boosted", onBoosted as EventListener);
-    return () => window.removeEventListener("post:boosted", onBoosted as EventListener);
+    return () =>
+      window.removeEventListener("post:boosted", onBoosted as EventListener);
   }, [postId]);
 
   const onBoost = () => {
+    triggerHaptic();
     const next = !boosted;
     setBoosted(next);
     setBoostCount((c) => c + (next ? 1 : -1));
@@ -66,6 +92,7 @@ export function PostActions({
   };
 
   const onBookmark = () => {
+    triggerHaptic();
     const next = !bookmarked;
     setBookmarked(next);
     startTransition(async () => {
@@ -79,6 +106,7 @@ export function PostActions({
   };
 
   const onShare = async () => {
+    triggerHaptic();
     const absoluteUrl =
       typeof window !== "undefined"
         ? new URL(shareUrl, window.location.origin).toString()
@@ -98,90 +126,118 @@ export function PostActions({
     }
   };
 
+  const openEditor = () => {
+    triggerHaptic();
+    setEditing((v) => !v);
+  };
+
   const iconClass = "transition-all duration-200 ease-out hover:text-zinc-100";
 
   return (
     <div className={compact ? "px-3 py-2" : "px-4 py-2.5"}>
       <div className="flex items-center justify-between">
-      <div className="flex items-center gap-4">
-        <button
-          type="button"
-          onClick={onBoost}
-          aria-label={boosted ? "Remove boost" : "Boost"}
-          disabled={isPending}
-          className={`${iconClass} ${boosted ? "text-[#22d3ee]" : "text-zinc-300"}`}
-        >
-          <Heart size={24} strokeWidth={1.8} fill={boosted ? "currentColor" : "none"} />
-        </button>
-        <Link
-          href={`/post/${postId}`}
-          aria-label="Thread"
-          className={`${iconClass} text-zinc-300`}
-        >
-          <MessageCircle size={24} strokeWidth={1.8} />
-        </Link>
-        <button
-          type="button"
-          onClick={onShare}
-          aria-label="Share"
-          className={`${iconClass} text-zinc-300`}
-        >
-          <Send size={24} strokeWidth={1.8} />
-        </button>
-        {isOwner && canEdit ? (
+        <div className="flex items-center gap-4">
           <button
             type="button"
-            onClick={() => setEditing((v) => !v)}
-            aria-label="Edit post"
-            className={`${iconClass} ${isEditing ? "text-[#22d3ee]" : "text-zinc-300"}`}
+            onClick={onBoost}
+            aria-label={boosted ? "Remove boost" : "Boost"}
+            disabled={isPending}
+            className={`${iconClass} ${boosted ? "text-[#22d3ee]" : "text-zinc-300"}`}
           >
-            <Pencil size={24} strokeWidth={1.8} />
+            <Heart
+              size={24}
+              strokeWidth={1.8}
+              fill={boosted ? "currentColor" : "none"}
+            />
           </button>
-        ) : null}
-      </div>
-      <button
-        type="button"
-        onClick={onBookmark}
-        aria-label={bookmarked ? "Remove bookmark" : "Bookmark"}
-        disabled={isPending}
-        className={`${iconClass} ${bookmarked ? "text-[#22d3ee]" : "text-zinc-300"}`}
-      >
-        <Bookmark size={24} strokeWidth={1.8} fill={bookmarked ? "currentColor" : "none"} />
-      </button>
-      <span className="sr-only">{boostCount} boosts</span>
-      <span className="sr-only">{threadCount} threads</span>
+          <Link
+            href={`/post/${postId}`}
+            aria-label="Thread"
+            className={`${iconClass} text-zinc-300`}
+          >
+            <MessageCircle size={24} strokeWidth={1.8} />
+          </Link>
+          <button
+            type="button"
+            onClick={onShare}
+            aria-label="Share"
+            className={`${iconClass} text-zinc-300`}
+          >
+            <Send size={24} strokeWidth={1.8} />
+          </button>
+          {isOwner && canEdit ? (
+            <button
+              type="button"
+              onClick={openEditor}
+              aria-label="Edit post"
+              className={`${iconClass} ${isEditing ? "text-[#22d3ee]" : "text-zinc-300"}`}
+            >
+              <Pencil size={24} strokeWidth={1.8} />
+            </button>
+          ) : null}
+        </div>
+        <button
+          type="button"
+          onClick={onBookmark}
+          aria-label={bookmarked ? "Remove bookmark" : "Bookmark"}
+          disabled={isPending}
+          className={`${iconClass} ${bookmarked ? "text-[#22d3ee]" : "text-zinc-300"}`}
+        >
+          <Bookmark
+            size={24}
+            strokeWidth={1.8}
+            fill={bookmarked ? "currentColor" : "none"}
+          />
+        </button>
+        <span className="sr-only">{boostCount} boosts</span>
+        <span className="sr-only">{threadCount} threads</span>
       </div>
 
-      {isEditing ? (
-        <div className="mt-3 border-t border-zinc-800 pt-3">
-          <div className="mb-2 flex items-center justify-between">
-            <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-zinc-500">Edit transmission</p>
-            <button type="button" onClick={() => setEditing(false)} className="text-zinc-500 transition-all duration-200 ease-out hover:text-zinc-200" aria-label="Close edit">
-              <X size={14} />
-            </button>
-          </div>
-          <form action={editAction} className="space-y-2">
-            <input type="hidden" name="postId" value={postId} />
+      <BottomSheet
+        open={isEditing}
+        onClose={() => setEditing(false)}
+        title="Edit transmission"
+      >
+        <form action={editAction} className="space-y-3 p-4">
+          <input type="hidden" name="postId" value={postId} />
+          <label className="block">
+            <span className="mb-2 block font-mono text-[10px] uppercase tracking-[0.15em] text-zinc-500">
+              &gt; Transmission body
+            </span>
             <textarea
               name="body"
               defaultValue={initialBody}
-              rows={4}
+              rows={5}
               className="w-full resize-y border border-zinc-800 bg-[#111111] px-3 py-2 text-sm leading-relaxed text-zinc-100 outline-none transition-all duration-200 ease-out placeholder:text-zinc-600 focus:border-[#22d3ee]"
               placeholder="Update post text..."
             />
-            {editState?.error ? <p className="font-mono text-[11px] text-red-400">{editState.error}</p> : null}
-            <div className="flex justify-end">
-              <button
-                type="submit"
-                disabled={editPending}
-                className="border border-zinc-700 bg-[#111111] px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.15em] text-[#22d3ee] transition-all duration-200 ease-out hover:border-zinc-600 disabled:opacity-50"
-              >
-                {editPending ? "Saving..." : "Save"}
-              </button>
-            </div>
-          </form>
-        </div>
-      ) : null}
+          </label>
+          {editState?.error ? (
+            <p className="font-mono text-[11px] text-red-400">
+              {editState.error}
+            </p>
+          ) : null}
+          <div className="flex items-center justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setEditing(false)}
+              className="border border-zinc-800 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.15em] text-zinc-400 transition-colors hover:text-zinc-100"
+            >
+              <span className="inline-flex items-center gap-1.5">
+                <X size={12} /> Cancel
+              </span>
+            </button>
+            <button
+              type="submit"
+              onClick={triggerHaptic}
+              disabled={editPending}
+              className="border border-zinc-700 bg-[#111111] px-3 py-2 font-mono text-[10px] uppercase tracking-[0.15em] text-[#22d3ee] transition-all duration-200 ease-out hover:border-zinc-600 disabled:opacity-50"
+            >
+              {editPending ? "Saving..." : "Save"}
+            </button>
+          </div>
+        </form>
+      </BottomSheet>
     </div>
   );
 }

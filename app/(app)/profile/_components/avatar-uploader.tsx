@@ -4,6 +4,7 @@ import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { ImagePlus, Loader2 } from "lucide-react";
 import { updateAvatar, type UpdateAvatarState } from "@/app/actions/profile";
+import { triggerHaptic } from "@/src/lib/utils";
 
 const initialState: UpdateAvatarState = {};
 
@@ -12,6 +13,7 @@ function UploadButton() {
   return (
     <button
       type="submit"
+      onClick={triggerHaptic}
       disabled={pending}
       className="flex w-full items-center justify-center gap-2 border border-zinc-700 bg-[#161616] px-4 py-3 text-xs font-bold uppercase tracking-[0.2em] text-[#22d3ee] transition-colors hover:border-zinc-600 hover:bg-[#1b1b1b] focus-visible:border-[#22d3ee] focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60"
     >

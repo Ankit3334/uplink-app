@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { Heart, Terminal } from "lucide-react";
 import { toggleReelBoost } from "@/app/actions/posts";
+import { triggerHaptic } from "@/src/lib/utils";
 import { ReelActions } from "./reel-actions";
 import { ReelVideo } from "./reel-video";
 
@@ -36,6 +37,7 @@ export function ReelItem({
     const now = Date.now();
     if (now - lastTap.current < 320) {
       lastTap.current = 0;
+      triggerHaptic();
       setShowHeart(true);
       window.setTimeout(() => setShowHeart(false), 1000);
       const res = await toggleReelBoost(reelId);

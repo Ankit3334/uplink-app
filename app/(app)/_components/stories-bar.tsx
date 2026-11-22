@@ -4,6 +4,8 @@ import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { Plus, Terminal, X, Loader2 } from "lucide-react";
 import { uploadStory, type UploadStoryState } from "@/app/actions/stories";
+import { BottomSheet } from "@/src/components/bottom-sheet";
+import { triggerHaptic } from "@/src/lib/utils";
 
 export type StoryItem = {
   id: string;
@@ -28,6 +30,7 @@ function UploadButton() {
   return (
     <button
       type="submit"
+      onClick={triggerHaptic}
       disabled={pending}
       className="flex w-full items-center justify-center gap-2 border border-zinc-700 bg-[#161616] px-4 py-3 text-xs font-bold uppercase tracking-[0.2em] text-[#22d3ee] transition-colors hover:border-zinc-600 hover:bg-[#1b1b1b] focus-visible:border-[#22d3ee] focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60"
     >
@@ -60,33 +63,17 @@ function StoryUploadModal({
     }
   }, [state?.success, open, onClose]);
 
-  if (!open) return null;
-
   return (
-    <div className="fixed inset-0 z-[70] flex items-end justify-center bg-black/80 p-4 sm:items-center">
-      <div className="w-full max-w-md border border-zinc-800 bg-[#0a0a0a]">
-        <div className="flex items-center justify-between border-b border-zinc-800 px-4 py-3">
-          <div>
-            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
-              Broadcast // Story Upload
-            </p>
-            <p className="mt-1 text-xs uppercase tracking-[0.12em] text-zinc-300">
-              Ephemeral Signal (24h)
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="border border-zinc-800 bg-[#111111] p-2 text-zinc-400 transition-colors hover:border-zinc-700 hover:text-zinc-100"
-            aria-label="Close"
-          >
-            <X size={16} />
-          </button>
-        </div>
-
-        <StoryUploadFormInner formAction={formAction} state={state} />
-      </div>
-    </div>
+    <BottomSheet
+      open={open}
+      onClose={onClose}
+      title="Broadcast // Story Upload"
+    >
+      <p className="px-4 pt-3 font-mono text-[10px] uppercase tracking-[0.12em] text-zinc-500">
+        Ephemeral Signal (24h)
+      </p>
+      <StoryUploadFormInner formAction={formAction} state={state} />
+    </BottomSheet>
   );
 }
 
@@ -221,7 +208,7 @@ function StorySlide({
   if (!story) return null;
 
   return (
-    <div className="fixed inset-0 z-[80] bg-[#050505]">
+    <div className="safe-area-top fixed inset-0 z-[80] bg-[#050505]">
       <div className="mx-auto flex h-full w-full max-w-md flex-col">
         <div className="flex gap-1 px-3 pt-3">
           {group.stories.map((s, i) => (
@@ -389,7 +376,10 @@ export function StoriesBar({
         <div className="flex gap-3 overflow-x-auto pb-1">
           <button
             type="button"
-            onClick={() => setUploadOpen(true)}
+            onClick={() => {
+              triggerHaptic();
+              setUploadOpen(true);
+            }}
             className="flex w-[72px] flex-shrink-0 flex-col items-center gap-2 text-left"
           >
             <div className="relative flex h-14 w-14 items-center justify-center border border-zinc-700 bg-[#111111] text-zinc-300">
@@ -416,7 +406,10 @@ export function StoriesBar({
             <button
               key={group.userId}
               type="button"
-              onClick={() => setViewerIndex(idx)}
+              onClick={() => {
+                triggerHaptic();
+                setViewerIndex(idx);
+              }}
               className="flex w-[72px] flex-shrink-0 flex-col items-center gap-2"
             >
               <div className="border-2 border-[#22d3ee] p-[2px]">

@@ -1,6 +1,6 @@
-﻿export default function Loading() {
+export default function Loading() {
   return (
-    <section className="mx-auto flex min-h-[calc(100vh-6rem)] w-full max-w-md flex-col gap-6 px-4 pb-8 pt-10 animate-fade-in">
+    <section className="mx-auto flex min-h-[calc(100dvh-6rem)] w-full max-w-md flex-col gap-6 px-4 pb-8 pt-10 animate-fade-in">
       <header className="border border-zinc-800 bg-[#0a0a0a] p-5">
         <div className="h-2 w-28 animate-pulse rounded-none bg-zinc-800" />
         <div className="mt-3 h-8 w-44 animate-pulse rounded-none bg-zinc-800" />

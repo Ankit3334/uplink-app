@@ -9,11 +9,19 @@ import {
   type TransmitPostState,
   type UploadReelState,
 } from "@/app/actions/posts";
+import { BottomSheet } from "@/src/components/bottom-sheet";
+import { triggerHaptic } from "@/src/lib/utils";
 
 const initialPostState: TransmitPostState = {};
 const initialReelState: UploadReelState = {};
 
 type Mode = "image" | "reel" | "text";
+
+const modeOptions: { key: Mode; label: string; hint: string }[] = [
+  { key: "image", label: "IMAGE PAYLOAD", hint: "Photo transmission with caption" },
+  { key: "reel", label: "REEL PAYLOAD", hint: "Vertical video broadcast" },
+  { key: "text", label: "TEXT PAYLOAD", hint: "Plain signal with optional link" },
+];
 
 function SubmitButton({ mode }: { mode: Mode }) {
   const { pending } = useFormStatus();
@@ -28,6 +36,7 @@ function SubmitButton({ mode }: { mode: Mode }) {
   return (
     <button
       type="submit"
+      onClick={triggerHaptic}
       disabled={pending}
       className="relative flex w-full items-center justify-center gap-2 overflow-hidden border border-zinc-700 bg-[#111111] px-4 py-3.5 text-sm font-bold uppercase tracking-[0.2em] transition-all duration-200 ease-out hover:border-zinc-600 hover:bg-[#161616] focus-visible:border-[#22d3ee] focus-visible:outline-none active:border-[#22d3ee] disabled:cursor-not-allowed disabled:opacity-60"
     >
@@ -405,13 +414,74 @@ function TextUploadForm() {
 
 export function UploadClient() {
   const [mode, setMode] = useState<Mode>("image");
+  const [optionsOpen, setOptionsOpen] = useState(false);
+
+  const chooseMode = (next: Mode) => {
+    triggerHaptic();
+    setMode(next);
+    setOptionsOpen(false);
+  };
 
   return (
     <div className="space-y-4 animate-fade-in-up">
-      <ModeToggle mode={mode} onChange={setMode} />
+      <div className="flex items-center justify-between gap-3">
+        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
+          Select payload
+        </p>
+        <button
+          type="button"
+          onClick={() => {
+            triggerHaptic();
+            setOptionsOpen(true);
+          }}
+          className="border border-zinc-800 bg-[#0a0a0a] px-3 py-2 font-mono text-[10px] uppercase tracking-[0.15em] text-zinc-300 transition-colors hover:border-zinc-700 hover:text-[#22d3ee]"
+        >
+          Upload options
+        </button>
+      </div>
+
+      <ModeToggle mode={mode} onChange={chooseMode} />
       {mode === "image" ? <ImageUploadForm /> : null}
       {mode === "reel" ? <ReelUploadForm /> : null}
       {mode === "text" ? <TextUploadForm /> : null}
+
+      <BottomSheet
+        open={optionsOpen}
+        onClose={() => setOptionsOpen(false)}
+        title="Upload options"
+      >
+        <div className="flex flex-col p-2">
+          {modeOptions.map((option) => {
+            const Icon =
+              option.key === "image"
+                ? ImagePlus
+                : option.key === "reel"
+                  ? Film
+                  : Type;
+            const active = mode === option.key;
+            return (
+              <button
+                key={option.key}
+                type="button"
+                onClick={() => chooseMode(option.key)}
+                className={`flex items-center gap-3 border-b border-zinc-800 px-3 py-4 text-left transition-colors last:border-b-0 ${
+                  active ? "text-[#22d3ee]" : "text-zinc-200 hover:text-[#22d3ee]"
+                }`}
+              >
+                <Icon size={18} strokeWidth={1.8} />
+                <span className="flex-1">
+                  <span className="block text-sm uppercase tracking-[0.12em]">
+                    {option.label}
+                  </span>
+                  <span className="mt-0.5 block font-mono text-[10px] text-zinc-500">
+                    {option.hint}
+                  </span>
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </BottomSheet>
     </div>
   );
 }

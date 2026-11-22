@@ -4,6 +4,8 @@ import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { Loader2 } from "lucide-react";
 import { updateProfile, type UpdateProfileState } from "@/app/actions/profile";
+import { BottomSheet } from "@/src/components/bottom-sheet";
+import { triggerHaptic } from "@/src/lib/utils";
 
 const initialState: UpdateProfileState = {};
 
@@ -12,6 +14,7 @@ function SaveConfigButton() {
   return (
     <button
       type="submit"
+      onClick={triggerHaptic}
       disabled={pending}
       className="flex w-full items-center justify-center gap-2 border border-zinc-700 bg-[#161616] px-4 py-3.5 text-sm font-bold uppercase tracking-[0.2em] text-[#22d3ee] transition-colors hover:border-zinc-600 hover:bg-[#1b1b1b] focus-visible:border-[#22d3ee] focus-visible:outline-none active:border-[#22d3ee] disabled:cursor-not-allowed disabled:opacity-60"
     >
@@ -38,7 +41,11 @@ export function ProfileEditor({
   const [state, formAction] = useActionState(updateProfile, initialState);
   const [ackSuccess, setAckSuccess] = useState<number | null>(null);
 
-  if (state?.success && state.success !== ackSuccess) {
+  // Render-time state adjustment closes the sheet after a successful save.
+  if (
+    state?.success != null &&
+    state.success !== ackSuccess
+  ) {
     setAckSuccess(state.success);
     setIsOpen(false);
   }
@@ -56,18 +63,22 @@ export function ProfileEditor({
         </div>
         <button
           type="button"
-          onClick={() => setIsOpen((v) => !v)}
+          onClick={() => {
+            triggerHaptic();
+            setIsOpen(true);
+          }}
           className="border border-zinc-700 bg-[#111111] px-3 py-2 font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-300 transition-colors hover:border-zinc-600 hover:text-zinc-100 focus-visible:border-[#22d3ee] focus-visible:text-[#22d3ee] focus-visible:outline-none"
         >
-          {isOpen ? "Close Config" : "EDIT NODE CONFIG"}
+          EDIT NODE CONFIG
         </button>
       </div>
 
-      {isOpen ? (
-        <form
-          action={formAction}
-          className="mt-5 space-y-5 border border-dashed border-zinc-700 bg-[#111111] p-4"
-        >
+      <BottomSheet
+        open={isOpen}
+        onClose={() => setIsOpen(false)}
+        title="Edit node config"
+      >
+        <form action={formAction} className="space-y-5 p-4">
           <label className="block">
             <span className="mb-2 block font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-400">
               &gt; Display_Name
@@ -114,7 +125,7 @@ export function ProfileEditor({
 
           <SaveConfigButton />
         </form>
-      ) : null}
+      </BottomSheet>
     </div>
   );
 }

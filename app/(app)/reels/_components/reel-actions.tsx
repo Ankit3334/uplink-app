@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { Bookmark, Heart, MessageCircle, Send, X, Link2 } from "lucide-react";
+import { Bookmark, Heart, MessageCircle, Send, Link2 } from "lucide-react";
 import { toggleReelBookmark, toggleReelBoost } from "@/app/actions/posts";
+import { BottomSheet } from "@/src/components/bottom-sheet";
+import { triggerHaptic } from "@/src/lib/utils";
 
 function ShareSheet({
   url,
@@ -11,19 +13,8 @@ function ShareSheet({
   url: string;
   onClose: () => void;
 }) {
-  useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
-    }
-    document.addEventListener("keydown", onKey);
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
-    };
-  }, [onClose]);
-
   const copy = async () => {
+    triggerHaptic();
     try {
       await navigator.clipboard.writeText(url);
       onClose();
@@ -31,14 +22,17 @@ function ShareSheet({
   };
 
   const shareX = () => {
+    triggerHaptic();
     window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}`, "_blank", "noopener,noreferrer");
   };
 
   const shareWhatsApp = () => {
+    triggerHaptic();
     window.open(`https://wa.me/?text=${encodeURIComponent(url)}`, "_blank", "noopener,noreferrer");
   };
 
   const nativeShare = async () => {
+    triggerHaptic();
     try {
       if (navigator.share) {
         await navigator.share({ url });
@@ -50,53 +44,38 @@ function ShareSheet({
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-end justify-center">
-      <button
-        type="button"
-        aria-label="Close share sheet"
-        className="absolute inset-0 bg-black/60 animate-fade-in transition-opacity duration-200 ease-out"
-        onClick={onClose}
-      />
-      <div className="relative w-full max-w-md border border-zinc-800 border-b-0 bg-[#0a0a0a] px-4 pb-6 pt-3 animate-slide-up transition-transform duration-200 ease-out">
-        <div className="mx-auto mb-4 h-1 w-10 bg-zinc-700" />
-        <div className="mb-3 flex items-center justify-between">
-          <p className="font-mono text-xs uppercase tracking-[0.15em] text-zinc-400">Share Reel</p>
-          <button type="button" onClick={onClose} className="text-zinc-500 transition-all duration-200 ease-out hover:text-zinc-200">
-            <X size={18} />
-          </button>
-        </div>
-        <div className="flex flex-col">
-          <button
-            type="button"
-            onClick={copy}
-            className="flex items-center gap-3 border-b border-zinc-800 py-3 text-left text-sm text-zinc-200 transition-all duration-200 ease-out hover:text-[#22d3ee]"
-          >
-            <Link2 size={18} /> Copy link
-          </button>
-          <button
-            type="button"
-            onClick={shareX}
-            className="flex items-center gap-3 border-b border-zinc-800 py-3 text-left text-sm text-zinc-200 transition-all duration-200 ease-out hover:text-[#22d3ee]"
-          >
-            <Send size={18} /> Share to X
-          </button>
-          <button
-            type="button"
-            onClick={shareWhatsApp}
-            className="flex items-center gap-3 border-b border-zinc-800 py-3 text-left text-sm text-zinc-200 transition-all duration-200 ease-out hover:text-[#22d3ee]"
-          >
-            <MessageCircle size={18} /> Share via WhatsApp
-          </button>
-          <button
-            type="button"
-            onClick={nativeShare}
-            className="flex items-center gap-3 py-3 text-left text-sm text-zinc-200 transition-all duration-200 ease-out hover:text-[#22d3ee]"
-          >
-            <Send size={18} /> More options
-          </button>
-        </div>
+    <BottomSheet open onClose={onClose} title="Share Reel">
+      <div className="flex flex-col px-4 pb-2 pt-3">
+        <button
+          type="button"
+          onClick={copy}
+          className="flex items-center gap-3 border-b border-zinc-800 py-3 text-left text-sm text-zinc-200 transition-all duration-200 ease-out hover:text-[#22d3ee]"
+        >
+          <Link2 size={18} /> Copy link
+        </button>
+        <button
+          type="button"
+          onClick={shareX}
+          className="flex items-center gap-3 border-b border-zinc-800 py-3 text-left text-sm text-zinc-200 transition-all duration-200 ease-out hover:text-[#22d3ee]"
+        >
+          <Send size={18} /> Share to X
+        </button>
+        <button
+          type="button"
+          onClick={shareWhatsApp}
+          className="flex items-center gap-3 border-b border-zinc-800 py-3 text-left text-sm text-zinc-200 transition-all duration-200 ease-out hover:text-[#22d3ee]"
+        >
+          <MessageCircle size={18} /> Share via WhatsApp
+        </button>
+        <button
+          type="button"
+          onClick={nativeShare}
+          className="flex items-center gap-3 py-3 text-left text-sm text-zinc-200 transition-all duration-200 ease-out hover:text-[#22d3ee]"
+        >
+          <Send size={18} /> More options
+        </button>
       </div>
-    </div>
+    </BottomSheet>
   );
 }
 
@@ -132,6 +111,7 @@ export function ReelActions({
   }, [reelId]);
 
   const onBoost = () => {
+    triggerHaptic();
     const next = !boosted;
     setBoosted(next);
     setCount((c) => c + (next ? 1 : -1));
@@ -148,6 +128,7 @@ export function ReelActions({
   };
 
   const onBookmark = () => {
+    triggerHaptic();
     const next = !bookmarked;
     setBookmarked(next);
     startTransition(async () => {
@@ -180,7 +161,10 @@ export function ReelActions({
 
         <button
           type="button"
-          onClick={() => setShareOpen(true)}
+          onClick={() => {
+            triggerHaptic();
+            setShareOpen(true);
+          }}
           aria-label="Share"
           className="flex flex-col items-center gap-1 text-white transition-all duration-200 ease-out hover:text-[#22d3ee]"
         >

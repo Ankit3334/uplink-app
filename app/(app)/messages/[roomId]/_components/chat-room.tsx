@@ -5,6 +5,8 @@ import { useFormStatus } from "react-dom";
 import { Loader2, Send } from "lucide-react";
 import { sendMessage, type SendMessageState } from "@/app/actions/messages";
 import { createClient } from "@/src/lib/supabase/client";
+import { triggerHaptic } from "@/src/lib/utils";
+import { useKeyboardInset } from "@/src/lib/use-keyboard-inset";
 
 type Message = {
   id: string;
@@ -32,6 +34,7 @@ function SendButton() {
   return (
     <button
       type="submit"
+      onClick={triggerHaptic}
       disabled={pending}
       className="flex h-10 w-10 items-center justify-center border border-zinc-700 bg-[#111111] text-[#22d3ee] transition-colors hover:border-[#22d3ee] hover:bg-[#161616] disabled:cursor-not-allowed disabled:opacity-60"
       aria-label="Send message"
@@ -55,6 +58,7 @@ export function ChatRoom({
   const formRef = useRef<HTMLFormElement | null>(null);
   const listRef = useRef<HTMLDivElement | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
+  const keyboardInset = useKeyboardInset();
 
   const sortedMessages = useMemo(
     () =>
@@ -98,14 +102,19 @@ export function ChatRoom({
   }, [state?.success]);
 
   useEffect(() => {
+    const list = listRef.current;
+    if (list) list.scrollTop = list.scrollHeight;
     bottomRef.current?.scrollIntoView({ block: "end" });
-  }, [sortedMessages.length]);
+  }, [sortedMessages.length, keyboardInset]);
 
   return (
     <div className="flex h-full flex-col">
       <div
         ref={listRef}
-        className="flex-1 overflow-y-auto px-3 pb-28 pt-3"
+        className="native-scroll flex-1 overflow-y-auto px-3 pt-3"
+        style={{
+          paddingBottom: `calc(7rem + env(safe-area-inset-bottom, 0px) + ${keyboardInset}px)`,
+        }}
       >
         {sortedMessages.length === 0 ? (
           <div className="border border-zinc-800 bg-[#111111] p-4 font-mono text-[10px] uppercase tracking-[0.12em] text-zinc-400">
@@ -153,7 +162,7 @@ export function ChatRoom({
         )}
       </div>
 
-      <div className="fixed inset-x-0 bottom-16 z-40 mx-auto w-full max-w-md px-4">
+      <div className="composer-bottom fixed inset-x-0 z-40 mx-auto w-full max-w-md px-4">
         <form
           ref={formRef}
           action={formAction}
@@ -165,6 +174,7 @@ export function ChatRoom({
               name="content"
               type="text"
               autoComplete="off"
+              enterKeyHint="send"
               placeholder="ENTER MESSAGE..."
               className="h-10 flex-1 border border-zinc-800 bg-[#111111] px-3 font-mono text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-[#22d3ee]"
             />

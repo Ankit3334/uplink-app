@@ -51,7 +51,7 @@ export default async function ReelsPage() {
   return (
     <section
       data-immersive
-      className="relative h-[calc(100dvh-4rem)] w-full overflow-y-scroll snap-y snap-mandatory bg-[#050505] animate-fade-in-up"
+      className="native-scroll relative h-[calc(100dvh-4rem)] w-full overflow-y-scroll snap-y snap-mandatory bg-[#050505] animate-fade-in-up"
     >
       {reels.length === 0 ? (
         <div className="flex h-[calc(100dvh-4rem)] snap-start snap-always items-center justify-center px-6">

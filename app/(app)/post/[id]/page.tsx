@@ -4,7 +4,7 @@ import { ArrowLeft, Terminal } from "lucide-react";
 import { deletePost } from "@/app/actions/posts";
 import { DeletePostButton } from "./_components/delete-post-button";
 import { PostActions } from "@/app/(app)/_components/post-actions";
-import { DoubleTapBoost } from "@/app/(app)/_components/double-tap-boost";
+import { PostImage } from "@/app/(app)/_components/post-image";
 import { FadeIn } from "@/src/components/fade-in";
 import { requireUser } from "@/src/lib/auth";
 import { createClient } from "@/src/lib/supabase/server";
@@ -94,7 +94,7 @@ export default async function PostDetailPage({
   const shareUrl = `/post/${post.id}`;
 
   return (
-    <section className="mx-auto flex min-h-[calc(100vh-6rem)] w-full max-w-md flex-col px-4 pt-6 pb-28 animate-fade-in-up">
+    <section className="mx-auto flex min-h-[calc(100dvh-6rem)] w-full max-w-md flex-col px-4 pt-6 pb-28 animate-fade-in-up">
       <div className="mb-3 flex items-center gap-3 border-b border-zinc-800 pb-3">
         <Link
           href="/"
@@ -142,14 +142,11 @@ export default async function PostDetailPage({
           </header>
 
           {post.image_url ? (
-            <DoubleTapBoost postId={post.id}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={post.image_url}
-                alt={post.caption ? post.caption : `Transmission by ${postUsername}`}
-                className="w-full object-cover"
-              />
-            </DoubleTapBoost>
+            <PostImage
+              postId={post.id}
+              src={post.image_url}
+              alt={post.caption ? post.caption : `Transmission by ${postUsername}`}
+            />
           ) : null}
 
           <PostActions

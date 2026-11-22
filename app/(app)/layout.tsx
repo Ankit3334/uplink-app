@@ -38,8 +38,10 @@ async function AppGate({
   }
 
   return (
-    <div className="min-h-full flex flex-col">
-      <main className="flex-1 pb-24 has-[data-immersive]:pb-0">{children}</main>
+    <div className="flex min-h-[100dvh] flex-col">
+      <main className="native-scroll flex-1 pb-24 has-[data-immersive]:pb-0">
+        {children}
+      </main>
       <BottomNav unreadCount={unreadCount} />
     </div>
   );
@@ -53,7 +55,7 @@ export default function AppLayout({
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-screen items-center justify-center px-4 animate-fade-in">
+        <div className="flex min-h-[100dvh] items-center justify-center px-4 animate-fade-in">
           <p className="border border-zinc-800 bg-[#0a0a0a] px-5 py-4 text-xs uppercase tracking-[0.2em] text-zinc-400 animate-pulse">
             Verifying Uplink Access...
           </p>

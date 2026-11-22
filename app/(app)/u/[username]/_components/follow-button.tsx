@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { toggleFollow } from "@/app/actions/social";
+import { triggerHaptic } from "@/src/lib/utils";
 
 export function FollowButton({
   followingId,
@@ -27,6 +28,7 @@ export function FollowButton({
       type="button"
       disabled={pending}
       onClick={() => {
+        triggerHaptic();
         startTransition(async () => {
           const result = await toggleFollow(followingId);
           if (!result.error) {

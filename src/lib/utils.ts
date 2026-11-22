@@ -7,6 +7,34 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+/**
+ * Fire a subtle haptic tick on supported devices.
+ *
+ * Android/Chrome expose the Vibration API (`navigator.vibrate`). iOS Safari
+ * does not, so we also check the WebKit-prefixed variant used by some hybrid
+ * shells and otherwise fail silently instead of throwing on primary taps.
+ */
+export function triggerHaptic(): void {
+  if (typeof navigator === "undefined") return;
+
+  const nav = navigator as Navigator & {
+    webkitVibrate?: (pattern: number | number[]) => boolean;
+  };
+
+  try {
+    if (typeof nav.vibrate === "function") {
+      nav.vibrate(10);
+      return;
+    }
+    if (typeof nav.webkitVibrate === "function") {
+      nav.webkitVibrate(10);
+    }
+    // Pure iOS Safari: no Vibration API available — no-op is the fallback.
+  } catch {
+    // Haptics are cosmetic; never let them break an interaction.
+  }
+}
+
 const TOKEN_REGEX = /(https?:\/\/[^\s<]+|@[a-zA-Z0-9_]+|#[a-zA-Z0-9_]+)/g;
 
 export function parseRichText(text: string): ReactNode[] {

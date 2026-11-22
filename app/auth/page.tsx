@@ -23,7 +23,7 @@ async function AuthGate() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4 py-12 animate-fade-in-up">
+    <div className="flex min-h-[100dvh] items-center justify-center px-4 py-12 animate-fade-in-up">
       <div className="w-full max-w-md">
         <div className="mb-5 text-center">
           <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-zinc-500">
@@ -40,7 +40,7 @@ export default function AuthPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-screen items-center justify-center px-4 animate-fade-in">
+        <div className="flex min-h-[100dvh] items-center justify-center px-4 animate-fade-in">
           <p className="border border-zinc-800 bg-[#0a0a0a] px-5 py-4 text-xs uppercase tracking-[0.2em] text-zinc-400 animate-pulse">
             Initializing Auth Terminal...
           </p>

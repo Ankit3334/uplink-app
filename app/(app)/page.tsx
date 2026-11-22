@@ -7,7 +7,7 @@ import {
   type StoryUserGroup,
 } from "./_components/stories-bar";
 import { PostActions } from "./_components/post-actions";
-import { DoubleTapBoost } from "./_components/double-tap-boost";
+import { PostImage } from "./_components/post-image";
 import { FadeIn } from "@/src/components/fade-in";
 import { parseRichText } from "@/src/lib/utils";
 import { requireUser } from "@/src/lib/auth";
@@ -263,15 +263,11 @@ async function FeedContent() {
                   </header>
 
                   {post.image_url ? (
-                    <DoubleTapBoost postId={post.id}>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={post.image_url}
-                        alt={post.caption ? post.caption : `Transmission by ${username}`}
-                        className="w-full object-cover"
-                        loading="lazy"
-                      />
-                    </DoubleTapBoost>
+                    <PostImage
+                      postId={post.id}
+                      src={post.image_url}
+                      alt={post.caption ? post.caption : `Transmission by ${username}`}
+                    />
                   ) : null}
 
                   <PostActions
@@ -328,7 +324,7 @@ async function FeedContent() {
 
 export default function FeedPage() {
   return (
-    <section className="mx-auto flex min-h-[calc(100vh-6rem)] w-full max-w-md flex-col px-4 pt-6 pb-24 animate-fade-in-up">
+    <section className="native-scroll mx-auto flex min-h-[calc(100dvh-6rem)] w-full max-w-md flex-col px-4 pt-6 pb-24 animate-fade-in-up">
       <header className="border-b border-zinc-800 pb-4">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">

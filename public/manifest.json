@@ -3,6 +3,7 @@
   "short_name": "UPLINK",
   "description": "Underground signal feed. Boost, thread, broadcast.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#050505",
   "theme_color": "#050505",

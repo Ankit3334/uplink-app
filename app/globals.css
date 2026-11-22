@@ -7,6 +7,37 @@
   --surface-raised: #111111;
   --border-subtle: #27272a;
   --accent: #22d3ee;
+  --keyboard-inset: 0px;
+}
+
+html {
+  background: #050505;
+  /* Locked, app-like scrolling instead of document rubber-banding. */
+  overscroll-behavior-y: contain;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Safe-area helpers. viewport-fit=cover is set in app/layout.tsx so these
+   evaluate to the real notch / home-indicator insets on iOS. */
+.safe-area-top {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.native-scroll {
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Fixed composers sit above the bottom nav, the home indicator and the
+   on-screen keyboard (--keyboard-inset is driven by visualViewport). */
+.composer-bottom {
+  bottom: calc(
+    4rem + env(safe-area-inset-bottom, 0px) + var(--keyboard-inset, 0px)
+  );
 }
 
 @keyframes fade-in-up {
@@ -74,4 +105,12 @@
 
 .animate-heart-pop {
   animation: heart-pop 1s ease-out forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-slide-up,
+  .animate-fade-in-up,
+  .animate-fade-in {
+    animation-duration: 0.01ms;
+  }
 }

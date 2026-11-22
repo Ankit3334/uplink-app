@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Film, Heart, LayoutGrid, Upload, User } from "lucide-react";
-import { cn } from "@/src/lib/utils";
+import { cn, triggerHaptic } from "@/src/lib/utils";
 
 const navItems = [
   { href: "/", label: "Feed", icon: LayoutGrid },
@@ -19,7 +19,7 @@ export function BottomNav({ unreadCount = 0 }: { unreadCount?: number }) {
   return (
     <nav
       aria-label="Primary"
-      className="fixed inset-x-0 bottom-0 z-50 border-t border-zinc-800 bg-[#0a0a0a]"
+      className="safe-area-bottom fixed inset-x-0 bottom-0 z-50 border-t border-zinc-800 bg-[#0a0a0a]"
     >
       <ul className="mx-auto grid h-16 max-w-md grid-cols-5 items-stretch px-1">
         {navItems.map((item) => {
@@ -35,6 +35,7 @@ export function BottomNav({ unreadCount = 0 }: { unreadCount?: number }) {
             <li key={item.href} className="h-full">
               <Link
                 href={item.href}
+                onClick={triggerHaptic}
                 className={cn(
                   "flex h-full flex-col items-center justify-center gap-1 border border-transparent px-1 text-[9px] uppercase tracking-[0.14em] transition-all duration-200 ease-out sm:text-[10px] sm:tracking-[0.18em]",
                   isActive
