@@ -78,11 +78,13 @@ export function ProjectSection({
 }) {
   const [open, setOpen] = useState(false);
   const [state, formAction, pending] = useActionState(createProject, {});
-  const [ackSuccess, setAckSuccess] = useState(false);
+  const [ackSuccess, setAckSuccess] = useState<number | null>(null);
 
-  const succeeded = Boolean(state.success) && !ackSuccess;
-  if (succeeded) {
-    setAckSuccess(true);
+  // Each successful save returns a fresh token, so every save closes the
+  // sheet – including when adding several projects in one session.
+  const successToken = typeof state.success === "number" ? state.success : null;
+  if (successToken !== null && successToken !== ackSuccess) {
+    setAckSuccess(successToken);
     setOpen(false);
   }
 

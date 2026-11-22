@@ -6,7 +6,7 @@ import { createClient } from "@/src/lib/supabase/server";
 
 export type CreateProjectState = {
   error?: string;
-  success?: boolean;
+  success?: number;
 };
 
 export async function createProject(
@@ -73,5 +73,6 @@ export async function createProject(
     revalidatePath(`/u/${profile.username}`);
   }
 
-  return { success: true };
+  // Unique token so repeated saves each close the sheet independently.
+  return { success: Date.now() };
 }
