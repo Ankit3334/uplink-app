@@ -123,30 +123,28 @@ export default async function MessagesPage() {
 
   return (
     <section className="mx-auto flex min-h-[calc(100dvh-6rem)] w-full max-w-md flex-col gap-4 px-4 pt-6 pb-24 animate-fade-in-up">
-      <header className="border border-zinc-800 bg-[#0a0a0a] p-4">
-        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
+      <header className="border border-zinc-800 bg-zinc-950 p-4">
+        <p className="eyebrow">
           Channel // Direct
         </p>
-        <h1 className="mt-2 text-xl font-bold uppercase tracking-wider text-zinc-100">
+        <h1 className="page-title">
           Messages
         </h1>
-        <p className="mt-2 text-xs leading-relaxed text-zinc-400">
+        <p className="page-subtitle">
           Private encrypted channel index. Select a node to open transmission.
         </p>
       </header>
 
       <div className="border-t border-zinc-800 pt-4">
         {items.length === 0 ? (
-          <div className="border border-zinc-800 bg-[#0a0a0a] p-8 text-center">
-            <p className="font-mono text-xs uppercase tracking-[0.15em] text-zinc-400">
-              {"// NO CONNECTIONS FOUND"}
-            </p>
-            <p className="mt-2 text-xs leading-relaxed text-zinc-500">
+          <div className="u-panel u-empty">
+            <p className="u-label">{"// NO CONNECTIONS FOUND"}</p>
+            <p className="u-empty-copy">
               Connect with builders to open a direct channel.
             </p>
           </div>
         ) : (
-          <div className="flex flex-col border border-zinc-800 bg-[#0a0a0a]">
+          <div className="flex flex-col border border-zinc-800 bg-zinc-950">
             {items.map(({ otherId, profile, room }, idx) => {
               const username = profile?.username ?? "unknown_node";
               const displayName = profile?.display_name ?? username;
@@ -160,7 +158,7 @@ export default async function MessagesPage() {
               const rowClass = `flex items-center gap-3 p-4 transition-colors ${idx > 0 ? "border-t border-zinc-800" : ""}`;
 
               const avatar = (
-                <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center border border-zinc-800 bg-[#111111] text-zinc-400">
+                <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center border border-zinc-800 bg-zinc-900 text-zinc-400">
                   {avatarUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
@@ -195,11 +193,11 @@ export default async function MessagesPage() {
                 <Link
                   key={otherId}
                   href={`/messages/${room.id}`}
-                  className={`${rowClass} hover:bg-[#111111]`}
+                  className={`${rowClass} hover:bg-zinc-900`}
                 >
                   {avatar}
                   {info}
-                  <MessageSquare size={16} className="flex-shrink-0 text-zinc-600" />
+                  <MessageSquare size={16} className="flex-shrink-0 text-zinc-500" />
                 </Link>
               ) : (
                 <div key={otherId} className={rowClass}>

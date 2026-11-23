@@ -28,7 +28,7 @@ export function FeedTabs({ active }: { active: FeedTabValue }) {
   return (
     <div
       aria-busy={pending}
-      className="flex gap-2 overflow-x-auto border-b border-zinc-800 px-4 py-3"
+      className="flex gap-2 overflow-x-auto border-b border-zinc-800 py-2.5"
     >
       {FEED_TABS.map((tab) => {
         const isActive = selected === tab.value;
@@ -38,7 +38,7 @@ export function FeedTabs({ active }: { active: FeedTabValue }) {
             type="button"
             onClick={() => select(tab.value)}
             aria-pressed={isActive}
-            className={`flex-shrink-0 rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-cyan-400/40 ${
+            className={`flex-shrink-0 rounded-lg border px-3.5 py-2 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-cyan-400/40 ${
               isActive
                 ? "border-zinc-800 bg-zinc-900 text-white"
                 : "border-transparent text-zinc-500 hover:bg-zinc-900 hover:text-zinc-200"

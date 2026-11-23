@@ -27,8 +27,8 @@ import { ConnectButton } from "./_components/connect-button";
 function ProfileContentSkeleton() {
   return (
     <>
-      <div className="overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-950 p-6">
-        <div className="h-24 animate-pulse rounded-2xl bg-zinc-900" />
+      <div className="overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950 p-6">
+        <div className="h-24 animate-pulse rounded-xl bg-zinc-900" />
         <div className="-mt-10 h-24 w-24 animate-pulse rounded-full bg-zinc-900" />
         <div className="mt-4 space-y-3">
           <div className="h-5 w-40 animate-pulse rounded-md bg-zinc-900" />
@@ -39,7 +39,7 @@ function ProfileContentSkeleton() {
       {[0, 1, 2].map((item) => (
         <div
           key={item}
-          className="h-36 animate-pulse rounded-3xl border border-zinc-800 bg-zinc-950"
+          className="h-36 animate-pulse rounded-xl border border-zinc-800 bg-zinc-950"
         />
       ))}
       <div className="grid grid-cols-3 gap-2">
@@ -150,7 +150,7 @@ async function ProfileContent({ username }: { username: string }) {
             {techStack.map((tech) => (
               <span
                 key={tech}
-                className="rounded-full bg-zinc-800 px-4 py-1.5 text-sm text-zinc-200"
+                className="rounded-lg bg-zinc-800 px-4 py-1.5 text-sm text-zinc-200"
               >
                 {tech}
               </span>
@@ -191,10 +191,8 @@ export default async function PublicProfilePage({
   return (
     <section className="native-scroll mx-auto flex min-h-[calc(100dvh-6rem)] w-full max-w-2xl flex-col gap-5 px-4 pb-28 pt-6 animate-fade-in-up">
       <header>
-        <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-zinc-500">
-          Professional Profile
-        </p>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-zinc-50">
+        <p className="eyebrow">Uplink // Node</p>
+        <h1 className="page-title">
           Member profile
         </h1>
       </header>

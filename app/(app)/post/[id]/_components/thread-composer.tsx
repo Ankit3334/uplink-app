@@ -17,7 +17,7 @@ function PostButton() {
       type="submit"
       onClick={triggerHaptic}
       disabled={pending}
-      className="px-2 py-1 text-sm font-semibold text-cyan-400 transition-all duration-200 ease-out hover:text-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
+      className="inline-flex h-10 flex-shrink-0 items-center justify-center rounded-lg border border-cyan-400/30 bg-cyan-400/10 px-4 text-sm font-semibold text-cyan-400 transition-colors hover:border-cyan-400/50 hover:bg-cyan-400/15 hover:text-cyan-300 disabled:cursor-not-allowed disabled:opacity-50"
     >
       {pending ? "Posting" : "Post"}
     </button>
@@ -58,7 +58,7 @@ export function ThreadComposer({ postId }: { postId: string }) {
   };
 
   return (
-    <div className="composer-bottom fixed inset-x-0 z-40 border-t border-zinc-800 bg-[#050505]/95 backdrop-blur-sm">
+    <div className="composer-bottom fixed inset-x-0 z-40 border-t border-zinc-800 bg-zinc-950">
       <div className="mx-auto w-full max-w-md px-4 py-2">
         {replyTarget ? (
           <div className="mb-1.5 flex items-center gap-2 border-l-2 border-cyan-400 pl-2 text-[11px] text-zinc-400">
@@ -73,7 +73,7 @@ export function ThreadComposer({ postId }: { postId: string }) {
               type="button"
               onClick={cancelReply}
               aria-label="Cancel reply"
-              className="ml-auto flex-shrink-0 text-zinc-600 transition-colors hover:text-zinc-200 focus-visible:text-zinc-200 focus-visible:outline-none"
+              className="ml-auto inline-flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md text-zinc-500 transition-colors hover:bg-zinc-900 hover:text-zinc-100"
             >
               <X size={12} />
             </button>
@@ -102,7 +102,9 @@ export function ThreadComposer({ postId }: { postId: string }) {
           <PostButton />
         </form>
         {state?.error ? (
-          <p className="pb-1 font-mono text-[11px] text-red-400">{state.error}</p>
+          <p role="alert" className="pb-1 font-mono text-[11px] text-red-300">
+            {state.error}
+          </p>
         ) : null}
       </div>
     </div>

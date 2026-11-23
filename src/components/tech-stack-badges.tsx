@@ -22,7 +22,7 @@ export function TechStackBadges({
         <span
           key={`${tech}-${index}`}
           className={cn(
-            "rounded-full border border-zinc-700/60 bg-zinc-800 text-zinc-300",
+            "rounded-md border border-zinc-700/60 bg-zinc-800 text-zinc-300",
             compact ? "px-2 py-0.5 text-[10px]" : "px-3 py-1 text-xs",
           )}
         >
@@ -30,7 +30,7 @@ export function TechStackBadges({
         </span>
       ))}
       {overflow > 0 ? (
-        <span className="rounded-full border border-zinc-700/60 bg-zinc-900 px-2 py-0.5 font-mono text-[10px] text-zinc-400">
+        <span className="rounded-md border border-zinc-700/60 bg-zinc-900 px-2 py-0.5 font-mono text-[10px] text-zinc-400">
           +{overflow}
         </span>
       ) : null}

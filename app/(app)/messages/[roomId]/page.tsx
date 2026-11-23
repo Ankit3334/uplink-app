@@ -63,16 +63,16 @@ export default async function MessageRoomPage({
 
   return (
     <section className="mx-auto flex h-[calc(100dvh-4rem)] w-full max-w-md flex-col px-4 pt-4 animate-fade-in-up">
-      <header className="mb-3 border border-zinc-800 bg-[#0a0a0a] p-3">
+      <header className="mb-3 border border-zinc-800 bg-zinc-950 p-3">
         <div className="flex items-center gap-3">
           <Link
             href="/messages"
-            className="inline-flex items-center gap-2 border border-zinc-800 bg-[#111111] px-2.5 py-2 font-mono text-[10px] uppercase tracking-[0.15em] text-zinc-300 transition-colors hover:border-zinc-700 hover:text-zinc-100"
+            className="inline-flex items-center gap-2 border border-zinc-800 bg-zinc-900 px-2.5 py-2 font-mono text-[10px] uppercase tracking-[0.15em] text-zinc-300 transition-colors hover:border-zinc-700 hover:text-zinc-100"
           >
             <ArrowLeft size={14} />
             Back
           </Link>
-          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center border border-zinc-800 bg-[#111111] text-zinc-400">
+          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center border border-zinc-800 bg-zinc-900 text-zinc-400">
             {avatarUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -92,13 +92,13 @@ export default async function MessageRoomPage({
               {displayName}
             </p>
           </div>
-          <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-zinc-600">
+          <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-zinc-500">
             DM
           </span>
         </div>
       </header>
 
-      <div className="relative min-h-0 flex-1 border border-zinc-800 bg-[#0a0a0a]">
+      <div className="relative min-h-0 flex-1 border border-zinc-800 bg-zinc-950">
         <ChatRoom
           roomId={roomId}
           currentUserId={user.id}

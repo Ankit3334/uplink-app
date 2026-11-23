@@ -269,14 +269,12 @@ async function FeedContent({ activeTab }: { activeTab: FeedTabValue }) {
       ) : null}
 
       {posts.length === 0 ? (
-        <div className="flex flex-col items-center px-6 py-16 text-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full border border-zinc-800 bg-zinc-900/60 text-zinc-400">
+        <div className="u-empty">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full border border-zinc-800 bg-zinc-900 text-zinc-400">
             <Search size={20} strokeWidth={1.8} />
           </div>
-          <p className="mt-4 text-base font-semibold text-zinc-100">
-            Your feed is quiet
-          </p>
-          <p className="mt-2 max-w-xs text-[15px] leading-relaxed text-zinc-400">
+          <p className="u-empty-title mt-4">Your feed is quiet</p>
+          <p className="u-empty-copy">
             {activeTab === "all"
               ? "No transmissions yet. Follow tech builders to see their updates."
               : `No ${categoryLabel(activeTab) ?? activeTab} posts in your network yet.`}
@@ -300,7 +298,7 @@ async function FeedContent({ activeTab }: { activeTab: FeedTabValue }) {
 
             return (
               <FadeIn key={post.id} delay={index * 0.03}>
-                <article className="flex flex-col gap-4 border-b border-zinc-800 bg-[#050505] py-4">
+                <article className="flex flex-col gap-4 border-b border-zinc-800 bg-zinc-950 py-4">
                   <header className="flex items-center gap-3 px-4">
                     <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden rounded-full border border-zinc-800 bg-zinc-900 text-zinc-400">
                       {avatarUrl ? (
@@ -326,22 +324,22 @@ async function FeedContent({ activeTab }: { activeTab: FeedTabValue }) {
                         <p className="truncate text-[15px] font-semibold text-zinc-100">{username}</p>
                       )}
                       {openToWork ? (
-                        <span className="inline-flex flex-shrink-0 items-center rounded-full border border-cyan-400/20 bg-cyan-400/10 px-2 py-0.5 text-[10px] font-medium text-cyan-400">
+                        <span className="inline-flex flex-shrink-0 items-center rounded-lg border border-cyan-400/20 bg-cyan-400/10 px-2 py-0.5 text-[10px] font-medium text-cyan-400">
                           Open to Work
                         </span>
                       ) : null}
                     </div>
                     <p className="text-xs text-zinc-500">
                       {formatTimestamp(post.created_at)}
-                      {post.is_edited ? <span className="ml-1 text-zinc-600">(edited)</span> : null}
+                      {post.is_edited ? <span className="ml-1 text-zinc-500">(edited)</span> : null}
                     </p>
                   </header>
 
                   {building || techStack.length > 0 ? (
                     <div className="flex flex-wrap items-center gap-2 px-4">
                       {building ? (
-                        <span className="inline-flex max-w-full items-center gap-1.5 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] text-emerald-300">
-                          <span className="h-1.5 w-1.5 flex-shrink-0 animate-pulse rounded-full bg-emerald-400" />
+                        <span className="inline-flex max-w-full items-center gap-1.5 rounded-lg bg-cyan-400/10 px-2 py-0.5 text-[10px] text-cyan-300">
+                          <span className="h-1.5 w-1.5 flex-shrink-0 animate-pulse rounded-full bg-cyan-400" />
                           <span className="truncate">Building · {building}</span>
                         </span>
                       ) : null}
@@ -459,17 +457,13 @@ export default async function FeedPage({
             </p>
           </div>
           <div className="flex flex-shrink-0 items-center gap-2">
-            <Link
-              href="/messages"
-              aria-label="Messages"
-              className="p-2 rounded-lg text-zinc-400 hover:bg-zinc-900 hover:text-white transition-colors"
-            >
+            <Link href="/messages" aria-label="Messages" className="u-icon-btn">
               <MessageSquare size={18} strokeWidth={1.8} />
             </Link>
             <Link
               href="/explore"
               aria-label="Explore and search nodes"
-              className="inline-flex h-9 w-9 flex-shrink-0 items-center justify-center border border-zinc-800 bg-[#0a0a0a] text-zinc-400 transition-colors hover:border-zinc-700 hover:text-cyan-400 focus-visible:border-cyan-400 focus-visible:text-cyan-400 focus-visible:outline-none"
+              className="u-icon-btn"
             >
               <Search size={16} strokeWidth={1.8} />
             </Link>

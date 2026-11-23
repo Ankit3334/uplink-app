@@ -16,6 +16,17 @@
   --border-subtle: #27272a;
   --accent: #22d3ee;
   --keyboard-inset: 0px;
+  color-scheme: dark;
+}
+
+/* One consistent, subtle focus language across every interactive surface. */
+:where(a, button, input, textarea, select, [role="button"]):focus-visible {
+  outline: 1px solid rgb(34 211 238 / 0.65);
+  outline-offset: 2px;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* Comfortable reading size for every unstyled paragraph; explicit component
@@ -31,6 +42,12 @@ body {
 ::selection {
   background-color: rgb(34 211 238 / 0.2);
   color: #22d3ee;
+}
+
+/* Small metadata must stay legible on near-black surfaces. */
+::placeholder {
+  color: #71717a !important;
+  opacity: 1;
 }
 
 html {
@@ -53,6 +70,89 @@ html {
 .native-scroll {
   overscroll-behavior-y: contain;
   -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: #27272a transparent;
+}
+
+.native-scroll::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.native-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.native-scroll::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: #27272a;
+}
+
+.native-scroll::-webkit-scrollbar-thumb:hover {
+  background: #3f3f46;
+}
+
+@layer components {
+  /* Shared premium surfaces. Boxy by default; cyan only for intent. */
+  .u-panel {
+    @apply rounded-xl border border-zinc-800 bg-zinc-950/60 shadow-lg shadow-black/20;
+  }
+
+  .u-card {
+    @apply rounded-xl border border-zinc-800 bg-zinc-900/50 transition-colors;
+  }
+
+  .u-input {
+    @apply w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2.5 text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-500 focus:border-cyan-400;
+  }
+
+  .u-input-sm {
+    @apply h-9 px-3 py-0;
+  }
+
+  .u-btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm font-medium text-zinc-200 transition-colors hover:border-zinc-700 hover:bg-zinc-800 hover:text-white;
+  }
+
+  .u-btn-accent {
+    @apply border-cyan-400/30 bg-cyan-400/10 text-cyan-400 hover:border-cyan-400/50 hover:bg-cyan-400/15 hover:text-cyan-300;
+  }
+
+  .u-icon-btn {
+    @apply inline-flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-950 text-zinc-400 transition-colors hover:border-zinc-700 hover:text-cyan-400;
+  }
+
+  .u-label {
+    @apply font-mono text-[10px] font-medium uppercase tracking-[0.2em] text-zinc-500;
+  }
+
+  .u-divider {
+    @apply border-zinc-800;
+  }
+
+  .u-empty {
+    @apply flex flex-col items-center px-6 py-14 text-center;
+  }
+
+  .eyebrow {
+    @apply font-mono text-[10px] font-medium uppercase tracking-[0.2em] text-zinc-500;
+  }
+
+  .page-title {
+    @apply mt-1 text-2xl font-semibold tracking-tight text-zinc-50;
+  }
+
+  .page-subtitle {
+    @apply mt-1 text-sm leading-relaxed text-zinc-400;
+  }
+
+  .u-empty-title {
+    @apply text-base font-semibold text-zinc-100;
+  }
+
+  .u-empty-copy {
+    @apply mt-2 max-w-xs text-sm leading-relaxed text-zinc-400;
+  }
 }
 
 /* Fixed composers sit above the bottom nav, the home indicator and the
@@ -149,7 +249,10 @@ html {
   .animate-slide-up,
   .animate-sheet-in,
   .animate-fade-in-up,
-  .animate-fade-in {
+  .animate-fade-in,
+  .animate-heart-pop,
+  .animate-pulse {
     animation-duration: 0.01ms;
+    animation-delay: 0ms !important;
   }
 }

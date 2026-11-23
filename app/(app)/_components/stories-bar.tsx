@@ -1,8 +1,8 @@
-﻿"use client";
+"use client";
 
 import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
-import { Plus, Terminal, X, Loader2 } from "lucide-react";
+import { Pause, Play, Plus, Terminal, X, Loader2 } from "lucide-react";
 import { uploadStory, type UploadStoryState } from "@/app/actions/stories";
 import { BottomSheet } from "@/src/components/bottom-sheet";
 import { triggerHaptic } from "@/src/lib/utils";
@@ -32,7 +32,7 @@ function UploadButton() {
       type="submit"
       onClick={triggerHaptic}
       disabled={pending}
-      className="flex w-full items-center justify-center gap-2 border border-zinc-700 bg-[#161616] px-4 py-3 text-xs font-bold uppercase tracking-[0.2em] text-cyan-400 transition-colors hover:border-zinc-600 hover:bg-[#1b1b1b] focus-visible:border-cyan-400 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+      className="flex w-full items-center justify-center gap-2 border border-zinc-700 bg-zinc-900 px-4 py-3 text-xs font-bold uppercase tracking-[0.2em] text-cyan-400 transition-colors hover:border-zinc-600 hover:bg-zinc-900 focus-visible:border-cyan-400 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60"
     >
       {pending ? (
         <>
@@ -98,7 +98,7 @@ function StoryUploadFormInner({
     <form action={formAction} className="space-y-4 p-4">
       <label
         htmlFor="story-media"
-        className="flex min-h-52 w-full cursor-pointer flex-col items-center justify-center border border-dashed border-zinc-700 bg-[#111111] p-4 text-center transition-colors hover:border-zinc-600 hover:bg-[#151515]"
+        className="flex min-h-52 w-full cursor-pointer flex-col items-center justify-center border border-dashed border-zinc-700 bg-zinc-900 p-4 text-center transition-colors hover:border-zinc-600 hover:bg-zinc-900"
       >
         {previewUrl ? (
           <>
@@ -158,7 +158,7 @@ function StoryUploadFormInner({
       {state?.error ? (
         <div
           role="alert"
-          className="border border-zinc-700 bg-[#111111] px-3 py-2 font-mono text-[10px] uppercase tracking-[0.08em] text-zinc-300"
+          className="border border-zinc-700 bg-zinc-900 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.08em] text-zinc-300"
         >
           {state.error}
         </div>
@@ -184,8 +184,10 @@ function StorySlide({
 }) {
   const story = group.stories[storyIndex];
   const [progress, setProgress] = useState(0);
+  const [paused, setPaused] = useState(false);
 
   useEffect(() => {
+    if (paused) return;
     const start = Date.now();
     const duration = 5000;
     const id = window.setInterval(() => {
@@ -203,12 +205,12 @@ function StorySlide({
       window.clearInterval(id);
       window.clearTimeout(timeout);
     };
-  }, [onNext, story.id]);
+  }, [onNext, paused, story.id]);
 
   if (!story) return null;
 
   return (
-    <div className="safe-area-top fixed inset-0 z-[80] bg-[#050505]">
+    <div className="safe-area-top fixed inset-0 z-[80] bg-zinc-950">
       <div className="mx-auto flex h-full w-full max-w-md flex-col">
         <div className="flex gap-1 px-3 pt-3">
           {group.stories.map((s, i) => (
@@ -230,7 +232,7 @@ function StorySlide({
 
         <div className="flex items-center justify-between px-3 py-3">
           <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center overflow-hidden border border-zinc-800 bg-[#111111] text-zinc-400">
+            <div className="flex h-8 w-8 items-center justify-center overflow-hidden border border-zinc-800 bg-zinc-900 text-zinc-400">
               {group.avatarUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -246,14 +248,24 @@ function StorySlide({
               @{group.username}
             </p>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="border border-zinc-800 bg-[#111111] p-2 text-zinc-300 transition-colors hover:border-zinc-700 hover:text-zinc-100"
-            aria-label="Close story"
-          >
-            <X size={16} />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setPaused((value) => !value)}
+              className="border border-zinc-800 bg-zinc-900 p-2 text-zinc-400 transition-colors hover:border-zinc-700 hover:text-cyan-400"
+              aria-label={paused ? "Play story" : "Pause story"}
+            >
+              {paused ? <Play size={16} /> : <Pause size={16} />}
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="border border-zinc-800 bg-zinc-900 p-2 text-zinc-300 transition-colors hover:border-zinc-700 hover:text-zinc-100"
+              aria-label="Close story"
+            >
+              <X size={16} />
+            </button>
+          </div>
         </div>
 
         <div className="relative flex-1">
@@ -278,14 +290,14 @@ function StorySlide({
 
           <button
             type="button"
-            aria-label="Previous"
-            className="absolute inset-y-0 left-0 w-1/3"
+            aria-label={`Previous story, ${storyIndex + 1} of ${group.stories.length}`}
+            className="absolute inset-y-0 left-0 w-1/3 focus-visible:bg-cyan-400/5"
             onClick={onPrev}
           />
           <button
             type="button"
-            aria-label="Next"
-            className="absolute inset-y-0 right-0 w-1/3"
+            aria-label={`Next story, ${storyIndex + 1} of ${group.stories.length}`}
+            className="absolute inset-y-0 right-0 w-1/3 focus-visible:bg-cyan-400/5"
             onClick={onNext}
           />
         </div>
@@ -363,12 +375,12 @@ export function StoriesBar({
 
   return (
     <>
-      <div className="border border-zinc-800 bg-[#0a0a0a] p-3">
+      <div className="border border-zinc-800 bg-zinc-950 p-3">
         <div className="mb-2 flex items-center justify-between">
           <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
             Broadcasts // Stories
           </p>
-          <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-zinc-600">
+          <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-zinc-500">
             24h Signal
           </p>
         </div>
@@ -382,7 +394,7 @@ export function StoriesBar({
             }}
             className="flex w-[72px] flex-shrink-0 flex-col items-center gap-2 text-left"
           >
-            <div className="relative flex h-14 w-14 items-center justify-center border border-zinc-700 bg-[#111111] text-zinc-300">
+            <div className="relative flex h-14 w-14 items-center justify-center border border-zinc-700 bg-zinc-900 text-zinc-300">
               {currentUser.avatarUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -393,7 +405,7 @@ export function StoriesBar({
               ) : (
                 <Terminal size={20} strokeWidth={1.6} />
               )}
-              <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center border border-[#050505] bg-cyan-400 text-[#050505]">
+              <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center border border-zinc-950 bg-cyan-400 text-zinc-950">
                 <Plus size={12} strokeWidth={2.4} />
               </span>
             </div>
@@ -413,7 +425,7 @@ export function StoriesBar({
               className="flex w-[72px] flex-shrink-0 flex-col items-center gap-2"
             >
               <div className="border-2 border-cyan-400 p-[2px]">
-                <div className="flex h-12 w-12 items-center justify-center border border-zinc-800 bg-[#111111] text-zinc-300">
+                <div className="flex h-12 w-12 items-center justify-center border border-zinc-800 bg-zinc-900 text-zinc-300">
                   {group.avatarUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img

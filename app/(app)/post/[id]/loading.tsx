@@ -1,6 +1,7 @@
 export default function Loading() {
   return (
-    <section className="mx-auto flex min-h-[calc(100dvh-6rem)] w-full max-w-md flex-col gap-6 px-4 pb-48 pt-6 animate-fade-in">
+    <section aria-busy="true" role="status" className="mx-auto flex min-h-[calc(100dvh-6rem)] w-full max-w-md flex-col gap-6 px-4 pb-48 pt-6 animate-fade-in">
+      <span className="sr-only">Loading…</span>
       <div className="flex items-center gap-3 border-b border-zinc-800 pb-3">
         <div className="h-9 w-20 animate-pulse rounded-lg bg-zinc-900" />
         <div className="ml-auto h-3 w-28 animate-pulse rounded-md bg-zinc-900" />

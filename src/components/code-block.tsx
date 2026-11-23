@@ -1,9 +1,6 @@
 import { cn, stripCodeFences } from "@/src/lib/utils";
 
-/**
- * Lightweight code snippet renderer. The label floats over the surface so the
- * code itself keeps a clean, uninterrupted monospace column.
- */
+/** Lightweight code snippet renderer with a compact, static header. */
 export function CodeBlock({
   code,
   language,
@@ -18,17 +15,15 @@ export function CodeBlock({
   return (
     <div
       className={cn(
-        "relative my-4 overflow-x-auto rounded-xl border border-zinc-800 bg-zinc-950 p-4",
+        "my-4 overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950",
         className,
       )}
     >
-      <div className="pointer-events-none absolute top-2 right-2 flex items-center gap-2 text-[10px] text-zinc-600 uppercase">
+      <div className="flex items-center justify-between border-b border-zinc-800 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.16em] text-zinc-500">
         <span>Code</span>
-        {language ? (
-          <span className="font-mono normal-case text-zinc-700">{language}</span>
-        ) : null}
+        {language ? <span className="normal-case">{language}</span> : null}
       </div>
-      <pre className="overflow-x-auto pt-5 font-mono text-sm leading-relaxed text-zinc-300">
+      <pre className="overflow-x-auto p-4 font-mono text-sm leading-relaxed text-zinc-300">
         <code>{source}</code>
       </pre>
     </div>

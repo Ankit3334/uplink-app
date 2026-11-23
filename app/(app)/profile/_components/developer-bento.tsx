@@ -18,7 +18,7 @@ function EditButton({ onClick }: { onClick: () => void }) {
     <button
       type="button"
       onClick={onClick}
-      className="inline-flex items-center gap-1 rounded-full border border-zinc-700 bg-zinc-800 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.12em] text-zinc-300 transition-colors hover:text-zinc-50"
+      className="inline-flex items-center gap-1 rounded-lg border border-zinc-700 bg-zinc-800 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.12em] text-zinc-300 transition-colors hover:text-zinc-50"
     >
       <Pencil size={11} strokeWidth={2} />
       Edit
@@ -75,7 +75,7 @@ export function DeveloperBento({
 
   return (
     <>
-      <div className="col-span-2 rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6">
+      <div className="col-span-2 rounded-xl border border-zinc-800 bg-zinc-950 p-6">
         <div className="flex items-center justify-between gap-3">
           <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-zinc-500">
             Currently building
@@ -85,8 +85,8 @@ export function DeveloperBento({
         {currentlyBuilding ? (
           <p className="mt-3 flex items-start gap-2 text-[15px] leading-relaxed text-zinc-100">
             <span className="relative mt-1.5 flex h-2 w-2 flex-shrink-0">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-cyan-400" />
             </span>
             <span>{currentlyBuilding}</span>
           </p>
@@ -97,7 +97,7 @@ export function DeveloperBento({
         )}
       </div>
 
-      <div className="col-span-2 rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6">
+      <div className="col-span-2 rounded-xl border border-zinc-800 bg-zinc-950 p-6">
         <div className="flex items-center justify-between gap-3">
           <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-zinc-500">
             Tech stack
@@ -129,7 +129,7 @@ export function DeveloperBento({
               defaultValue={currentlyBuilding ?? ""}
               maxLength={160}
               placeholder="Real-time collaboration engine in Rust"
-              className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-3 text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-cyan-400"
+              className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-3 text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-500 focus:border-cyan-400"
             />
           </label>
 
@@ -142,7 +142,7 @@ export function DeveloperBento({
               rows={3}
               defaultValue={stack.join(", ")}
               placeholder="Next.js, Rust, AI, PostgreSQL"
-              className="w-full resize-y rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-3 text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-cyan-400"
+              className="w-full resize-y rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-3 text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-500 focus:border-cyan-400"
             />
             <span className="mt-2 block font-mono text-[10px] text-zinc-500">
               Comma separated. Up to 12 technologies.

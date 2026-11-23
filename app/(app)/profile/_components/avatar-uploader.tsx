@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
@@ -15,7 +15,7 @@ function UploadButton() {
       type="submit"
       onClick={triggerHaptic}
       disabled={pending}
-      className="flex w-full items-center justify-center gap-2 border border-zinc-700 bg-[#161616] px-4 py-3 text-xs font-bold uppercase tracking-[0.2em] text-cyan-400 transition-colors hover:border-zinc-600 hover:bg-[#1b1b1b] focus-visible:border-cyan-400 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+      className="flex w-full items-center justify-center gap-2 border border-zinc-700 bg-zinc-900 px-4 py-3 text-xs font-bold uppercase tracking-[0.2em] text-cyan-400 transition-colors hover:border-zinc-600 hover:bg-zinc-900 focus-visible:border-cyan-400 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60"
     >
       {pending ? (
         <>
@@ -63,7 +63,7 @@ function AvatarForm({
       <div className="flex flex-wrap gap-2">
         <label
           htmlFor="avatar"
-          className="inline-flex cursor-pointer items-center justify-center border border-zinc-700 bg-[#111111] px-3 py-2 font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-300 transition-colors hover:border-zinc-600 hover:text-zinc-100"
+          className="inline-flex cursor-pointer items-center justify-center border border-zinc-700 bg-zinc-900 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-300 transition-colors hover:border-zinc-600 hover:text-zinc-100"
         >
           {shown ? "CHANGE NODE ICON" : "UPLOAD AVATAR"}
         </label>
@@ -74,14 +74,14 @@ function AvatarForm({
       {state?.error ? (
         <div
           role="alert"
-          className="border border-zinc-700 bg-[#111111] px-3 py-2 font-mono text-[10px] uppercase tracking-[0.08em] text-zinc-300"
+          className="border border-zinc-700 bg-zinc-900 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.08em] text-zinc-300"
         >
           {state.error}
         </div>
       ) : null}
 
       {state?.success ? (
-        <div className="border border-zinc-700 bg-[#111111] px-3 py-2 font-mono text-[10px] uppercase tracking-[0.08em] text-zinc-300">
+        <div role="status" className="border border-zinc-700 bg-zinc-900 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.08em] text-zinc-300">
           Avatar updated.
         </div>
       ) : null}
@@ -98,12 +98,12 @@ export function AvatarUploader({
   const currentAvatarUrl = state?.avatarUrl ?? initialAvatarUrl;
 
   return (
-    <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-5">
+    <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-5">
       <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
         Node Icon
       </p>
       <div className="mt-4 flex items-start gap-4">
-        <div className="flex h-20 w-20 flex-shrink-0 items-center justify-center overflow-hidden border border-zinc-800 bg-[#111111] text-zinc-500">
+        <div className="flex h-20 w-20 flex-shrink-0 items-center justify-center overflow-hidden border border-zinc-800 bg-zinc-900 text-zinc-500">
           {currentAvatarUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img

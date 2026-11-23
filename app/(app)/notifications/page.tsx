@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Check, Heart, MessageSquare, UserPlus } from "lucide-react";
+import { Check, Heart, MessageSquare, Terminal, UserPlus } from "lucide-react";
 import { requireUser } from "@/src/lib/auth";
 import { createClient } from "@/src/lib/supabase/server";
 import { ConnectionRequestActions } from "./_components/connection-request-actions";
@@ -125,30 +125,22 @@ export default async function NotificationsPage() {
 
   return (
     <section className="mx-auto flex min-h-[calc(100dvh-6rem)] w-full max-w-md flex-col gap-4 px-4 pt-6 pb-24 animate-fade-in-up">
-      <header className="rounded-3xl border border-zinc-800 bg-zinc-900/50 p-6 backdrop-blur-xl">
-        <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-zinc-500">
-          Network
-        </p>
-        <h1 className="mt-2 text-xl font-semibold tracking-tight text-zinc-100">
-          Notifications
-        </h1>
-        <p className="mt-2 text-[15px] leading-relaxed text-zinc-400">
+      <header className="u-panel p-5">
+        <p className="eyebrow">Network</p>
+        <h1 className="page-title">Notifications</h1>
+        <p className="page-subtitle">
           Connection requests and activity from your network.
         </p>
       </header>
 
       <div className="border-t border-zinc-800 pt-4">
         {notifications.length === 0 ? (
-          <div className="rounded-3xl border border-white/5 bg-zinc-900/40 p-8 text-center backdrop-blur-xl">
-            <p className="text-xs font-medium uppercase tracking-[0.15em] text-zinc-400">
-              All caught up
-            </p>
-            <p className="mt-2 text-[15px] leading-relaxed text-zinc-500">
-              New activity will appear here.
-            </p>
+          <div className="u-empty u-panel py-10">
+            <p className="u-empty-title">All caught up</p>
+            <p className="u-empty-copy">New activity will appear here.</p>
           </div>
         ) : (
-          <div className="flex animate-fade-in flex-col overflow-hidden rounded-3xl border border-white/5 bg-zinc-900/40 backdrop-blur-xl">
+          <div className="flex animate-fade-in flex-col overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950">
             {notifications.map((notification, index) => {
               const actor = actorsById.get(notification.actor_id);
               const actorUsername = actor?.username ?? "uplink_user";
@@ -163,7 +155,7 @@ export default async function NotificationsPage() {
 
               const content = (
                 <>
-                  <div className="h-11 w-11 flex-shrink-0 overflow-hidden rounded-full border border-zinc-700 bg-zinc-800">
+                  <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-full border border-zinc-800 bg-zinc-900 text-zinc-500">
                     {avatarUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
@@ -171,13 +163,15 @@ export default async function NotificationsPage() {
                         alt={`${actorUsername} avatar`}
                         className="h-full w-full object-cover"
                       />
-                    ) : null}
+                    ) : (
+                      <Terminal size={14} strokeWidth={1.8} />
+                    )}
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-[15px] leading-relaxed text-zinc-200">
                       {notificationText(notification.type, actorUsername)}
                     </p>
-                    <p className="mt-1 text-xs text-zinc-500">
+                    <p className="mt-1 text-xs text-zinc-400">
                       {formatTimestamp(notification.created_at)}
                     </p>
                     {notification.type === "connection_request" && connectionId ? (
@@ -187,10 +181,10 @@ export default async function NotificationsPage() {
                   <div className="flex flex-shrink-0 items-center gap-2 text-zinc-500">
                     <TypeIcon type={notification.type} />
                     {!notification.is_read ? (
-                      <span
-                        className="h-2 w-2 rounded-full bg-cyan-400"
-                        aria-label="Unread"
-                      />
+                      <>
+                        <span className="h-2 w-2 rounded-full bg-cyan-400" aria-hidden="true" />
+                        <span className="sr-only">Unread</span>
+                      </>
                     ) : null}
                   </div>
                 </>

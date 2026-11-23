@@ -7,10 +7,10 @@ import { getOrCreateRoom } from "@/app/actions/messages";
 import { triggerHaptic } from "@/src/lib/utils";
 
 const fullButton =
-  "inline-flex min-w-[132px] items-center justify-center gap-2 rounded-full border border-zinc-700 bg-transparent px-5 py-2.5 text-sm font-medium text-zinc-200 transition-colors hover:border-zinc-500 hover:bg-zinc-900 disabled:cursor-not-allowed disabled:opacity-70";
+  "inline-flex min-w-[132px] items-center justify-center gap-2 rounded-lg border border-zinc-700 bg-transparent px-5 py-2.5 text-sm font-medium text-zinc-200 transition-colors hover:border-zinc-500 hover:bg-zinc-900 disabled:cursor-not-allowed disabled:opacity-70";
 
 const compactButton =
-  "inline-flex flex-shrink-0 items-center justify-center gap-1.5 rounded-full border border-zinc-700 px-3 py-1.5 text-[11px] font-medium text-zinc-300 transition-colors hover:border-cyan-400/40 hover:bg-zinc-900 hover:text-cyan-400 disabled:cursor-not-allowed disabled:opacity-60";
+  "inline-flex flex-shrink-0 items-center justify-center gap-1.5 rounded-lg border border-zinc-700 px-3 py-1.5 text-[11px] font-medium text-zinc-300 transition-colors hover:border-cyan-400/40 hover:bg-zinc-900 hover:text-cyan-400 disabled:cursor-not-allowed disabled:opacity-60";
 
 /** Opens (or lazily creates) the DM room, then navigates straight into it. */
 export function StartChatButton({

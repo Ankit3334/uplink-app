@@ -64,7 +64,7 @@ export function ProfileHero({
   };
 
   return (
-    <section className="overflow-hidden rounded-3xl border border-white/5 bg-zinc-900/60 shadow-2xl shadow-black/40 backdrop-blur-xl">
+    <section className="overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950 shadow-2xl shadow-black/40">
       <div className="h-24 bg-gradient-to-br from-zinc-800 via-zinc-900 to-zinc-950" />
 
       <div className="px-5 pb-5">
@@ -98,8 +98,8 @@ export function ProfileHero({
               aria-pressed={isOpenToWork}
               className={
                 isOpenToWork
-                  ? "inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1.5 text-xs font-medium text-cyan-400 transition-colors hover:bg-cyan-400/15 disabled:opacity-60"
-                  : "inline-flex items-center gap-2 rounded-full border border-zinc-700 bg-zinc-800/70 px-3 py-1.5 text-xs font-medium text-zinc-300 transition-colors hover:bg-zinc-800 disabled:opacity-60"
+                  ? "inline-flex items-center gap-2 rounded-lg border border-cyan-400/20 bg-cyan-400/10 px-3 py-1.5 text-xs font-medium text-cyan-400 transition-colors hover:bg-cyan-400/15 disabled:opacity-60"
+                  : "inline-flex items-center gap-2 rounded-lg border border-zinc-700 bg-zinc-800/70 px-3 py-1.5 text-xs font-medium text-zinc-300 transition-colors hover:bg-zinc-800 disabled:opacity-60"
               }
             >
               <span
@@ -109,13 +109,13 @@ export function ProfileHero({
               {isOpenToWork ? <Check size={12} strokeWidth={2.2} /> : null}
             </button>
           ) : isOpenToWork ? (
-            <span className="inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1.5 text-xs font-medium text-cyan-400">
+            <span className="inline-flex items-center gap-2 rounded-lg border border-cyan-400/20 bg-cyan-400/10 px-3 py-1.5 text-xs font-medium text-cyan-400">
               <span className="h-1.5 w-1.5 rounded-full bg-cyan-400" />
               Open to Work
             </span>
           ) : null}
 
-          <span className="rounded-full border border-zinc-800 bg-zinc-950/70 px-3 py-1.5 text-xs text-zinc-400">
+          <span className="rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-1.5 text-xs text-zinc-400">
             {connectionsCount} connection{connectionsCount === 1 ? "" : "s"}
           </span>
         </div>

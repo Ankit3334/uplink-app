@@ -54,7 +54,7 @@ export function UserSearch() {
 
   return (
     <div ref={containerRef} className="relative">
-      <div className="flex items-center border border-zinc-800 bg-[#111111] px-3 py-2.5 focus-within:border-cyan-400">
+      <div className="flex items-center border border-zinc-800 bg-zinc-900 px-3 py-2.5 focus-within:border-cyan-400">
         <Search size={16} className="mr-2 flex-shrink-0 text-zinc-500" />
         <input
           type="text"
@@ -64,12 +64,12 @@ export function UserSearch() {
             if (results.length > 0 || query.trim()) setOpen(true);
           }}
           placeholder="SEARCH NODES // USERNAME OR DISPLAY NAME"
-          className="w-full bg-transparent font-mono text-xs uppercase tracking-[0.08em] text-zinc-100 outline-none placeholder:text-zinc-600"
+          className="w-full bg-transparent font-mono text-xs uppercase tracking-[0.08em] text-zinc-100 outline-none placeholder:text-zinc-500"
         />
       </div>
 
       {open ? (
-        <div className="absolute left-0 right-0 top-full z-30 mt-1 border border-zinc-800 bg-[#0a0a0a]">
+        <div className="absolute left-0 right-0 top-full z-30 mt-1 border border-zinc-800 bg-zinc-950">
           {loading ? (
             <div className="px-3 py-3 font-mono text-[10px] uppercase tracking-[0.12em] text-zinc-500">
               Scanning nodes...
@@ -85,9 +85,9 @@ export function UserSearch() {
                   <Link
                     href={`/u/${u.username}`}
                     onClick={() => setOpen(false)}
-                    className="flex items-center gap-3 px-3 py-2.5 transition-colors hover:bg-[#111111]"
+                    className="flex items-center gap-3 px-3 py-2.5 transition-colors hover:bg-zinc-900"
                   >
-                    <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center border border-zinc-800 bg-[#111111] text-zinc-400">
+                    <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center border border-zinc-800 bg-zinc-900 text-zinc-400">
                       {u.avatar_url ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img

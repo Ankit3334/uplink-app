@@ -41,7 +41,7 @@ export default function AuthPage() {
     <Suspense
       fallback={
         <div className="flex min-h-[100dvh] items-center justify-center px-4 animate-fade-in">
-          <p className="border border-zinc-800 bg-[#0a0a0a] px-5 py-4 text-xs uppercase tracking-[0.2em] text-zinc-400 animate-pulse">
+          <p className="border border-zinc-800 bg-zinc-950 px-5 py-4 text-xs uppercase tracking-[0.2em] text-zinc-400 animate-pulse">
             Initializing Auth Terminal...
           </p>
         </div>

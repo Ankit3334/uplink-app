@@ -3,14 +3,14 @@ import { UploadClient } from "./_components/upload-client";
 export default function UplinkPage() {
   return (
     <section className="mx-auto flex min-h-[calc(100dvh-6rem)] w-full max-w-md flex-col gap-4 px-4 pt-6 pb-24 animate-fade-in-up">
-      <header className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-4 backdrop-blur-xl">
-        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
+      <header className="rounded-xl border border-zinc-800 bg-zinc-950 p-4">
+        <p className="eyebrow">
           Channel // 03
         </p>
-        <h1 className="mt-2 text-xl font-bold uppercase tracking-wider text-zinc-100">
+        <h1 className="page-title">
           Uplink
         </h1>
-        <p className="mt-2 text-xs leading-relaxed text-zinc-400">
+        <p className="page-subtitle">
           System Transmission Console // Prepare payload for broadcast.
         </p>
       </header>

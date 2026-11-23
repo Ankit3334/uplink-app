@@ -21,7 +21,7 @@ function DeleteGridButton() {
       aria-label="Delete transmission"
       title="Delete transmission"
       disabled={pending}
-      className="flex h-7 w-7 items-center justify-center border border-zinc-700 bg-[#111111] text-zinc-300 transition-colors hover:border-zinc-600 hover:text-zinc-100 focus-visible:border-cyan-400 focus-visible:text-cyan-400 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+      className="flex h-7 w-7 items-center justify-center border border-zinc-700 bg-zinc-900 text-zinc-300 transition-colors hover:border-zinc-600 hover:text-zinc-100 focus-visible:border-cyan-400 focus-visible:text-cyan-400 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60"
     >
       {pending ? (
         <Loader2 size={13} strokeWidth={1.8} className="animate-spin" />
@@ -43,10 +43,8 @@ export function PostGrid({
 }) {
   if (posts.length === 0) {
     return (
-      <div className="border border-zinc-800 bg-[#0a0a0a] p-6 text-center">
-        <p className="font-mono text-xs uppercase tracking-[0.15em] text-zinc-500">
-          {"// NO TRANSMISSIONS ON RECORD"}
-        </p>
+      <div className="u-panel u-empty py-10">
+        <p className="u-label">{"// NO TRANSMISSIONS ON RECORD"}</p>
       </div>
     );
   }
@@ -55,7 +53,7 @@ export function PostGrid({
     <div className="grid grid-cols-3 gap-2">
       {posts.map((post, index) => (
         <FadeIn key={post.id} delay={index * 0.03}>
-          <div className="relative aspect-square border border-zinc-800 bg-[#111111]">
+          <div className="relative aspect-square border border-zinc-800 bg-zinc-900">
             <Link href={`/post/${post.id}`} className="block h-full w-full transition-opacity duration-200 ease-out hover:opacity-90">
               {post.image_url ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -66,7 +64,7 @@ export function PostGrid({
                   loading="lazy"
                 />
               ) : (
-                <div className="flex h-full w-full items-center justify-center bg-[#0a0a0a] p-2">
+                <div className="flex h-full w-full items-center justify-center bg-zinc-950 p-2">
                   <p className="line-clamp-4 text-center text-[10px] leading-relaxed text-zinc-300">
                     {post.body || post.caption || "TEXT"}
                   </p>

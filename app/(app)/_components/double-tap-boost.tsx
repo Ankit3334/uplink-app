@@ -69,18 +69,23 @@ export function DoubleTapBoost({
   };
 
   return (
-    <div className={`relative ${className ?? ""}`} onClick={onClick}>
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label="Tap once to preview, twice to boost"
+      className={`relative block w-full text-left transition-opacity hover:opacity-95 ${className ?? ""}`}
+    >
       {children}
       {showHeart ? (
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+        <span className="pointer-events-none absolute inset-0 flex items-center justify-center">
           <Heart
             size={72}
             className="text-white/90 drop-shadow-[0_0_12px_rgba(255,255,255,0.25)] animate-heart-pop"
             fill="currentColor"
             strokeWidth={0}
           />
-        </div>
+        </span>
       ) : null}
-    </div>
+    </button>
   );
 }

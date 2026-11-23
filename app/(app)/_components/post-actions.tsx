@@ -21,7 +21,7 @@ import { triggerHaptic } from "@/src/lib/utils";
 const initialEditState: EditPostState = {};
 
 const iconButtonClass =
-  "flex items-center justify-center bg-zinc-900/40 border border-zinc-800 rounded-lg p-1.5 transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-cyan-400/40";
+  "flex items-center justify-center bg-zinc-950 border border-zinc-800 rounded-lg p-1.5 transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-cyan-400/40";
 
 const inactiveIconClass = "text-zinc-400 hover:bg-zinc-800 hover:text-white";
 
@@ -245,7 +245,7 @@ export function PostActions({
               name="body"
               defaultValue={initialBody}
               rows={5}
-              className="w-full resize-y rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2.5 text-[15px] leading-relaxed text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-cyan-400"
+              className="w-full resize-y rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2.5 text-[15px] leading-relaxed text-zinc-100 outline-none transition-colors placeholder:text-zinc-500 focus:border-cyan-400"
               placeholder="Update your post..."
             />
           </label>
@@ -261,7 +261,7 @@ export function PostActions({
             <button
               type="button"
               onClick={() => setEditing(false)}
-              className="rounded-full border border-zinc-700 px-4 py-2 text-sm font-medium text-zinc-300 transition-colors hover:bg-zinc-800"
+              className="rounded-lg border border-zinc-700 px-4 py-2 text-sm font-medium text-zinc-300 transition-colors hover:bg-zinc-800"
             >
               <span className="inline-flex items-center gap-1.5">
                 <X size={13} /> Cancel
@@ -271,7 +271,7 @@ export function PostActions({
               type="submit"
               onClick={triggerHaptic}
               disabled={editPending}
-              className="rounded-full bg-zinc-100 px-4 py-2 text-sm font-semibold text-zinc-900 transition-colors hover:bg-white disabled:opacity-50"
+              className="rounded-lg bg-zinc-100 px-4 py-2 text-sm font-semibold text-zinc-900 transition-colors hover:bg-white disabled:opacity-50"
             >
               {editPending ? "Saving..." : "Save"}
             </button>

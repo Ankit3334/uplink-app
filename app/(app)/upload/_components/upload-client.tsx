@@ -51,7 +51,7 @@ function ModeToggle({
     { key: "image", label: "[ IMAGE ]" },
   ];
   return (
-    <div className="grid grid-cols-2 rounded-2xl border border-zinc-800 bg-zinc-950/80 p-1 backdrop-blur-xl">
+    <div className="grid grid-cols-2 rounded-xl border border-zinc-800 bg-zinc-950 p-1">
       {tabs.map((tab) => {
         const active = mode === tab.key;
         return (
@@ -110,7 +110,7 @@ function ImageUploadForm() {
   }
 
   return (
-    <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-4 backdrop-blur-xl">
+    <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-4">
       <div className="mb-4 border-b border-zinc-800 pb-3">
         <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
           System Transmission // Image Payload
@@ -130,7 +130,7 @@ function ImageUploadForm() {
             htmlFor="image"
             onDrop={onDrop}
             onDragOver={(e) => e.preventDefault()}
-            className="group relative flex min-h-60 w-full cursor-pointer flex-col items-center justify-center overflow-hidden rounded-2xl border border-dashed border-zinc-700 bg-zinc-950 p-4 text-center transition-all duration-200 ease-out hover:border-zinc-600 hover:bg-zinc-900"
+            className="group relative flex min-h-60 w-full cursor-pointer flex-col items-center justify-center overflow-hidden rounded-xl border border-dashed border-zinc-700 bg-zinc-950 p-4 text-center transition-all duration-200 ease-out hover:border-zinc-600 hover:bg-zinc-900"
           >
             {previewUrl ? (
               <>
@@ -162,7 +162,7 @@ function ImageUploadForm() {
                     or click to select payload
                   </p>
                 </div>
-                <p className="font-mono text-[10px] text-zinc-600">
+                <p className="font-mono text-[10px] text-zinc-500">
                   ACCEPTED: image/* // target bucket: uplink-posts
                 </p>
               </div>
@@ -188,14 +188,14 @@ function ImageUploadForm() {
             name="caption"
             rows={4}
             placeholder="ENTER TRANSMISSION TEXT..."
-            className="w-full resize-y rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2.5 font-mono text-sm leading-relaxed text-zinc-100 outline-none transition-all duration-200 ease-out placeholder:text-zinc-600 focus:border-cyan-400"
+            className="u-input resize-y font-mono leading-relaxed"
           />
         </label>
 
         {state?.error ? (
           <div
             role="alert"
-            className="rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-3 font-mono text-xs text-red-400"
+            className="rounded-lg border border-red-500/20 bg-red-500/5 px-3 py-3 font-mono text-xs text-red-300"
           >
             {state.error}
           </div>
@@ -307,7 +307,7 @@ function TextUploadForm() {
   };
 
   return (
-    <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-4 backdrop-blur-xl">
+    <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-4">
       <div className="mb-4 border-b border-zinc-800 pb-3">
         <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
           System Transmission // Text Payload
@@ -346,10 +346,10 @@ function TextUploadForm() {
                   }}
                   aria-pressed={active}
                   className={cn(
-                    "rounded-full border px-3.5 py-1.5 text-xs font-medium transition-colors",
+                    "rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors",
                     active
-                      ? "border-zinc-100 bg-zinc-100 text-zinc-900"
-                      : "border-zinc-700 bg-zinc-800/60 text-zinc-300 hover:bg-zinc-800",
+                      ? "border-cyan-400/40 bg-cyan-400/10 text-cyan-400"
+                      : "border-zinc-800 bg-zinc-950 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200",
                   )}
                 >
                   {option.label}
@@ -433,7 +433,7 @@ function TextUploadForm() {
               isCodeBlock ? "Paste or write your snippet..." : "What's happening in the grid?"
             }
             className={cn(
-              "w-full resize-y border-0 bg-transparent px-0 py-2 text-[15px] leading-relaxed text-zinc-100 outline-none transition-all duration-200 ease-out placeholder:text-zinc-600 focus:ring-0",
+              "w-full resize-y border-0 bg-transparent px-0 py-2 text-[15px] leading-relaxed text-zinc-100 outline-none transition-all duration-200 ease-out placeholder:text-zinc-500 focus:ring-0",
               isCodeBlock &&
                 "rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-3 font-mono text-sm",
             )}
@@ -458,7 +458,7 @@ function TextUploadForm() {
 
             {pollOptions.map((option, index) => (
               <div key={index} className="flex items-center gap-2">
-                <span className="w-5 flex-shrink-0 font-mono text-[10px] text-zinc-600">
+                <span className="w-5 flex-shrink-0 font-mono text-[10px] text-zinc-500">
                   {String(index + 1).padStart(2, "0")}
                 </span>
                 <input
@@ -468,7 +468,7 @@ function TextUploadForm() {
                   maxLength={120}
                   placeholder={`Option ${index + 1}`}
                   aria-label={`Poll option ${index + 1}`}
-                  className="h-9 min-w-0 flex-1 rounded-lg border border-zinc-800 bg-zinc-900 px-3 text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-cyan-400"
+                  className="u-input u-input-sm min-w-0 flex-1"
                 />
                 {index >= 2 ? (
                   <button
@@ -503,7 +503,7 @@ function TextUploadForm() {
               name="link"
               type="url"
               placeholder="https://..."
-              className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2.5 font-mono text-sm text-zinc-100 outline-none transition-all duration-200 ease-out placeholder:text-zinc-600 focus:border-cyan-400"
+              className="u-input font-mono"
             />
           </label>
         ) : null}
@@ -511,7 +511,7 @@ function TextUploadForm() {
         {state?.error ? (
           <div
             role="alert"
-            className="rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-3 font-mono text-xs text-red-400"
+            className="rounded-lg border border-red-500/20 bg-red-500/5 px-3 py-3 font-mono text-xs text-red-300"
           >
             {state.error}
           </div>
@@ -545,7 +545,7 @@ export function UploadClient() {
             triggerHaptic();
             setOptionsOpen(true);
           }}
-          className="border border-zinc-800 bg-[#0a0a0a] px-3 py-2 font-mono text-[10px] uppercase tracking-[0.15em] text-zinc-300 transition-colors hover:border-zinc-700 hover:text-cyan-400"
+          className="border border-zinc-800 bg-zinc-950 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.15em] text-zinc-300 transition-colors hover:border-zinc-700 hover:text-cyan-400"
         >
           Upload options
         </button>

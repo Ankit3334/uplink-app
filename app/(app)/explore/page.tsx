@@ -22,20 +22,20 @@ export default async function ExplorePage() {
 
   return (
     <section className="mx-auto flex min-h-[calc(100dvh-6rem)] w-full max-w-md flex-col gap-4 px-4 pt-6 pb-24 animate-fade-in-up">
-      <header className="border border-zinc-800 bg-[#0a0a0a] p-4">
-        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
+      <header className="border border-zinc-800 bg-zinc-950 p-4">
+        <p className="eyebrow">
           Channel // Explore
         </p>
-        <h1 className="mt-2 text-xl font-bold uppercase tracking-wider text-zinc-100">
+        <h1 className="page-title">
           Explore
         </h1>
-        <p className="mt-2 text-xs leading-relaxed text-zinc-400">
+        <p className="page-subtitle">
           Search nodes and scan high-signal transmissions across the network.
         </p>
       </header>
 
       <div className="flex flex-col gap-4 border-t border-zinc-800 pt-4">
-        <div className="border border-zinc-800 bg-[#0a0a0a] p-4">
+        <div className="border border-zinc-800 bg-zinc-950 p-4">
           <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
             Node Search
           </p>

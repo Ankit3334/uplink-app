@@ -16,7 +16,7 @@ function CommitButton() {
     <button
       type="submit"
       disabled={pending}
-      className="mt-2 flex w-full items-center justify-center gap-2 border border-zinc-700 bg-[#111111] px-4 py-3.5 text-sm font-bold uppercase tracking-[0.2em] text-cyan-400 transition-colors hover:border-zinc-600 hover:bg-[#161616] focus-visible:border-cyan-400 focus-visible:outline-none active:border-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
+      className="mt-2 flex w-full items-center justify-center gap-2 border border-zinc-700 bg-zinc-900 px-4 py-3.5 text-sm font-bold uppercase tracking-[0.2em] text-cyan-400 transition-colors hover:border-zinc-600 hover:bg-zinc-900 focus-visible:border-cyan-400 focus-visible:outline-none active:border-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
     >
       {pending ? (
         <>
@@ -37,7 +37,7 @@ export function OnboardingClient() {
   );
 
   return (
-    <div className="w-full max-w-md border border-zinc-800 bg-[#0a0a0a] p-6">
+    <div className="w-full max-w-md border border-zinc-800 bg-zinc-950 p-6">
       <div className="mb-6 border-b border-zinc-800 pb-5">
         <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-zinc-500">
           System Configuration // Profile Init
@@ -50,7 +50,7 @@ export function OnboardingClient() {
         </p>
       </div>
 
-      <div className="mb-6 border border-zinc-800 bg-[#111111] p-4 font-mono text-[10px] uppercase tracking-[0.15em] text-zinc-500">
+      <div className="mb-6 border border-zinc-800 bg-zinc-900 p-4 font-mono text-[10px] uppercase tracking-[0.15em] text-zinc-500">
         <p>&gt; STATUS: AUTHENTICATED</p>
         <p className="mt-1">&gt; PROFILE: UNINITIALIZED</p>
         <p className="mt-1">&gt; ACTION: REQUIRED</p>
@@ -70,9 +70,9 @@ export function OnboardingClient() {
             pattern="[a-zA-Z0-9]+"
             autoComplete="off"
             placeholder="operator01"
-            className="w-full border border-zinc-800 bg-[#111111] px-3 py-3 text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-cyan-400"
+            className="w-full border border-zinc-800 bg-zinc-900 px-3 py-3 text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-500 focus:border-cyan-400"
           />
-          <span className="mt-2 block font-mono text-[10px] text-zinc-600">
+          <span className="mt-2 block font-mono text-[10px] text-zinc-500">
             Alphanumeric only. Will be stored in lowercase.
           </span>
         </label>
@@ -88,14 +88,14 @@ export function OnboardingClient() {
             maxLength={64}
             autoComplete="nickname"
             placeholder="Operator Zero"
-            className="w-full border border-zinc-800 bg-[#111111] px-3 py-3 text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-cyan-400"
+            className="w-full border border-zinc-800 bg-zinc-900 px-3 py-3 text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-500 focus:border-cyan-400"
           />
         </label>
 
         {state?.error ? (
           <div
             role="alert"
-            className="border border-zinc-700 bg-[#111111] px-3 py-3 font-mono text-xs uppercase tracking-[0.08em] text-zinc-300"
+            className="border border-zinc-700 bg-zinc-900 px-3 py-3 font-mono text-xs uppercase tracking-[0.08em] text-zinc-300"
           >
             {state.error}
           </div>
@@ -104,7 +104,7 @@ export function OnboardingClient() {
         <CommitButton />
       </form>
 
-      <p className="mt-6 border-t border-zinc-800 pt-4 font-mono text-[10px] uppercase tracking-[0.15em] text-zinc-600">
+      <p className="mt-6 border-t border-zinc-800 pt-4 font-mono text-[10px] uppercase tracking-[0.15em] text-zinc-500">
         Uplink Config Shell v1.0 // Identity binding required
       </p>
     </div>

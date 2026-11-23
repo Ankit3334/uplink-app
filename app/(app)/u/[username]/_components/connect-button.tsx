@@ -13,7 +13,7 @@ import {
 import { triggerHaptic } from "@/src/lib/utils";
 
 const baseButton =
-  "inline-flex min-w-[132px] items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-70";
+  "inline-flex min-w-[132px] items-center justify-center gap-2 rounded-lg px-5 py-2.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-70";
 
 export function ConnectButton({
   addresseeId,
@@ -87,7 +87,7 @@ export function ConnectButton({
             type="button"
             disabled={pending}
             onClick={() => run(() => ignoreConnectionRequest(connectionId))}
-            className="rounded-full border border-zinc-700 px-4 py-2.5 text-sm font-medium text-zinc-300 transition-colors hover:bg-zinc-800"
+            className="rounded-lg border border-zinc-700 px-4 py-2.5 text-sm font-medium text-zinc-300 transition-colors hover:bg-zinc-800"
           >
             Ignore
           </button>

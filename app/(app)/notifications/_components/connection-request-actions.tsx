@@ -38,7 +38,7 @@ export function ConnectionRequestActions({
         type="button"
         disabled={pending}
         onClick={() => run(true)}
-        className="rounded-full bg-zinc-100 px-4 py-1.5 text-xs font-semibold text-zinc-900 transition-colors hover:bg-white disabled:opacity-60"
+        className="rounded-lg bg-zinc-100 px-4 py-1.5 text-xs font-semibold text-zinc-900 transition-colors hover:bg-white disabled:opacity-60"
       >
         Accept
       </button>
@@ -46,7 +46,7 @@ export function ConnectionRequestActions({
         type="button"
         disabled={pending}
         onClick={() => run(false)}
-        className="rounded-full border border-zinc-700 px-4 py-1.5 text-xs font-medium text-zinc-300 transition-colors hover:bg-zinc-800 disabled:opacity-60"
+        className="rounded-lg border border-zinc-700 px-4 py-1.5 text-xs font-medium text-zinc-300 transition-colors hover:bg-zinc-800 disabled:opacity-60"
       >
         Ignore
       </button>

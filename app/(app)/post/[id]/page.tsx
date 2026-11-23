@@ -232,7 +232,7 @@ export default async function PostDetailPage({
       </div>
 
       <FadeIn>
-        <article className="flex flex-col gap-4 border-b border-zinc-800 bg-[#050505] py-4">
+        <article className="flex flex-col gap-4 border-b border-zinc-800 bg-zinc-950 py-4">
           <header className="flex items-center gap-3 px-4">
             <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden rounded-full border border-zinc-800 bg-zinc-900 text-zinc-400">
               {postAvatar ? (
@@ -258,22 +258,22 @@ export default async function PostDetailPage({
                 <p className="truncate text-[15px] font-semibold text-zinc-100">{postUsername}</p>
               )}
               {openToWork ? (
-                <span className="inline-flex flex-shrink-0 items-center rounded-full border border-cyan-400/20 bg-cyan-400/10 px-2 py-0.5 text-[10px] font-medium text-cyan-400">
+                <span className="inline-flex flex-shrink-0 items-center rounded-lg border border-cyan-400/20 bg-cyan-400/10 px-2 py-0.5 text-[10px] font-medium text-cyan-400">
                   Open to Work
                 </span>
               ) : null}
             </div>
             <p className="text-xs text-zinc-500">
               {formatTimestamp(post.created_at)}
-              {post.is_edited ? <span className="ml-1 text-zinc-600">(edited)</span> : null}
+              {post.is_edited ? <span className="ml-1 text-zinc-500">(edited)</span> : null}
             </p>
           </header>
 
           {building || techStack.length > 0 ? (
             <div className="flex flex-wrap items-center gap-2 px-4">
               {building ? (
-                <span className="inline-flex max-w-full items-center gap-1.5 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] text-emerald-300">
-                  <span className="h-1.5 w-1.5 flex-shrink-0 animate-pulse rounded-full bg-emerald-400" />
+                <span className="inline-flex max-w-full items-center gap-1.5 rounded-lg bg-cyan-400/10 px-2 py-0.5 text-[10px] text-cyan-300">
+                  <span className="h-1.5 w-1.5 flex-shrink-0 animate-pulse rounded-full bg-cyan-400" />
                   <span className="truncate">Building · {building}</span>
                 </span>
               ) : null}
@@ -366,7 +366,7 @@ export default async function PostDetailPage({
           </div>
 
           {topLevelThreads.length === 0 ? (
-            <div className="px-1 py-6 text-center">
+            <div className="u-empty py-10">
               <p className="text-[15px] text-zinc-400">No threads yet.</p>
               <p className="mt-1 text-xs text-zinc-500">Be the first to start the conversation.</p>
             </div>

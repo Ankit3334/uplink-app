@@ -39,7 +39,7 @@ function StatCard({
   hint?: string;
 }) {
   return (
-    <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6 backdrop-blur-xl">
+    <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-6">
       <div className="flex items-center gap-2 text-zinc-500">
         <Icon size={14} strokeWidth={1.8} />
         <p className="text-[10px] font-medium uppercase tracking-[0.14em]">
@@ -112,13 +112,11 @@ export default async function ProfilePage() {
     <section className="native-scroll mx-auto flex min-h-[calc(100dvh-6rem)] w-full max-w-2xl flex-col gap-5 px-4 pt-6 pb-28 animate-fade-in-up">
       <header className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-zinc-500">
-            Professional Profile
-          </p>
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-zinc-50">
+          <p className="eyebrow">Uplink // Profile</p>
+          <h1 className="page-title">
             Your profile
           </h1>
-          <p className="mt-1 text-[15px] leading-relaxed text-zinc-400">
+          <p className="page-subtitle">
             Build your professional presence on UPLINK.
           </p>
         </div>
@@ -127,7 +125,7 @@ export default async function ProfilePage() {
             href="/settings"
             aria-label="Settings"
             title="Settings"
-            className="flex h-10 w-10 items-center justify-center border border-zinc-700 bg-[#111111] text-zinc-400 transition-colors hover:border-zinc-600 hover:text-zinc-200 focus-visible:border-cyan-400 focus-visible:text-cyan-400 focus-visible:outline-none"
+            className="flex h-10 w-10 items-center justify-center border border-zinc-700 bg-zinc-900 text-zinc-400 transition-colors hover:border-zinc-600 hover:text-zinc-200 focus-visible:border-cyan-400 focus-visible:text-cyan-400 focus-visible:outline-none"
           >
             <Settings size={18} strokeWidth={1.8} />
           </Link>
@@ -187,13 +185,13 @@ export default async function ProfilePage() {
           icon={FileText}
           hint={`${totalBoosts} boosts received`}
         />
-        <div className="relative overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6 backdrop-blur-xl">
+        <div className="relative overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950 p-6">
           <p className="flex items-center gap-2 text-[10px] font-medium uppercase tracking-[0.14em] text-zinc-500">
             <Sparkles size={14} strokeWidth={1.8} />
             Status
           </p>
           <div className="mt-3">
-            <span className="inline-flex items-center rounded-full border border-cyan-400/20 bg-cyan-400/10 px-2.5 py-1 text-xs font-medium text-cyan-400">
+            <span className="inline-flex items-center rounded-lg border border-cyan-400/20 bg-cyan-400/10 px-2.5 py-1 text-xs font-medium text-cyan-400">
               Pro Node
             </span>
           </div>

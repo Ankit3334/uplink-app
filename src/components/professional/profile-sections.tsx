@@ -19,7 +19,7 @@ export function SectionCard({
   children: ReactNode;
 }) {
   return (
-    <section className="rounded-3xl border border-zinc-800 bg-zinc-900/50 p-6 shadow-lg shadow-black/20 backdrop-blur-xl">
+    <section className="rounded-xl border border-zinc-800 bg-zinc-950 p-6 shadow-lg shadow-black/20">
       <div className="flex items-start justify-between gap-3">
         <div>
           <h2 className="text-base font-semibold tracking-tight text-zinc-100">
@@ -53,7 +53,7 @@ function IconAction({
       aria-label={label}
       title={label}
       onClick={onClick}
-      className="rounded-full border border-zinc-700 bg-zinc-800/70 p-1.5 text-zinc-400 transition-colors hover:text-zinc-100"
+      className="rounded-lg border border-zinc-700 bg-zinc-800/70 p-1.5 text-zinc-400 transition-colors hover:text-zinc-100"
     >
       {children}
     </button>
@@ -115,10 +115,10 @@ export function ExperienceList({
                 </div>
               ) : null}
             </div>
-            <p className="mt-2 text-xs text-zinc-600">
+            <p className="mt-2 text-xs text-zinc-500">
               {experiencePeriod(item)}
               {item.is_current ? (
-                <span className="ml-2 rounded-full bg-emerald-500/10 px-2 py-0.5 font-medium text-emerald-300">
+                <span className="ml-2 rounded-lg bg-cyan-400/10 px-2 py-0.5 font-medium text-cyan-300">
                   Current
                 </span>
               ) : null}
@@ -157,9 +157,9 @@ export function EducationList({
       {education.map((item) => (
         <li
           key={item.id}
-          className="flex items-start gap-3 rounded-2xl border border-zinc-800 bg-zinc-950/50 p-3"
+          className="flex items-start gap-3 rounded-xl border border-zinc-800 bg-zinc-900 p-3"
         >
-          <div className="mt-0.5 rounded-full bg-zinc-800 p-2 text-zinc-400">
+          <div className="mt-0.5 rounded-lg bg-zinc-800 p-2 text-zinc-400">
             <GraduationCap size={16} strokeWidth={1.8} />
           </div>
           <div className="min-w-0 flex-1">
@@ -172,7 +172,7 @@ export function EducationList({
               </p>
             ) : null}
             {item.start_year || item.end_year ? (
-              <p className="mt-1 text-xs text-zinc-600">
+              <p className="mt-1 text-xs text-zinc-500">
                 {item.start_year ?? "—"} — {item.end_year ?? "Present"}
               </p>
             ) : null}
@@ -220,7 +220,7 @@ export function SkillsList({
       {skills.map((skill) => (
         <span
           key={skill.id}
-          className="inline-flex cursor-default items-center gap-1.5 rounded-full border border-zinc-700 bg-zinc-800 px-4 py-1.5 text-[15px] text-zinc-200 transition-colors hover:border-zinc-600"
+          className="inline-flex cursor-default items-center gap-1.5 rounded-lg border border-zinc-700 bg-zinc-800 px-4 py-1.5 text-[15px] text-zinc-200 transition-colors hover:border-zinc-600"
         >
           {skill.name}
           {onRemove ? (
@@ -228,7 +228,7 @@ export function SkillsList({
               type="button"
               aria-label={`Remove ${skill.name}`}
               onClick={() => onRemove(skill.id)}
-              className="rounded-full text-zinc-500 transition-colors hover:text-zinc-100"
+              className="rounded-lg text-zinc-500 transition-colors hover:text-zinc-100"
             >
               <X size={12} strokeWidth={2} />
             </button>

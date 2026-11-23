@@ -13,7 +13,7 @@ export function PostImage({
   postId,
   src,
   alt,
-  className = "w-full object-cover",
+  className = "aspect-[4/3] w-full object-cover",
 }: {
   postId: string;
   src: string;
@@ -60,7 +60,7 @@ export function PostImage({
             role="dialog"
             aria-modal="true"
             aria-label="Image preview"
-            className="relative z-[70] w-full max-w-lg rounded-t-3xl border-t border-zinc-800 bg-zinc-950 text-white shadow-2xl sm:rounded-3xl max-h-[85vh] overflow-y-auto"
+            className="relative z-[70] w-full max-w-lg rounded-t-3xl border-t border-zinc-800 bg-zinc-950 text-white shadow-2xl sm:rounded-xl max-h-[85vh] overflow-y-auto"
           >
             {/* Drag Handle */}
             <div className="sticky top-0 z-10 flex justify-center border-b border-zinc-900 bg-zinc-950 pt-3 pb-2">
@@ -74,7 +74,7 @@ export function PostImage({
                 <img
                   src={src}
                   alt={alt}
-                  className="mx-auto max-h-[70vh] w-auto max-w-full rounded-xl object-contain"
+                  className="mx-auto max-h-[70vh] w-auto max-w-full rounded-lg object-contain"
                 />
               </div>
             </div>

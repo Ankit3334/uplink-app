@@ -55,7 +55,7 @@ export function ProfileEditor({
   }
 
   return (
-    <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-5">
+    <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-5">
       <div className="flex items-center justify-between gap-3">
         <div>
           <p className="text-sm font-semibold text-zinc-100">Edit profile</p>
@@ -69,7 +69,7 @@ export function ProfileEditor({
             triggerHaptic();
             setIsOpen(true);
           }}
-          className="rounded-full border border-zinc-700 bg-zinc-800/70 px-3.5 py-1.5 text-xs font-medium text-zinc-200 transition-colors hover:bg-zinc-800"
+          className="rounded-lg border border-zinc-700 bg-zinc-800/70 px-3.5 py-1.5 text-xs font-medium text-zinc-200 transition-colors hover:bg-zinc-800"
         >
           Edit details
         </button>
@@ -91,7 +91,7 @@ export function ProfileEditor({
               required
               defaultValue={initialDisplayName}
               maxLength={64}
-              className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2.5 text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-cyan-400"
+              className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2.5 text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-500 focus:border-cyan-400"
               placeholder="Your name"
             />
           </label>
@@ -105,7 +105,7 @@ export function ProfileEditor({
               name="location"
               defaultValue={initialLocation}
               maxLength={120}
-              className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2.5 text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-cyan-400"
+              className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2.5 text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-500 focus:border-cyan-400"
               placeholder="San Francisco, CA"
             />
           </label>
@@ -119,7 +119,7 @@ export function ProfileEditor({
               rows={4}
               defaultValue={initialBio}
               maxLength={280}
-              className="w-full resize-y rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2.5 text-[15px] leading-relaxed text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-cyan-400"
+              className="w-full resize-y rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2.5 text-[15px] leading-relaxed text-zinc-100 outline-none transition-colors placeholder:text-zinc-500 focus:border-cyan-400"
               placeholder="A short introduction..."
             />
           </label>
@@ -151,7 +151,7 @@ export function ProfileEditor({
           ) : null}
 
           {state?.success ? (
-            <p className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-300">
+            <p role="status" className="rounded-xl border border-cyan-400/20 bg-cyan-400/10 px-3 py-2 text-sm text-cyan-300">
               Profile updated.
             </p>
           ) : null}

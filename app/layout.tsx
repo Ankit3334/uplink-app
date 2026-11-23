@@ -53,9 +53,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${jetBrainsMono.variable} h-full bg-[#050505] antialiased`}
+      className={`${inter.variable} ${jetBrainsMono.variable} h-full bg-zinc-950 antialiased`}
     >
-      <body className="safe-area-top min-h-full bg-[#050505] font-sans text-[#e0e0e0]">
+      <body className="safe-area-top min-h-full bg-zinc-950 font-sans text-zinc-100">
         {children}
       </body>
     </html>

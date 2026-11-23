@@ -44,15 +44,15 @@ export default async function SavedPage() {
 
   return (
     <section className="mx-auto flex min-h-[calc(100dvh-6rem)] w-full max-w-md flex-col gap-4 px-4 pt-6 pb-24 animate-fade-in-up">
-      <header className="rounded-3xl border border-zinc-800 bg-zinc-900/50 p-6">
-        <p className="flex items-center gap-2 text-[10px] font-medium uppercase tracking-[0.2em] text-zinc-500">
+      <header className="rounded-xl border border-zinc-800 bg-zinc-950 p-6">
+        <p className="eyebrow flex items-center gap-2">
           <Bookmark size={13} strokeWidth={1.8} />
           Your library
         </p>
-        <h1 className="mt-2 text-xl font-semibold tracking-tight text-zinc-100">
+        <h1 className="page-title">
           Saved posts
         </h1>
-        <p className="mt-2 text-[15px] leading-relaxed text-zinc-400">
+        <p className="page-subtitle">
           Transmissions you bookmarked, all in one place.
         </p>
       </header>
@@ -67,13 +67,9 @@ export default async function SavedPage() {
       </div>
 
       {posts.length === 0 ? (
-        <div className="rounded-3xl border border-zinc-800 bg-zinc-950 p-8 text-center">
-          <p className="font-mono text-xs uppercase tracking-[0.15em] text-zinc-400">
-            {"// NOTHING SAVED YET"}
-          </p>
-          <p className="mt-2 text-[15px] leading-relaxed text-zinc-500">
-            Tap the bookmark icon on any post to keep it here.
-          </p>
+        <div className="u-panel u-empty">
+          <p className="u-label">{"// NOTHING SAVED YET"}</p>
+          <p className="u-empty-copy">Tap the bookmark icon on any post to keep it here.</p>
         </div>
       ) : (
         <PostGrid

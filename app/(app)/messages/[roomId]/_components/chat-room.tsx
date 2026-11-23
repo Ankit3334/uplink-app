@@ -36,7 +36,7 @@ function SendButton() {
       type="submit"
       onClick={triggerHaptic}
       disabled={pending}
-      className="flex h-10 w-10 items-center justify-center border border-zinc-700 bg-[#111111] text-cyan-400 transition-colors hover:border-cyan-400 hover:bg-[#161616] disabled:cursor-not-allowed disabled:opacity-60"
+      className="flex h-10 w-10 items-center justify-center border border-zinc-700 bg-zinc-900 text-cyan-400 transition-colors hover:border-cyan-400 hover:bg-zinc-900 disabled:cursor-not-allowed disabled:opacity-60"
       aria-label="Send message"
     >
       {pending ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
@@ -117,7 +117,7 @@ export function ChatRoom({
         }}
       >
         {sortedMessages.length === 0 ? (
-          <div className="border border-zinc-800 bg-[#111111] p-4 font-mono text-[10px] uppercase tracking-[0.12em] text-zinc-400">
+          <div className="border border-zinc-800 bg-zinc-900 p-4 font-mono text-[10px] uppercase tracking-[0.12em] text-zinc-400">
             No transmissions in this channel. Send the first signal.
           </div>
         ) : (
@@ -130,10 +130,10 @@ export function ChatRoom({
                   className={`flex ${mine ? "justify-end" : "justify-start"}`}
                 >
                   <div
-                    className={`max-w-[82%] rounded-2xl border px-3 py-2 ${
+                    className={`max-w-[82%] rounded-xl border px-3 py-2 ${
                       mine
-                        ? "border-cyan-400/40 bg-[#111111] text-zinc-100"
-                        : "border-zinc-800 bg-[#0f0f0f] text-zinc-200"
+                        ? "border-cyan-400/40 bg-zinc-900 text-zinc-100"
+                        : "border-zinc-800 bg-zinc-900 text-zinc-200"
                     }`}
                   >
                     {msg.content ? (
@@ -166,7 +166,7 @@ export function ChatRoom({
         <form
           ref={formRef}
           action={formAction}
-          className="border border-zinc-800 bg-[#0a0a0a] p-2"
+          className="border border-zinc-800 bg-zinc-950 p-2"
         >
           <input type="hidden" name="roomId" value={roomId} />
           <div className="flex items-center gap-2">
@@ -176,12 +176,12 @@ export function ChatRoom({
               autoComplete="off"
               enterKeyHint="send"
               placeholder="ENTER MESSAGE..."
-              className="h-10 flex-1 border border-zinc-800 bg-[#111111] px-3 font-mono text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-cyan-400"
+              className="h-10 min-w-0 flex-1 bg-transparent px-2 font-mono text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-500"
             />
             <SendButton />
           </div>
           {state?.error ? (
-            <p className="mt-2 border border-zinc-700 bg-[#111111] px-2 py-1.5 font-mono text-[10px] uppercase tracking-[0.08em] text-zinc-300">
+            <p className="mt-2 border border-zinc-700 bg-zinc-900 px-2 py-1.5 font-mono text-[10px] uppercase tracking-[0.08em] text-zinc-300">
               {state.error}
             </p>
           ) : null}

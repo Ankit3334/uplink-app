@@ -16,14 +16,14 @@ export type ProjectCardData = {
 };
 
 const fieldClass =
-  "w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2.5 text-[15px] leading-relaxed text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-cyan-400";
+  "w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2.5 text-[15px] leading-relaxed text-zinc-100 outline-none transition-colors placeholder:text-zinc-500 focus:border-cyan-400";
 
 function ProjectCard({ project }: { project: ProjectCardData }) {
   const hasLink = Boolean(project.link);
   const tech = Array.isArray(project.tech_stack) ? project.tech_stack : [];
 
   return (
-    <article className="relative rounded-xl border border-zinc-800 bg-zinc-900/50 p-4 transition-colors hover:border-zinc-700">
+    <article className="relative rounded-xl border border-zinc-800 bg-zinc-950 p-4 transition-colors hover:border-zinc-700">
       {hasLink ? (
         <a
           href={project.link ?? "#"}
@@ -94,7 +94,7 @@ export function ProjectSection({
   };
 
   return (
-    <section className="rounded-3xl border border-zinc-800 bg-zinc-950/60 p-6 shadow-lg shadow-black/20">
+    <section className="rounded-xl border border-zinc-800 bg-zinc-950/60 p-6 shadow-lg shadow-black/20">
       <div className="flex items-start justify-between gap-3">
         <div>
           <h2 className="text-[10px] font-medium uppercase tracking-[0.2em] text-zinc-500">
@@ -122,7 +122,7 @@ export function ProjectSection({
             <FolderKanban
               size={18}
               strokeWidth={1.8}
-              className="mx-auto text-zinc-600"
+              className="mx-auto text-zinc-500"
             />
             <p className="mt-2 text-xs text-zinc-500">
               {isSelf
@@ -171,7 +171,7 @@ export function ProjectSection({
 
             <label className="block">
               <span className="mb-1.5 block text-xs font-medium text-zinc-400">
-                Link <span className="text-zinc-600">(optional)</span>
+                Link <span className="text-zinc-500">(optional)</span>
               </span>
               <input
                 name="link"
@@ -183,7 +183,7 @@ export function ProjectSection({
 
             <label className="block">
               <span className="mb-1.5 block text-xs font-medium text-zinc-400">
-                Tech stack <span className="text-zinc-600">(comma separated)</span>
+                Tech stack <span className="text-zinc-500">(comma separated)</span>
               </span>
               <input
                 name="tech_stack"
@@ -194,7 +194,7 @@ export function ProjectSection({
 
             <label className="block">
               <span className="mb-1.5 block text-xs font-medium text-zinc-400">
-                Image URL <span className="text-zinc-600">(optional)</span>
+                Image URL <span className="text-zinc-500">(optional)</span>
               </span>
               <input
                 name="image_url"

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -19,7 +19,7 @@ export function BottomNav({ unreadCount = 0 }: { unreadCount?: number }) {
   return (
     <nav
       aria-label="Primary"
-      className="safe-area-bottom fixed inset-x-0 bottom-0 z-50 border-t border-white/5 bg-black/80 backdrop-blur-xl"
+      className="safe-area-bottom fixed inset-x-0 bottom-0 z-50 border-t border-zinc-800 bg-zinc-950/95"
     >
       <ul className="mx-auto grid h-16 max-w-md grid-cols-5 items-stretch gap-0.5 px-2">
         {navItems.map((item) => {
@@ -41,12 +41,12 @@ export function BottomNav({ unreadCount = 0 }: { unreadCount?: number }) {
               >
                 <span
                   className={cn(
-                    "relative flex h-12 w-full max-w-[68px] flex-col items-center justify-center gap-1 rounded-2xl transition-colors duration-200 ease-out",
+                    "relative flex h-12 w-full max-w-[68px] flex-col items-center justify-center gap-1 rounded-lg transition-colors duration-200 ease-out",
                     isActive
                       ? isCreate
                         ? "bg-cyan-400 text-zinc-950"
                         : "bg-zinc-800 text-zinc-100"
-                      : "text-zinc-400 hover:bg-zinc-900/80 hover:text-zinc-200",
+                      : "text-zinc-400 hover:bg-zinc-900 hover:text-zinc-100",
                   )}
                 >
                   <Icon size={18} strokeWidth={1.8} />

@@ -49,8 +49,8 @@ export function PollCard({ poll }: { poll: PollData }) {
   };
 
   return (
-    <div className="mt-3 rounded-xl border border-zinc-800 bg-zinc-950/40 p-3">
-      <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
+    <div className="u-panel mt-3 p-3">
+      <p className="u-label mb-2">
         Poll // {poll.options.length} options
       </p>
 
@@ -62,7 +62,7 @@ export function PollCard({ poll }: { poll: PollData }) {
               type="button"
               onClick={() => vote(option.id)}
               disabled={pending}
-              className="w-full text-left bg-zinc-900/50 border border-zinc-800 rounded-lg p-3 mb-2 hover:border-cyan-400/50 transition-colors focus-visible:border-cyan-400 focus-visible:outline-none last:mb-0 disabled:cursor-not-allowed disabled:opacity-70"
+              className="w-full text-left bg-zinc-900 border border-zinc-800 rounded-lg p-3 mb-2 hover:border-cyan-400/50 transition-colors focus-visible:border-cyan-400 focus-visible:outline-none last:mb-0 disabled:cursor-not-allowed disabled:opacity-70"
             >
               <span className="text-sm text-zinc-200">{option.option_text}</span>
             </button>
@@ -82,7 +82,7 @@ export function PollCard({ poll }: { poll: PollData }) {
                 className={`rounded-lg border p-3 ${
                   isMine
                     ? "border-cyan-400/20 bg-cyan-400/10"
-                    : "border-zinc-800 bg-zinc-900/50"
+                    : "border-zinc-800 bg-zinc-900"
                 }`}
               >
                 <div className="flex items-center justify-between gap-3 text-xs">
@@ -95,7 +95,7 @@ export function PollCard({ poll }: { poll: PollData }) {
                   </span>
                   <span className="flex-shrink-0 font-mono text-[11px] text-zinc-400">
                     {percent}%
-                    <span className="ml-1 text-zinc-600">({count})</span>
+                    <span className="ml-1 text-zinc-500">({count})</span>
                   </span>
                 </div>
                 <div className="mt-2 h-1 w-full overflow-hidden rounded bg-zinc-800">
@@ -107,14 +107,14 @@ export function PollCard({ poll }: { poll: PollData }) {
               </div>
             );
           })}
-          <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.15em] text-zinc-600">
+          <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.15em] text-zinc-500">
             {totalVotes} {totalVotes === 1 ? "vote" : "votes"}
           </p>
         </div>
       )}
 
       {error ? (
-        <p role="status" className="mt-2 text-[11px] text-red-400">
+        <p role="alert" className="mt-2 text-[11px] text-red-300">
           {error}
         </p>
       ) : null}
