@@ -9,7 +9,7 @@ export default async function ExplorePage() {
 
   const { data: postsData } = await supabase
     .from("posts")
-    .select("id, image_url, caption, boost_count, created_at")
+    .select("id, image_url, caption")
     .order("boost_count", { ascending: false })
     .order("created_at", { ascending: false })
     .limit(30);

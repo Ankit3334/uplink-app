@@ -12,8 +12,6 @@ export type StoryItem = {
   user_id: string;
   media_url: string;
   media_type: "image" | "video";
-  expires_at: string;
-  created_at: string;
 };
 
 export type StoryUserGroup = {

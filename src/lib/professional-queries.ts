@@ -2,7 +2,7 @@ import { createClient } from "@/src/lib/supabase/server";
 import type { Education, Experience, Skill } from "@/src/lib/professional";
 
 export const PROFILE_SELECT =
-  "id, username, display_name, avatar_url, bio, location, open_to_work, currently_building, tech_stack";
+  "id, username, display_name, avatar_url, bio, location, open_to_work, currently_building, tech_stack, pinned_post_id";
 
 export type ProfileRow = {
   id: string;
@@ -14,6 +14,7 @@ export type ProfileRow = {
   open_to_work: boolean;
   currently_building: string | null;
   tech_stack: string[] | null;
+  pinned_post_id: string | null;
 };
 
 export type ConnectionViewState =
@@ -21,6 +22,16 @@ export type ConnectionViewState =
   | "pending_outgoing"
   | "pending_incoming"
   | "accepted";
+
+export type ProfilePostStats = {
+  postCount: number;
+  totalBoosts: number;
+};
+
+type ProfilePostStatsRow = {
+  post_count: number | string | null;
+  total_boosts: number | string | null;
+};
 
 export async function getProfessionalData(userId: string) {
   const supabase = await createClient();
@@ -55,6 +66,24 @@ export async function getProfessionalData(userId: string) {
     education: (educationResult.data ?? []) as Education[],
     skills: (skillsResult.data ?? []) as Skill[],
     connectionsCount: acceptedResult.count ?? 0,
+  };
+}
+
+/** Aggregate profile stats in SQL instead of reducing a limited post list. */
+export async function getProfilePostStats(
+  userId: string,
+): Promise<ProfilePostStats> {
+  const supabase = await createClient();
+  const { data } = await supabase.rpc("get_profile_post_stats", {
+    p_user_id: userId,
+  });
+
+  const rows = (data ?? []) as ProfilePostStatsRow[];
+  const row = Array.isArray(rows) ? rows[0] : null;
+
+  return {
+    postCount: Number(row?.post_count ?? 0),
+    totalBoosts: Number(row?.total_boosts ?? 0),
   };
 }
 

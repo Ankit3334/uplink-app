@@ -20,7 +20,6 @@ export type ConnectionResult = {
 type ConnectionRow = {
   id: string;
   requester_id: string;
-  addressee_id: string;
   status: "pending" | "accepted" | "ignored";
 };
 
@@ -34,13 +33,13 @@ async function findConnection(
   const [{ data: forward }, { data: reverse }] = await Promise.all([
     supabase
       .from("connections")
-      .select("id, requester_id, addressee_id, status")
+      .select("id, requester_id, status")
       .eq("requester_id", firstUserId)
       .eq("addressee_id", secondUserId)
       .maybeSingle(),
     supabase
       .from("connections")
-      .select("id, requester_id, addressee_id, status")
+      .select("id, requester_id, status")
       .eq("requester_id", secondUserId)
       .eq("addressee_id", firstUserId)
       .maybeSingle(),
@@ -50,20 +49,13 @@ async function findConnection(
 }
 
 async function countConnections(supabase: SupabaseClient, userId: string) {
-  const [{ count: outgoing }, { count: incoming }] = await Promise.all([
-    supabase
-      .from("connections")
-      .select("*", { count: "exact", head: true })
-      .eq("requester_id", userId)
-      .eq("status", "accepted"),
-    supabase
-      .from("connections")
-      .select("*", { count: "exact", head: true })
-      .eq("addressee_id", userId)
-      .eq("status", "accepted"),
-  ]);
+  const { count } = await supabase
+    .from("connections")
+    .select("id", { count: "exact", head: true })
+    .eq("status", "accepted")
+    .or(`requester_id.eq.${userId},addressee_id.eq.${userId}`);
 
-  return (outgoing ?? 0) + (incoming ?? 0);
+  return count ?? 0;
 }
 
 function revalidateConnectionPaths() {
@@ -227,7 +219,7 @@ export async function acceptConnectionRequest(
 
   const { data: connection } = await supabase
     .from("connections")
-    .select("id, requester_id, addressee_id, status")
+    .select("id, requester_id, status")
     .eq("id", connectionId)
     .eq("addressee_id", user.id)
     .maybeSingle();

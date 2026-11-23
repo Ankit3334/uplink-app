@@ -31,7 +31,7 @@ function formatTimestamp(iso: string) {
   });
 }
 
-const FeedPostCard = memo(function FeedPostCard({
+export const FeedPostCard = memo(function FeedPostCard({
   item,
   currentUserId,
   animationDelay,
@@ -178,6 +178,7 @@ const FeedPostCard = memo(function FeedPostCard({
           initialBookmarked={bookmarked}
           shareUrl={`/post/${post.id}`}
           isOwner={post.user_id === currentUserId}
+          isPinned={item.pinned}
           initialBody={post.body ?? ""}
           canEdit
         />
@@ -233,7 +234,9 @@ export function FeedList({
   const loadingRef = useRef(false);
   const [, startTransition] = useTransition();
 
-  const cursor = items[items.length - 1]?.post.id ?? null;
+  const lastPost = items[items.length - 1]?.post ?? null;
+  const cursor = lastPost?.id ?? null;
+  const cursorCreatedAt = lastPost?.created_at ?? null;
 
   const loadMore = useCallback(() => {
     if (!hasMore || !cursor || loadingRef.current) return;
@@ -244,7 +247,7 @@ export function FeedList({
 
     startTransition(async () => {
       try {
-        const page = await getFeedPosts({ cursor, category });
+        const page = await getFeedPosts({ cursor, cursorCreatedAt, category });
         setItems((current) => {
           const seen = new Set(current.map((item) => item.post.id));
           const additions = page.items.filter((item) => !seen.has(item.post.id));
@@ -258,7 +261,7 @@ export function FeedList({
         setIsLoading(false);
       }
     });
-  }, [category, cursor, hasMore]);
+  }, [category, cursor, cursorCreatedAt, hasMore]);
 
   return (
     <div className="flex flex-col">

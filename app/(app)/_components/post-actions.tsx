@@ -8,8 +8,18 @@ import {
   useActionState,
 } from "react";
 import Link from "next/link";
-import { Bookmark, Heart, MessageCircle, Pencil, Send, X } from "lucide-react";
 import {
+  Bookmark,
+  Heart,
+  MessageCircle,
+  MoreHorizontal,
+  Pencil,
+  Pin,
+  Send,
+  X,
+} from "lucide-react";
+import {
+  pinPost,
   toggleBookmark,
   toggleBoostPost,
   editPost,
@@ -36,6 +46,7 @@ export function PostActions({
   initialBookmarked,
   shareUrl,
   isOwner = false,
+  isPinned = false,
   initialBody = "",
   canEdit = false,
 }: {
@@ -46,6 +57,7 @@ export function PostActions({
   initialBookmarked: boolean;
   shareUrl: string;
   isOwner?: boolean;
+  isPinned?: boolean;
   initialBody?: string;
   canEdit?: boolean;
 }) {
@@ -59,6 +71,10 @@ export function PostActions({
   const [boosted, setBoosted] = useState(initialBoosted);
   const [boostCount, setBoostCount] = useState(initialBoostCount);
   const [bookmarked, setBookmarked] = useState(initialBookmarked);
+  const [pinned, setPinned] = useState(isPinned);
+  const [pinError, setPinError] = useState<string | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement | null>(null);
   const [, startTransition] = useTransition();
   const [editing, setEditing] = useState(false);
   const [ackEditSuccess, setAckEditSuccess] = useState(false);
@@ -93,6 +109,74 @@ export function PostActions({
     return () =>
       window.removeEventListener("post:boosted", onBoosted as EventListener);
   }, [postId]);
+
+  useEffect(() => {
+    function onPinned(e: Event) {
+      const detail = (
+        e as CustomEvent<{
+          postId: string;
+          pinned: boolean;
+          previousPinnedPostId?: string | null;
+        }>
+      ).detail;
+      if (!detail) return;
+      if (detail.postId === postId) {
+        setPinned(detail.pinned);
+      } else if (detail.previousPinnedPostId === postId) {
+        setPinned(false);
+      }
+    }
+    window.addEventListener("post:pinned", onPinned as EventListener);
+    return () =>
+      window.removeEventListener("post:pinned", onPinned as EventListener);
+  }, [postId]);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+
+    const onPointerDown = (event: PointerEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMenuOpen(false);
+    };
+
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [menuOpen]);
+
+  const onTogglePin = () => {
+    triggerHaptic();
+    setMenuOpen(false);
+    setPinError(null);
+    const next = !pinned;
+    setPinned(next);
+
+    startTransition(async () => {
+      const result = await pinPost(postId);
+      if (result.error) {
+        setPinned(!next);
+        setPinError(result.error);
+        return;
+      }
+      setPinned(result.pinned);
+      window.dispatchEvent(
+        new CustomEvent("post:pinned", {
+          detail: {
+            postId,
+            pinned: result.pinned,
+            previousPinnedPostId: result.previousPinnedPostId,
+          },
+        }),
+      );
+    });
+  };
 
   const onBoost = () => {
     triggerHaptic();
@@ -160,6 +244,7 @@ export function PostActions({
 
   const openEditor = () => {
     triggerHaptic();
+    setMenuOpen(false);
     setEditing((v) => !v);
   };
 
@@ -228,7 +313,52 @@ export function PostActions({
             <Pencil size={16} className="h-4 w-4" strokeWidth={1.8} />
           </button>
         ) : null}
+
+        {isOwner ? (
+          <div className="relative" ref={menuRef}>
+            <button
+              type="button"
+              onClick={() => {
+                triggerHaptic();
+                setMenuOpen((open) => !open);
+              }}
+              aria-label="More post options"
+              aria-haspopup="menu"
+              aria-expanded={menuOpen}
+              className={`${iconButtonClass} ${menuOpen ? activeIconClass : inactiveIconClass}`}
+            >
+              <MoreHorizontal size={16} className="h-4 w-4" strokeWidth={1.8} />
+            </button>
+
+            {menuOpen ? (
+              <div
+                role="menu"
+                className="absolute bottom-full right-0 z-30 mb-1 w-48 border border-zinc-800 bg-zinc-950 p-1 shadow-lg shadow-black/40"
+              >
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={onTogglePin}
+                  className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-xs text-zinc-300 transition-colors hover:bg-zinc-900 hover:text-cyan-400 focus-visible:bg-zinc-900 focus-visible:text-cyan-400 focus-visible:outline-none"
+                >
+                  <Pin
+                    size={13}
+                    strokeWidth={1.8}
+                    className={pinned ? "text-cyan-400" : "text-zinc-500"}
+                  />
+                  {pinned ? "Unpin from profile" : "Pin to profile"}
+                </button>
+              </div>
+            ) : null}
+          </div>
+        ) : null}
       </div>
+
+      {pinError ? (
+        <p role="alert" className="mt-2 px-4 text-[11px] text-red-300">
+          {pinError}
+        </p>
+      ) : null}
 
       <BottomSheet
         open={isEditing}

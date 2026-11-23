@@ -27,8 +27,6 @@ type StoryRow = {
   user_id: string;
   media_url: string;
   media_type: "image" | "video";
-  expires_at: string;
-  created_at: string;
   profiles: StoryProfile | StoryProfile[];
 };
 
@@ -87,9 +85,7 @@ async function StoriesSection() {
       .maybeSingle(),
     supabase
       .from("stories")
-      .select(
-        "id, user_id, media_url, media_type, expires_at, created_at, profiles(username, avatar_url)",
-      )
+      .select("id, user_id, media_url, media_type, profiles(username, avatar_url)")
       .gt("expires_at", nowIso)
       .order("created_at", { ascending: true }),
   ]);
@@ -106,8 +102,6 @@ async function StoriesSection() {
       user_id: row.user_id,
       media_url: row.media_url,
       media_type: row.media_type,
-      expires_at: row.expires_at,
-      created_at: row.created_at,
     };
     const existing = byUser.get(row.user_id);
     if (existing) {

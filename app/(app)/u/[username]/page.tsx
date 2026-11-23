@@ -1,5 +1,13 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
+import { Pin } from "lucide-react";
+import { FeedPostCard } from "../../_components/feed-list";
+import {
+  FEED_POST_SELECT,
+  hydrateFeedItems,
+  type FeedItem,
+  type FeedPost,
+} from "@/src/lib/feed";
 import { PostGrid } from "@/src/components/post-grid";
 import { ProfileHero } from "@/src/components/professional/profile-hero";
 import {
@@ -17,6 +25,7 @@ import { headlineFor } from "@/src/lib/professional";
 import {
   getConnectionView,
   getProfessionalData,
+  getProfilePostStats,
   PROFILE_SELECT,
   type ProfileRow,
 } from "@/src/lib/professional-queries";
@@ -64,26 +73,53 @@ async function ProfileContent({ username }: { username: string }) {
 
   const profile = profileData as ProfileRow;
   const isSelf = currentUser?.id === profile.id;
+  const pinnedPostId = profile.pinned_post_id;
+  const viewerId = currentUser?.id ?? "";
+  let pinnedPost: FeedItem | null = null;
 
-  const [{ data: postsData }, { data: projectsData }, professionalData, connection] =
-    await Promise.all([
-      supabase
-        .from("posts")
-        .select("id, image_url, caption, boost_count, created_at")
-        .eq("user_id", profile.id)
-        .order("created_at", { ascending: false })
-        .limit(60),
-      supabase
-        .from("projects")
-        .select("id, title, description, link, tech_stack, image_url")
-        .eq("user_id", profile.id)
-        .order("created_at", { ascending: false })
-        .limit(3),
-      getProfessionalData(profile.id),
-      getConnectionView(currentUser?.id, profile.id),
-    ]);
+  const [
+    { data: pinnedPostData },
+    { data: postsData },
+    { data: projectsData },
+    professionalData,
+    profileStats,
+    connection,
+  ] = await Promise.all([
+    pinnedPostId
+      ? supabase
+          .from("posts")
+          .select(FEED_POST_SELECT)
+          .eq("id", pinnedPostId)
+          .eq("user_id", profile.id)
+          .maybeSingle()
+      : Promise.resolve({ data: null }),
+    supabase
+      .from("posts")
+      .select("id, image_url, caption")
+      .eq("user_id", profile.id)
+      .order("created_at", { ascending: false })
+      .limit(60),
+    supabase
+      .from("projects")
+      .select("id, title, description, link, tech_stack, image_url")
+      .eq("user_id", profile.id)
+      .order("created_at", { ascending: false })
+      .limit(3),
+    getProfessionalData(profile.id),
+    getProfilePostStats(profile.id),
+    getConnectionView(currentUser?.id, profile.id),
+  ]);
+
+  if (pinnedPostData) {
+    [pinnedPost] = await hydrateFeedItems(
+      [pinnedPostData as FeedPost],
+      viewerId,
+      pinnedPostId,
+    );
+  }
 
   const posts = postsData ?? [];
+  const gridPosts = posts.filter((post) => post.id !== pinnedPostId);
   const projects = (projectsData ?? []) as ProjectCardData[];
   const { experiences, education, skills, connectionsCount } = professionalData;
 
@@ -165,11 +201,25 @@ async function ProfileContent({ username }: { username: string }) {
             Activity
           </h2>
           <span className="text-xs text-zinc-500">
-            {posts.length} post{posts.length === 1 ? "" : "s"}
+            {profileStats.postCount} post{profileStats.postCount === 1 ? "" : "s"}
           </span>
         </div>
+        {pinnedPost ? (
+          <div>
+            <div className="text-zinc-500 text-xs flex items-center gap-1 mb-2">
+              <Pin size={12} strokeWidth={1.8} />
+              Pinned
+            </div>
+            <FeedPostCard
+              item={pinnedPost}
+              currentUserId={viewerId}
+              animationDelay={0}
+            />
+          </div>
+        ) : null}
+
         <PostGrid
-          posts={posts.map((p) => ({
+          posts={gridPosts.map((p) => ({
             id: p.id as string,
             image_url: p.image_url as string,
             caption: (p.caption as string | null) ?? null,

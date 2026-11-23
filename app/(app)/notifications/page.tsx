@@ -14,22 +14,25 @@ type NotificationType =
   | "connection_request"
   | "connection_accepted";
 
+type ActorProfile = {
+  username: string | null;
+  avatar_url: string | null;
+} | null;
+
 type NotificationRow = {
   id: string;
-  user_id: string;
   actor_id: string;
   type: NotificationType;
-  post_id: string | null;
   created_at: string;
   is_read: boolean;
+  profiles: ActorProfile | ActorProfile[];
 };
 
-type ActorProfile = {
-  id: string;
-  username: string | null;
-  display_name: string | null;
-  avatar_url: string | null;
-};
+function pickActor(notification: NotificationRow): ActorProfile {
+  return Array.isArray(notification.profiles)
+    ? (notification.profiles[0] ?? null)
+    : notification.profiles;
+}
 
 function formatTimestamp(iso: string) {
   const date = new Date(iso);
@@ -87,7 +90,9 @@ export default async function NotificationsPage() {
     await Promise.all([
       supabase
         .from("notifications")
-        .select("id, user_id, actor_id, type, post_id, created_at, is_read")
+        .select(
+          "id, actor_id, type, created_at, is_read, profiles!notifications_actor_id_fkey(username, avatar_url)",
+        )
         .eq("user_id", user.id)
         .order("created_at", { ascending: false })
         .limit(50),
@@ -102,18 +107,6 @@ export default async function NotificationsPage() {
   const pendingByActor = new Map(
     (pendingConnections ?? []).map((row) => [row.requester_id, row.id]),
   );
-
-  const actorIds = Array.from(new Set(notifications.map((n) => n.actor_id)));
-  let actorsById = new Map<string, ActorProfile>();
-  if (actorIds.length > 0) {
-    const { data: actors } = await supabase
-      .from("profiles")
-      .select("id, username, display_name, avatar_url")
-      .in("id", actorIds);
-    actorsById = new Map(
-      ((actors ?? []) as ActorProfile[]).map((actor) => [actor.id, actor]),
-    );
-  }
 
   if (notifications.some((n) => !n.is_read)) {
     await supabase
@@ -142,7 +135,7 @@ export default async function NotificationsPage() {
         ) : (
           <div className="flex animate-fade-in flex-col overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950">
             {notifications.map((notification, index) => {
-              const actor = actorsById.get(notification.actor_id);
+              const actor = pickActor(notification);
               const actorUsername = actor?.username ?? "uplink_user";
               const avatarUrl = actor?.avatar_url ?? null;
               const href =

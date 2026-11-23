@@ -31,19 +31,106 @@ export type EditPostState = {
   success?: boolean;
 };
 
+export type PinPostResult = {
+  pinned: boolean;
+  pinnedPostId: string | null;
+  previousPinnedPostId?: string | null;
+  error?: string;
+};
+
 /** Read-only feed action used by the infinite-scroll trigger. */
 export async function getFeedPosts({
   cursor,
+  cursorCreatedAt,
   category,
 }: {
   cursor?: string | null;
+  cursorCreatedAt?: string | null;
   category?: FeedTabValue;
 }): Promise<FeedPageResult> {
   const safeCursor = cursor && UUID_PATTERN.test(cursor) ? cursor : null;
+  const safeTimestamp =
+    cursorCreatedAt && !Number.isNaN(Date.parse(cursorCreatedAt))
+      ? cursorCreatedAt
+      : null;
+
   return loadFeedPage({
     cursor: safeCursor,
+    cursorCreatedAt: safeTimestamp,
     category: feedTabForCategory(category),
   });
+}
+
+/**
+ * Feature one of the caller's own posts on their profile. Calling it again
+ * with the same id unpins the post, and choosing another post replaces it.
+ */
+export async function pinPost(postId: string): Promise<PinPostResult> {
+  if (!UUID_PATTERN.test(postId)) {
+    return { pinned: false, pinnedPostId: null, error: "Invalid post reference." };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    return { pinned: false, pinnedPostId: null, error: "Authentication required." };
+  }
+
+  const { data: post } = await supabase
+    .from("posts")
+    .select("id, user_id")
+    .eq("id", postId)
+    .maybeSingle();
+
+  if (!post || post.user_id !== user.id) {
+    return { pinned: false, pinnedPostId: null, error: "Not authorized." };
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("pinned_post_id, username")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (!profile) {
+    return { pinned: false, pinnedPostId: null, error: "Profile not found." };
+  }
+
+  const previousPinnedPostId = (profile.pinned_post_id as string | null) ?? null;
+  const nextPinnedPostId = previousPinnedPostId === postId ? null : postId;
+
+  const { error: updateError } = await supabase
+    .from("profiles")
+    .update({ pinned_post_id: nextPinnedPostId })
+    .eq("id", user.id);
+
+  if (updateError) {
+    return {
+      pinned: previousPinnedPostId === postId,
+      pinnedPostId: previousPinnedPostId,
+      error: `PIN FAILED: ${updateError.message}`,
+    };
+  }
+
+  revalidatePath("/");
+  revalidatePath("/profile");
+  revalidatePath(`/post/${postId}`);
+  if (previousPinnedPostId && previousPinnedPostId !== postId) {
+    revalidatePath(`/post/${previousPinnedPostId}`);
+  }
+  if (profile.username) {
+    revalidatePath(`/u/${profile.username}`);
+  }
+
+  return {
+    pinned: nextPinnedPostId !== null,
+    pinnedPostId: nextPinnedPostId,
+    previousPinnedPostId,
+  };
 }
 
 export async function transmitPost(
@@ -259,6 +346,7 @@ export async function toggleBoostPost(postId: string): Promise<ToggleBoostResult
     .maybeSingle();
 
   let boosted = false;
+  let shouldNotify = false;
 
   if (existingBoost) {
     const { error: deleteError } = await supabase
@@ -297,6 +385,7 @@ export async function toggleBoostPost(postId: string): Promise<ToggleBoostResult
 
     if (!insertError) {
       boosted = true;
+      shouldNotify = true;
       const { error: rpcError } = await supabase.rpc("adjust_post_boost_count", {
         p_post_id: postId,
         p_delta: 1,
@@ -315,27 +404,23 @@ export async function toggleBoostPost(postId: string): Promise<ToggleBoostResult
         }
       }
 
-      const { data: post } = await supabase
-        .from("posts")
-        .select("user_id")
-        .eq("id", postId)
-        .maybeSingle();
-      if (post?.user_id && post.user_id !== user.id) {
-        await supabase.from("notifications").insert({
-          user_id: post.user_id,
-          actor_id: user.id,
-          type: "boost",
-          post_id: postId,
-        });
-      }
     }
   }
 
   const { data: postRow } = await supabase
     .from("posts")
-    .select("boost_count")
+    .select("user_id, boost_count")
     .eq("id", postId)
     .maybeSingle();
+
+  if (shouldNotify && postRow?.user_id && postRow.user_id !== user.id) {
+    await supabase.from("notifications").insert({
+      user_id: postRow.user_id,
+      actor_id: user.id,
+      type: "boost",
+      post_id: postId,
+    });
+  }
 
   revalidatePath("/");
   revalidatePath(`/post/${postId}`);
@@ -437,6 +522,16 @@ export async function addThread(
       redirect("/auth");
     }
 
+    const { data: post } = await supabase
+      .from("posts")
+      .select("user_id, thread_count")
+      .eq("id", postId)
+      .maybeSingle();
+
+    if (!post) {
+      return { error: "THREAD INJECTION FAILED: Post not found." };
+    }
+
     let rootParentId: string | null = null;
     if (parentId) {
       const { data: parentThread, error: parentError } = await supabase
@@ -470,25 +565,13 @@ export async function addThread(
     });
 
     if (rpcError) {
-      const { data: post } = await supabase
+      await supabase
         .from("posts")
-        .select("thread_count")
-        .eq("id", postId)
-        .maybeSingle();
-      if (post) {
-        await supabase
-          .from("posts")
-          .update({ thread_count: (post.thread_count ?? 0) + 1 })
-          .eq("id", postId);
-      }
+        .update({ thread_count: (post.thread_count ?? 0) + 1 })
+        .eq("id", postId);
     }
 
-    const { data: post } = await supabase
-      .from("posts")
-      .select("user_id")
-      .eq("id", postId)
-      .maybeSingle();
-    if (post?.user_id && post.user_id !== user.id) {
+    if (post.user_id && post.user_id !== user.id) {
       await supabase.from("notifications").insert({
         user_id: post.user_id,
         actor_id: user.id,

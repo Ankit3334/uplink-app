@@ -24,6 +24,13 @@ create table if not exists public.posts (
   created_at timestamptz not null default now()
 );
 
+-- A member can feature exactly one of their own posts at the top of their profile.
+alter table public.profiles
+  add column if not exists pinned_post_id uuid references public.posts(id) on delete set null;
+
+comment on column public.profiles.pinned_post_id is
+  'Single post featured at the top of the member profile';
+
 -- Boosts: tracks who boosted what to prevent double-boosting.
 create table if not exists public.boosts (
   id uuid primary key default gen_random_uuid(),

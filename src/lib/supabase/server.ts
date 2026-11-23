@@ -2,6 +2,7 @@ import { cache } from "react";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
+/** One request-scoped client per render pass; safe to call from nested helpers. */
 export const createClient = cache(async () => {
   const cookieStore = await cookies();
 

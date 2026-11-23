@@ -5,9 +5,13 @@ import { createClient } from "@/src/lib/supabase/server";
 import { StartChatButton } from "./_components/start-chat-button";
 
 type ConnectionRow = {
-  id: string;
   requester_id: string;
   addressee_id: string;
+};
+
+type LatestMessageRow = {
+  room_id: string;
+  content: string | null;
 };
 
 type RoomRow = {
@@ -46,7 +50,7 @@ export default async function MessagesPage() {
   const [{ data: connectionsData }, { data: roomsData }] = await Promise.all([
     supabase
       .from("connections")
-      .select("id, requester_id, addressee_id")
+      .select("requester_id, addressee_id")
       .eq("status", "accepted")
       .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`),
     supabase
@@ -89,16 +93,14 @@ export default async function MessagesPage() {
   const roomIds = Array.from(roomByUserId.values()).map((room) => room.id);
   const lastMessageByRoom = new Map<string, string>();
   if (roomIds.length > 0) {
-    const { data: messages } = await supabase
-      .from("messages")
-      .select("room_id, content, created_at")
-      .in("room_id", roomIds)
-      .order("created_at", { ascending: false });
-    for (const m of messages ?? []) {
-      const roomId = m.room_id as string;
-      if (!lastMessageByRoom.has(roomId)) {
-        lastMessageByRoom.set(roomId, (m.content as string | null) ?? "");
-      }
+    // One SQL call returns only the newest message per room instead of every
+    // message in every connected room.
+    const { data: messages } = await supabase.rpc(
+      "get_latest_messages_for_rooms",
+      { p_room_ids: roomIds },
+    );
+    for (const message of (messages ?? []) as LatestMessageRow[]) {
+      lastMessageByRoom.set(message.room_id, message.content ?? "");
     }
   }
 
