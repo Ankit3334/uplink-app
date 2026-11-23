@@ -11,7 +11,6 @@ import { signOut } from "@/app/actions/auth";
 import { requireUser } from "@/src/lib/auth";
 import { FeedPostCard } from "../_components/feed-list";
 import {
-  FEED_POST_SELECT,
   hydrateFeedItems,
   type FeedItem,
   type FeedPost,
@@ -27,7 +26,6 @@ import {
 } from "@/src/components/professional/profile-sections";
 import {
   getProfessionalData,
-  getProfilePostStats,
   PROFILE_SELECT,
   type ProfileRow,
 } from "@/src/lib/professional-queries";
@@ -75,44 +73,40 @@ export default async function ProfilePage() {
   const user = await requireUser();
   const supabase = await createClient();
 
-  const [
-    { data: profileData },
-    { data: postsData },
-    { data: projectsData },
-    professionalData,
-    profileStats,
-  ] = await Promise.all([
-    supabase
-      .from("profiles")
-      .select(PROFILE_SELECT)
-      .eq("id", user.id)
-      .maybeSingle(),
-    supabase
-      .from("posts")
-      .select("id, image_url, caption")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false })
-      .limit(60),
-    supabase
-      .from("projects")
-      .select(
-        "id, title, description, link, tech_stack, image_url",
-      )
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false })
-      .limit(3),
-    getProfessionalData(user.id),
-    getProfilePostStats(user.id),
-  ]);
+  const [{ data: profileData }, { data: postsData }, { data: projectsData }] =
+    await Promise.all([
+      supabase
+        .from("profiles")
+        .select(PROFILE_SELECT)
+        .eq("id", user.id)
+        .maybeSingle(),
+      supabase
+        .from("posts")
+        .select("id, image_url, caption, boost_count, created_at")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(60),
+      supabase
+        .from("projects")
+        .select(
+          "id, title, description, link, tech_stack, image_url",
+        )
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(3),
+    ]);
 
   const profile = profileData as ProfileRow | null;
+  const { experiences, education, skills, connectionsCount } =
+    await getProfessionalData(user.id);
+
   const pinnedPostId = profile?.pinned_post_id ?? null;
   let pinnedPost: FeedItem | null = null;
 
   if (pinnedPostId) {
     const { data: pinnedPostData } = await supabase
       .from("posts")
-      .select(FEED_POST_SELECT)
+      .select("*, profiles(*)")
       .eq("id", pinnedPostId)
       .eq("user_id", user.id)
       .maybeSingle();
@@ -126,11 +120,13 @@ export default async function ProfilePage() {
     }
   }
 
-  const { experiences, education, skills, connectionsCount } = professionalData;
-
   const posts = postsData ?? [];
   const gridPosts = posts.filter((post) => post.id !== pinnedPostId);
   const projects = (projectsData ?? []) as ProjectCardData[];
+  const totalBoosts = posts.reduce(
+    (sum, row) => sum + (row.boost_count ?? 0),
+    0,
+  );
 
   const username = profile?.username ?? "uplink_user";
   const displayName = profile?.display_name ?? username;
@@ -219,9 +215,9 @@ export default async function ProfilePage() {
         />
         <StatCard
           label="Posts"
-          value={profileStats.postCount}
+          value={posts.length}
           icon={FileText}
-          hint={`${profileStats.totalBoosts} boosts received`}
+          hint={`${totalBoosts} boosts received`}
         />
         <div className="relative overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950 p-6">
           <p className="flex items-center gap-2 text-[10px] font-medium uppercase tracking-[0.14em] text-zinc-500">
@@ -247,7 +243,7 @@ export default async function ProfilePage() {
             Activity
           </h2>
           <span className="text-xs text-zinc-500">
-            {profileStats.postCount} post{profileStats.postCount === 1 ? "" : "s"}
+            {posts.length} post{posts.length === 1 ? "" : "s"}
           </span>
         </div>
         {pinnedPost ? (
@@ -263,7 +259,6 @@ export default async function ProfilePage() {
             />
           </div>
         ) : null}
-
         <PostGrid
           posts={gridPosts.map((p) => ({
             id: p.id as string,

@@ -22,7 +22,10 @@ export type FeedPost = {
   category: string | null;
   boost_count: number;
   thread_count: number;
+  /** Older schemas named this comment_count; tolerate both. */
+  comment_count?: number | null;
   created_at: string;
+  updated_at: string | null;
   is_edited: boolean | null;
   is_code_block: boolean | null;
   language: string | null;
@@ -44,9 +47,6 @@ export type FeedPageResult = {
   networkEmpty: boolean;
 };
 
-export const FEED_POST_SELECT =
-  "id, user_id, image_url, caption, body, category, boost_count, thread_count, created_at, is_edited, is_code_block, language, profiles(username, avatar_url, tech_stack, currently_building, open_to_work)";
-
 /** Add viewer-specific state to already-selected post rows. */
 export async function hydrateFeedItems(
   posts: FeedPost[],
@@ -57,27 +57,19 @@ export async function hydrateFeedItems(
 
   const supabase = await createClient();
   const postIds = posts.map((post) => post.id);
-  const emptyPostRefs = Promise.resolve({ data: [] as { post_id: string }[] });
 
-  // Polls are public, but viewer-specific boost/bookmark/vote state is not.
-  // Anonymous profile views skip those lookups instead of querying with an
-  // impossible user id.
   const [{ data: boosts }, { data: bookmarks }, { data: polls }] =
     await Promise.all([
-      viewerId
-        ? supabase
-            .from("boosts")
-            .select("post_id")
-            .eq("user_id", viewerId)
-            .in("post_id", postIds)
-        : emptyPostRefs,
-      viewerId
-        ? supabase
-            .from("bookmarks")
-            .select("post_id")
-            .eq("user_id", viewerId)
-            .in("post_id", postIds)
-        : emptyPostRefs,
+      supabase
+        .from("boosts")
+        .select("post_id")
+        .eq("user_id", viewerId)
+        .in("post_id", postIds),
+      supabase
+        .from("bookmarks")
+        .select("post_id")
+        .eq("user_id", viewerId)
+        .in("post_id", postIds),
       supabase
         .from("polls")
         .select("id, post_id, ends_at, poll_options(id, option_text, vote_count)")
@@ -91,14 +83,13 @@ export async function hydrateFeedItems(
 
   const pollRows = (polls ?? []) as PollRow[];
   const pollIds = pollRows.map((poll) => poll.id);
-  const { data: pollVotes } =
-    viewerId && pollIds.length
-      ? await supabase
-          .from("poll_votes")
-          .select("poll_id, option_id")
-          .eq("user_id", viewerId)
-          .in("poll_id", pollIds)
-      : { data: [] };
+  const { data: pollVotes } = pollIds.length
+    ? await supabase
+        .from("poll_votes")
+        .select("poll_id, option_id")
+        .eq("user_id", viewerId)
+        .in("poll_id", pollIds)
+    : { data: [] };
 
   const votedOptionByPoll = new Map(
     (pollVotes ?? []).map((vote) => [
@@ -136,11 +127,9 @@ function toCursorTimestamp(value: string) {
  */
 export async function loadFeedPage({
   cursor = null,
-  cursorCreatedAt = null,
   category = "all",
 }: {
   cursor?: string | null;
-  cursorCreatedAt?: string | null;
   category?: FeedTabValue;
 }): Promise<FeedPageResult> {
   const user = await requireUser();
@@ -175,41 +164,58 @@ export async function loadFeedPage({
   ];
   const networkEmpty = connectionIds.length === 0;
 
-  let postsQuery = supabase.from("posts").select(FEED_POST_SELECT);
-  if (activeTab !== "all") {
-    postsQuery = postsQuery.eq("category", activeTab);
-  }
-  if (!networkEmpty) {
-    postsQuery = postsQuery.in("user_id", connectionIds);
-  }
-
+  let cursorTimestamp: string | null = null;
   if (cursor) {
-    let timestamp = cursorCreatedAt ? toCursorTimestamp(cursorCreatedAt) : null;
+    const { data: cursorRow } = await supabase
+      .from("posts")
+      .select("created_at")
+      .eq("id", cursor)
+      .maybeSingle();
 
-    if (!timestamp) {
-      const { data: cursorRow } = await supabase
-        .from("posts")
-        .select("created_at")
-        .eq("id", cursor)
-        .maybeSingle();
-
-      if (!cursorRow?.created_at) {
-        return { items: [], hasMore: false, userId: user.id, networkEmpty };
-      }
-      timestamp = toCursorTimestamp(cursorRow.created_at as string);
+    if (!cursorRow?.created_at) {
+      return { items: [], hasMore: false, userId: user.id, networkEmpty };
     }
-
-    postsQuery = postsQuery.or(
-      `created_at.lt.${timestamp},and(created_at.eq.${timestamp},id.lt.${cursor})`,
-    );
+    cursorTimestamp = toCursorTimestamp(cursorRow.created_at as string);
   }
 
-  const { data: postsData } = await postsQuery
-    .order("created_at", { ascending: false })
-    .order("id", { ascending: false })
-    .limit(FEED_PAGE_SIZE);
+  const buildPostsQuery = (networkOnly: boolean) => {
+    let query = supabase.from("posts").select("*, profiles(*)");
+    if (activeTab !== "all") {
+      query = query.eq("category", activeTab);
+    }
+    if (networkOnly && !networkEmpty) {
+      query = query.in("user_id", connectionIds);
+    }
+    if (cursor && cursorTimestamp) {
+      query = query.or(
+        `created_at.lt.${cursorTimestamp},and(created_at.eq.${cursorTimestamp},id.lt.${cursor})`,
+      );
+    }
+    return query
+      .order("created_at", { ascending: false })
+      .order("id", { ascending: false })
+      .limit(FEED_PAGE_SIZE);
+  };
 
-  const posts = (postsData ?? []) as FeedPost[];
+  const { data: postsData, error: postsError } = await buildPostsQuery(true);
+  if (postsError) {
+    console.error("Feed query error:", postsError);
+  }
+
+  let posts = (postsData ?? []) as FeedPost[];
+
+  // A connected account with no posts from its network should still see the
+  // global stream instead of an empty feed.
+  if (!networkEmpty && posts.length === 0 && !cursor) {
+    const { data: globalData, error: globalError } = await buildPostsQuery(false);
+    if (globalError) {
+      console.error("Feed fallback query error:", globalError);
+    }
+    posts = (globalData ?? []) as FeedPost[];
+  }
+
+  console.log("Feed Posts:", posts);
+
   const pinnedPostId = (ownProfile?.pinned_post_id as string | null) ?? null;
 
   return {

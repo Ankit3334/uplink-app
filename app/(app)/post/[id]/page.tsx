@@ -9,10 +9,6 @@ import { CodeBlock } from "@/src/components/code-block";
 import { FadeIn } from "@/src/components/fade-in";
 import { TechStackBadges } from "@/src/components/tech-stack-badges";
 import { PollCard } from "@/src/components/poll/poll-card";
-import {
-  FEED_POST_SELECT,
-  type FeedPost,
-} from "@/src/lib/feed";
 import { toPollData, type PollData, type PollRow } from "@/src/lib/polls";
 import {
   POST_CATEGORY_BADGE_CLASS,
@@ -33,8 +29,28 @@ type ProfileRef = {
   open_to_work: boolean | null;
 } | null;
 
+type PostDetail = {
+  id: string;
+  user_id: string;
+  image_url: string | null;
+  caption: string | null;
+  body: string | null;
+  category: string | null;
+  boost_count: number;
+  thread_count: number;
+  comment_count?: number | null;
+  created_at: string;
+  updated_at: string | null;
+  is_edited: boolean | null;
+  is_code_block: boolean | null;
+  language: string | null;
+  profiles: ProfileRef | ProfileRef[];
+};
+
 type ThreadRow = {
   id: string;
+  user_id: string;
+  post_id: string;
   parent_id: string | null;
   content: string;
   created_at: string;
@@ -127,15 +143,20 @@ export default async function PostDetailPage({
   const user = await requireUser();
   const supabase = await createClient();
 
-  const { data: postData } = await supabase
+  const { data: postData, error: postError } = await supabase
     .from("posts")
-    .select(FEED_POST_SELECT)
+    .select("*, profiles(*)")
     .eq("id", id)
     .maybeSingle();
 
+  if (postError) {
+    console.error("Post detail query error:", postError);
+  }
+  console.log("Post Detail:", postData);
+
   if (!postData) notFound();
 
-  const post = postData as FeedPost;
+  const post = postData as PostDetail;
   const postProfile = pickProfile(post.profiles);
   const postUsername = postProfile?.username ?? "unknown_node";
   const postAvatar = postProfile?.avatar_url ?? null;
@@ -155,7 +176,9 @@ export default async function PostDetailPage({
   ] = await Promise.all([
     supabase
       .from("threads")
-      .select("id, parent_id, content, created_at, profiles(username, avatar_url)")
+      .select(
+        "id, user_id, post_id, parent_id, content, created_at, profiles(username, avatar_url)",
+      )
       .eq("post_id", id)
       .order("created_at", { ascending: true }),
     supabase.from("boosts").select("id").eq("post_id", id).eq("user_id", user.id).maybeSingle(),
@@ -186,7 +209,7 @@ export default async function PostDetailPage({
     repliesByParent.set(thread.parent_id, replies);
   }
 
-  const totalThreads = post.thread_count ?? 0;
+  const totalThreads = allThreads.length;
 
   let poll: PollData | null = null;
   if (pollRow) {
@@ -333,7 +356,9 @@ export default async function PostDetailPage({
             postId={post.id}
             initialBoosted={Boolean(boostRow)}
             initialBoostCount={post.boost_count ?? 0}
-            threadCount={post.thread_count ?? totalThreads}
+            threadCount={
+              Number(post.thread_count ?? post.comment_count ?? totalThreads) || totalThreads
+            }
             initialBookmarked={Boolean(bookmarkRow)}
             shareUrl={shareUrl}
             isOwner={isOwner}

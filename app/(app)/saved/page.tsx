@@ -3,6 +3,10 @@ import { requireUser } from "@/src/lib/auth";
 import { PostGrid } from "@/src/components/post-grid";
 import { createClient } from "@/src/lib/supabase/server";
 
+type BookmarkRow = {
+  post_id: string;
+};
+
 type SavedPost = {
   id: string;
   image_url: string | null;
@@ -10,33 +14,33 @@ type SavedPost = {
   body: string | null;
 };
 
-type BookmarkRow = {
-  post_id: string;
-  posts: SavedPost | SavedPost[] | null;
-};
-
 export default async function SavedPage() {
   const user = await requireUser();
   const supabase = await createClient();
 
-  const [{ data: bookmarkRows }, { count }] = await Promise.all([
-    supabase
-      .from("bookmarks")
-      .select("post_id, posts(id, image_url, caption, body)")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false }),
-    supabase
-      .from("bookmarks")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", user.id),
-  ]);
+  const { data: bookmarkRows } = await supabase
+    .from("bookmarks")
+    .select("post_id")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false });
 
   const bookmarks = (bookmarkRows ?? []) as BookmarkRow[];
-  const posts = bookmarks
-    .map((row) =>
-      Array.isArray(row.posts) ? (row.posts[0] ?? null) : row.posts,
-    )
-    .filter((post): post is SavedPost => Boolean(post));
+  const postIds = Array.from(new Set(bookmarks.map((b) => b.post_id)));
+
+  let posts: SavedPost[] = [];
+  if (postIds.length > 0) {
+    const { data: postsData } = await supabase
+      .from("posts")
+      .select("id, image_url, caption, body")
+      .in("id", postIds);
+    const byId = new Map(
+      ((postsData ?? []) as SavedPost[]).map((post) => [post.id, post]),
+    );
+    // Preserve bookmark order (newest save first) rather than post order.
+    posts = postIds
+      .map((id) => byId.get(id))
+      .filter((post): post is SavedPost => Boolean(post));
+  }
 
   return (
     <section className="mx-auto flex min-h-[calc(100dvh-6rem)] w-full max-w-md flex-col gap-4 px-4 pt-6 pb-24 animate-fade-in-up">
@@ -58,7 +62,7 @@ export default async function SavedPage() {
           Bookmarks
         </h2>
         <span className="text-xs text-zinc-500">
-          {count ?? 0} saved
+          {posts.length} saved
         </span>
       </div>
 

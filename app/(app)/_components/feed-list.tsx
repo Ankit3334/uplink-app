@@ -41,6 +41,9 @@ export const FeedPostCard = memo(function FeedPostCard({
   animationDelay: number;
 }) {
   const { post, boosted, bookmarked, poll } = item;
+  if (!post?.id) return null;
+
+  const threadCount = Number(post.thread_count ?? post.comment_count ?? 0) || 0;
   const profile = Array.isArray(post.profiles)
     ? (post.profiles[0] ?? null)
     : post.profiles;
@@ -159,14 +162,12 @@ export const FeedPostCard = memo(function FeedPostCard({
 
             {poll ? <PollCard poll={poll} /> : null}
 
-            {post.thread_count > 0 ? (
-              <Link
-                href={`/post/${post.id}`}
-                className="text-xs text-zinc-500 transition-colors hover:text-zinc-300"
-              >
-                View all {post.thread_count} threads
-              </Link>
-            ) : null}
+            <Link
+              href={`/post/${post.id}`}
+              className="text-xs text-zinc-500 transition-colors hover:text-cyan-400"
+            >
+              {threadCount > 0 ? `View all ${threadCount} threads` : "Open transmission"}
+            </Link>
           </div>
         </div>
 
@@ -174,7 +175,7 @@ export const FeedPostCard = memo(function FeedPostCard({
           postId={post.id}
           initialBoosted={boosted}
           initialBoostCount={post.boost_count ?? 0}
-          threadCount={post.thread_count ?? 0}
+          threadCount={threadCount}
           initialBookmarked={bookmarked}
           shareUrl={`/post/${post.id}`}
           isOwner={post.user_id === currentUserId}
@@ -234,9 +235,7 @@ export function FeedList({
   const loadingRef = useRef(false);
   const [, startTransition] = useTransition();
 
-  const lastPost = items[items.length - 1]?.post ?? null;
-  const cursor = lastPost?.id ?? null;
-  const cursorCreatedAt = lastPost?.created_at ?? null;
+  const cursor = items[items.length - 1]?.post.id ?? null;
 
   const loadMore = useCallback(() => {
     if (!hasMore || !cursor || loadingRef.current) return;
@@ -247,7 +246,7 @@ export function FeedList({
 
     startTransition(async () => {
       try {
-        const page = await getFeedPosts({ cursor, cursorCreatedAt, category });
+        const page = await getFeedPosts({ cursor, category });
         setItems((current) => {
           const seen = new Set(current.map((item) => item.post.id));
           const additions = page.items.filter((item) => !seen.has(item.post.id));
@@ -261,7 +260,7 @@ export function FeedList({
         setIsLoading(false);
       }
     });
-  }, [category, cursor, cursorCreatedAt, hasMore]);
+  }, [category, cursor, hasMore]);
 
   return (
     <div className="flex flex-col">
