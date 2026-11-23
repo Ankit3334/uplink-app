@@ -143,20 +143,20 @@ export default async function PostDetailPage({
   const user = await requireUser();
   const supabase = await createClient();
 
-  const { data: postData, error: postError } = await supabase
+  const { data: postRow, error: postError } = await supabase
     .from("posts")
     .select("*, profiles(*)")
     .eq("id", id)
-    .maybeSingle();
+    .single();
 
   if (postError) {
     console.error("Post detail query error:", postError);
   }
-  console.log("Post Detail:", postData);
 
-  if (!postData) notFound();
+  const post = postRow as PostDetail | null;
+  console.log("Post Data:", post);
 
-  const post = postData as PostDetail;
+  if (!post) notFound();
   const postProfile = pickProfile(post.profiles);
   const postUsername = postProfile?.username ?? "unknown_node";
   const postAvatar = postProfile?.avatar_url ?? null;

@@ -43,6 +43,7 @@ export const FeedPostCard = memo(function FeedPostCard({
   const { post, boosted, bookmarked, poll } = item;
   if (!post?.id) return null;
 
+  console.log('Post ID:', post.id);
   const threadCount = Number(post.thread_count ?? post.comment_count ?? 0) || 0;
   const profile = Array.isArray(post.profiles)
     ? (post.profiles[0] ?? null)

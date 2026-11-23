@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { MessageSquare, Search } from "lucide-react";
-import { FeedList } from "./_components/feed-list";
+import { FeedPostCard } from "./_components/feed-list";
 import { FeedTabs } from "./_components/feed-tabs";
 import {
   StoriesBar,
@@ -9,7 +9,10 @@ import {
   type StoryUserGroup,
 } from "./_components/stories-bar";
 import { requireUser } from "@/src/lib/auth";
-import { loadFeedPage } from "@/src/lib/feed";
+import {
+  hydrateFeedItems,
+  type FeedPost,
+} from "@/src/lib/feed";
 import {
   categoryLabel,
   feedTabForCategory,
@@ -135,17 +138,26 @@ async function StoriesSection() {
 }
 
 async function FeedContent({ activeTab }: { activeTab: FeedTabValue }) {
-  const feed = await loadFeedPage({ category: activeTab });
+  const user = await requireUser();
+  const supabase = await createClient();
+
+  // Functionality-first: every post, globally, with no network filters.
+  const { data: posts, error } = await supabase
+    .from('posts')
+    .select('*, profiles(*)')
+    .order('created_at', { ascending: false })
+    .limit(50);
+
+  if (error) {
+    console.error('Feed query error:', error);
+  }
+  console.log('Feed Posts:', posts);
+
+  const items = await hydrateFeedItems((posts ?? []) as FeedPost[], user.id);
 
   return (
     <>
-      {feed.networkEmpty ? (
-        <div className="border-b border-zinc-800 px-4 py-3 text-xs text-zinc-500">
-          Your network is empty. Connect with people to curate your feed.
-        </div>
-      ) : null}
-
-      {feed.items.length === 0 ? (
+      {items.length === 0 ? (
         <div className="u-empty">
           <div className="flex h-12 w-12 items-center justify-center rounded-full border border-zinc-800 bg-zinc-900 text-zinc-400">
             <Search size={20} strokeWidth={1.8} />
@@ -153,18 +165,21 @@ async function FeedContent({ activeTab }: { activeTab: FeedTabValue }) {
           <p className="u-empty-title mt-4">Your feed is quiet</p>
           <p className="u-empty-copy">
             {activeTab === "all"
-              ? "No transmissions yet. Follow tech builders to see their updates."
-              : `No ${categoryLabel(activeTab) ?? activeTab} posts in your network yet.`}
+              ? "No transmissions yet. Check back soon."
+              : `No ${categoryLabel(activeTab) ?? activeTab} posts yet.`}
           </p>
         </div>
       ) : (
-        <FeedList
-          key={activeTab}
-          initialItems={feed.items}
-          initialHasMore={feed.hasMore}
-          category={activeTab}
-          currentUserId={feed.userId}
-        />
+        <div className="flex flex-col">
+          {items.map((item, index) => (
+            <FeedPostCard
+              key={item.post.id}
+              item={item}
+              currentUserId={user.id}
+              animationDelay={Math.min(index * 0.03, 0.18)}
+            />
+          ))}
+        </div>
       )}
     </>
   );
