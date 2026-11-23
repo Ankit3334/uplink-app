@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
-import { ImagePlus, Loader2, Type } from "lucide-react";
+import { BarChart2, ImagePlus, Loader2, Type } from "lucide-react";
 import { transmitPost, type TransmitPostState } from "@/app/actions/posts";
 import { BottomSheet } from "@/src/components/bottom-sheet";
 import { cn, stripCodeFences, triggerHaptic } from "@/src/lib/utils";
@@ -235,9 +235,48 @@ function TextUploadForm() {
   const [isCodeBlock, setIsCodeBlock] = useState(false);
   const [language, setLanguage] = useState("tsx");
   const [category, setCategory] = useState<string>("general");
+  const [pollEnabled, setPollEnabled] = useState(false);
+  const [pollOptions, setPollOptions] = useState<string[]>(["", ""]);
+
+  const togglePoll = () => {
+    triggerHaptic();
+    if (pollEnabled) {
+      setPollEnabled(false);
+      return;
+    }
+    if (isCodeBlock) {
+      setIsCodeBlock(false);
+      setBody((value) => stripCodeFences(value));
+    }
+    setPollOptions((options) =>
+      options.length >= 2 ? options : ["", ""],
+    );
+    setPollEnabled(true);
+  };
+
+  const updatePollOption = (index: number, value: string) => {
+    setPollOptions((options) =>
+      options.map((option, i) => (i === index ? value : option)),
+    );
+  };
+
+  const addPollOption = () => {
+    triggerHaptic();
+    setPollOptions((options) => (options.length < 4 ? [...options, ""] : options));
+  };
+
+  const removePollOption = (index: number) => {
+    triggerHaptic();
+    setPollOptions((options) =>
+      options.length > 2 ? options.filter((_, i) => i !== index) : options,
+    );
+  };
 
   const enableCodeBlock = () => {
     triggerHaptic();
+    if (pollEnabled) {
+      setPollEnabled(false);
+    }
     setIsCodeBlock(true);
     const el = textareaRef.current;
     if (!el || body.includes("```")) return;
@@ -325,45 +364,62 @@ function TextUploadForm() {
             <span className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-400">
               <Type size={12} /> &gt; Text_Payload
             </span>
-            <span className="flex items-center gap-1 rounded-lg border border-zinc-800 bg-zinc-950 p-1">
+            <div className="flex flex-wrap items-center justify-end gap-2">
+              <span className="flex items-center gap-1 rounded-lg border border-zinc-800 bg-zinc-950 p-1">
+                <button
+                  type="button"
+                  onClick={enableCodeBlock}
+                  aria-pressed={isCodeBlock}
+                  title="Wrap selection in a code block"
+                  className={cn(
+                    "rounded-md px-2 py-1 font-mono text-[11px] transition-colors",
+                    isCodeBlock
+                      ? "bg-cyan-400 text-zinc-950"
+                      : "text-zinc-300 hover:bg-zinc-800",
+                  )}
+                >
+                  &lt;/&gt;
+                </button>
+                {isCodeBlock ? (
+                  <>
+                    <select
+                      aria-label="Code language"
+                      value={language}
+                      onChange={(event) => changeLanguage(event.target.value)}
+                      className="rounded-md border border-zinc-800 bg-zinc-900 px-1.5 py-1 font-mono text-[10px] text-zinc-300 outline-none focus:border-cyan-400"
+                    >
+                      {CODE_LANGUAGES.map((lang) => (
+                        <option key={lang} value={lang}>
+                          {lang}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={disableCodeBlock}
+                      className="rounded-md px-2 py-1 font-mono text-[10px] uppercase tracking-[0.1em] text-zinc-400 transition-colors hover:text-zinc-100"
+                    >
+                      Plain
+                    </button>
+                  </>
+                ) : null}
+              </span>
               <button
                 type="button"
-                onClick={enableCodeBlock}
-                aria-pressed={isCodeBlock}
-                title="Wrap selection in a code block"
+                onClick={togglePoll}
+                aria-pressed={pollEnabled}
+                title="Add a poll"
                 className={cn(
-                  "rounded-md px-2 py-1 font-mono text-[11px] transition-colors",
-                  isCodeBlock
-                    ? "bg-cyan-400 text-zinc-950"
-                    : "text-zinc-300 hover:bg-zinc-800",
+                  "inline-flex items-center gap-1.5 rounded-lg border px-2 py-1.5 font-mono text-[10px] uppercase tracking-[0.15em] transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-cyan-400/40",
+                  pollEnabled
+                    ? "border-cyan-400/40 bg-cyan-400/10 text-cyan-400"
+                    : "border-zinc-800 bg-zinc-950 text-zinc-400 hover:border-zinc-700 hover:text-cyan-400",
                 )}
               >
-                &lt;/&gt;
+                <BarChart2 size={14} strokeWidth={1.8} />
+                Poll
               </button>
-              {isCodeBlock ? (
-                <>
-                  <select
-                    aria-label="Code language"
-                    value={language}
-                    onChange={(event) => changeLanguage(event.target.value)}
-                    className="rounded-md border border-zinc-800 bg-zinc-900 px-1.5 py-1 font-mono text-[10px] text-zinc-300 outline-none focus:border-cyan-400"
-                  >
-                    {CODE_LANGUAGES.map((lang) => (
-                      <option key={lang} value={lang}>
-                        {lang}
-                      </option>
-                    ))}
-                  </select>
-                  <button
-                    type="button"
-                    onClick={disableCodeBlock}
-                    className="rounded-md px-2 py-1 font-mono text-[10px] uppercase tracking-[0.1em] text-zinc-400 transition-colors hover:text-zinc-100"
-                  >
-                    Plain
-                  </button>
-                </>
-              ) : null}
-            </span>
+            </div>
           </div>
           <textarea
             ref={textareaRef}
@@ -383,6 +439,60 @@ function TextUploadForm() {
             )}
           />
         </div>
+
+        {pollEnabled ? (
+          <div className="space-y-2 rounded-xl border border-zinc-800 bg-zinc-950 p-3">
+            <input type="hidden" name="poll_enabled" value="true" />
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-cyan-400">
+                Poll options // {pollOptions.length}/4
+              </span>
+              <button
+                type="button"
+                onClick={togglePoll}
+                className="font-mono text-[10px] uppercase tracking-[0.1em] text-zinc-500 transition-colors hover:text-zinc-200"
+              >
+                Remove poll
+              </button>
+            </div>
+
+            {pollOptions.map((option, index) => (
+              <div key={index} className="flex items-center gap-2">
+                <span className="w-5 flex-shrink-0 font-mono text-[10px] text-zinc-600">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <input
+                  name="pollOptions"
+                  value={option}
+                  onChange={(event) => updatePollOption(index, event.target.value)}
+                  maxLength={120}
+                  placeholder={`Option ${index + 1}`}
+                  aria-label={`Poll option ${index + 1}`}
+                  className="h-9 min-w-0 flex-1 rounded-lg border border-zinc-800 bg-zinc-900 px-3 text-sm text-zinc-100 outline-none transition-colors placeholder:text-zinc-600 focus:border-cyan-400"
+                />
+                {index >= 2 ? (
+                  <button
+                    type="button"
+                    onClick={() => removePollOption(index)}
+                    className="flex-shrink-0 rounded-lg border border-zinc-800 px-2 py-1 text-[10px] text-zinc-500 transition-colors hover:border-zinc-700 hover:text-zinc-200"
+                  >
+                    Remove
+                  </button>
+                ) : null}
+              </div>
+            ))}
+
+            {pollOptions.length < 4 ? (
+              <button
+                type="button"
+                onClick={addPollOption}
+                className="rounded-lg border border-dashed border-zinc-800 px-3 py-1.5 text-[11px] text-zinc-400 transition-colors hover:border-cyan-400/50 hover:text-cyan-400"
+              >
+                + Add option
+              </button>
+            ) : null}
+          </div>
+        ) : null}
 
         {!isCodeBlock ? (
           <label className="block border-t border-zinc-800 pt-4">

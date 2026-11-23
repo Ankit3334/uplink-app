@@ -8,6 +8,8 @@ import { PostImage } from "@/app/(app)/_components/post-image";
 import { CodeBlock } from "@/src/components/code-block";
 import { FadeIn } from "@/src/components/fade-in";
 import { TechStackBadges } from "@/src/components/tech-stack-badges";
+import { PollCard } from "@/src/components/poll/poll-card";
+import { toPollData, type PollData, type PollRow } from "@/src/lib/polls";
 import {
   POST_CATEGORY_BADGE_CLASS,
   categoryLabel,
@@ -15,6 +17,8 @@ import {
 import { requireUser } from "@/src/lib/auth";
 import { createClient } from "@/src/lib/supabase/server";
 import { ThreadComposer } from "./_components/thread-composer";
+import { ReplyButton } from "./_components/reply-button";
+import { ReplyProvider } from "./_components/reply-context";
 import { parseRichText } from "@/src/lib/utils";
 
 type ProfileRef = {
@@ -46,6 +50,7 @@ type ThreadRow = {
   id: string;
   user_id: string;
   post_id: string;
+  parent_id: string | null;
   content: string;
   created_at: string;
   profiles: ProfileRef | ProfileRef[];
@@ -65,6 +70,67 @@ function formatTimestamp(iso: string) {
     minute: "2-digit",
     hour12: false,
   });
+}
+
+function ThreadItem({
+  thread,
+  replyParentId,
+  isReply = false,
+}: {
+  thread: ThreadRow;
+  /** Root thread id, so replies to replies stay one level deep. */
+  replyParentId: string;
+  isReply?: boolean;
+}) {
+  const tProfile = pickProfile(thread.profiles);
+  const tUsername = tProfile?.username ?? "unknown_node";
+  const tAvatar = tProfile?.avatar_url ?? null;
+
+  return (
+    <div
+      className={`min-w-0 flex items-start gap-3 border-b py-3 ${
+        isReply
+          ? "ml-5 border-l-2 border-zinc-800 pl-3 sm:ml-8 sm:pl-4"
+          : "border-zinc-800 px-1"
+      }`}
+    >
+      <div
+        className={`flex flex-shrink-0 items-center justify-center rounded-full border border-zinc-800 bg-zinc-900 text-zinc-500 ${
+          isReply ? "h-7 w-7" : "h-9 w-9"
+        }`}
+      >
+        {tAvatar ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={tAvatar}
+            alt={`${tUsername} avatar`}
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <Terminal size={isReply ? 11 : 13} strokeWidth={1.8} />
+        )}
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="break-words text-[15px] leading-relaxed text-zinc-300">
+          {tProfile?.username ? (
+            <Link
+              href={`/u/${tProfile.username}`}
+              className="mr-2 font-semibold text-zinc-100 transition-colors hover:text-cyan-400"
+            >
+              {tUsername}
+            </Link>
+          ) : (
+            <span className="mr-2 font-semibold text-zinc-100">{tUsername}</span>
+          )}
+          <span>{parseRichText(thread.content)}</span>
+        </p>
+        <p className="mt-1 flex flex-wrap items-center text-xs text-zinc-500">
+          <span>{formatTimestamp(thread.created_at)}</span>
+          <ReplyButton parentId={replyParentId} username={tUsername} />
+        </p>
+      </div>
+    </div>
+  );
 }
 
 export default async function PostDetailPage({
@@ -97,17 +163,57 @@ export default async function PostDetailPage({
   const openToWork = Boolean(postProfile?.open_to_work);
   const isOwner = user.id === post.user_id;
 
-  const [{ data: threadData }, { data: boostRow }, { data: bookmarkRow }] = await Promise.all([
+  const [
+    { data: threadData },
+    { data: boostRow },
+    { data: bookmarkRow },
+    { data: pollRow },
+  ] = await Promise.all([
     supabase
       .from("threads")
-      .select("id, user_id, post_id, content, created_at, profiles(username, avatar_url)")
+      .select(
+        "id, user_id, post_id, parent_id, content, created_at, profiles(username, avatar_url)",
+      )
       .eq("post_id", id)
       .order("created_at", { ascending: true }),
     supabase.from("boosts").select("id").eq("post_id", id).eq("user_id", user.id).maybeSingle(),
     supabase.from("bookmarks").select("id").eq("post_id", id).eq("user_id", user.id).maybeSingle(),
+    supabase
+      .from("polls")
+      .select("id, post_id, ends_at, poll_options(id, option_text, vote_count)")
+      .eq("post_id", id)
+      .maybeSingle(),
   ]);
 
-  const threads = (threadData ?? []) as ThreadRow[];
+  const allThreads = (threadData ?? []) as ThreadRow[];
+  const threadIds = new Set(allThreads.map((thread) => thread.id));
+  const topLevelThreads = allThreads.filter(
+    (thread) => !thread.parent_id || !threadIds.has(thread.parent_id),
+  );
+
+  const repliesByParent = new Map<string, ThreadRow[]>();
+  for (const thread of allThreads) {
+    if (!thread.parent_id || !threadIds.has(thread.parent_id)) continue;
+    const replies = repliesByParent.get(thread.parent_id) ?? [];
+    replies.push(thread);
+    repliesByParent.set(thread.parent_id, replies);
+  }
+
+  const totalThreads = allThreads.length;
+
+  let poll: PollData | null = null;
+  if (pollRow) {
+    const typedPoll = pollRow as PollRow;
+    const { data: voteRow } = await supabase
+      .from("poll_votes")
+      .select("option_id")
+      .eq("poll_id", typedPoll.id)
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    poll = toPollData(typedPoll, (voteRow?.option_id as string) ?? null);
+  }
+
   const shareUrl = `/post/${post.id}`;
 
   return (
@@ -224,6 +330,8 @@ export default async function PostDetailPage({
                 </p>
               ) : null}
 
+              {poll ? <PollCard poll={poll} /> : null}
+
               {isOwner ? (
                 <form action={deletePost} className="pt-2">
                   <input type="hidden" name="postId" value={post.id} />
@@ -238,7 +346,7 @@ export default async function PostDetailPage({
             postId={post.id}
             initialBoosted={Boolean(boostRow)}
             initialBoostCount={post.boost_count ?? 0}
-            threadCount={post.thread_count ?? threads.length}
+            threadCount={post.thread_count ?? totalThreads}
             initialBookmarked={Boolean(bookmarkRow)}
             shareUrl={shareUrl}
             isOwner={isOwner}
@@ -248,67 +356,52 @@ export default async function PostDetailPage({
         </article>
       </FadeIn>
 
-      <div className="pt-3">
-        <div className="mb-2 flex items-center justify-between px-1">
-          <h2 className="text-xs font-medium text-zinc-500">
-            Threads
-          </h2>
-          <span className="text-xs text-zinc-500">{threads.length}</span>
+      <ReplyProvider>
+        <div className="pt-3">
+          <div className="mb-2 flex items-center justify-between px-1">
+            <h2 className="text-xs font-medium text-zinc-500">
+              Threads
+            </h2>
+            <span className="text-xs text-zinc-500">{totalThreads}</span>
+          </div>
+
+          {topLevelThreads.length === 0 ? (
+            <div className="px-1 py-6 text-center">
+              <p className="text-[15px] text-zinc-400">No threads yet.</p>
+              <p className="mt-1 text-xs text-zinc-500">Be the first to start the conversation.</p>
+            </div>
+          ) : (
+            <ul className="flex flex-col">
+              {topLevelThreads.map((thread, index) => {
+                const replies = repliesByParent.get(thread.id) ?? [];
+                return (
+                  <li key={thread.id} className="min-w-0">
+                    <FadeIn delay={index * 0.02}>
+                      <ThreadItem thread={thread} replyParentId={thread.id} />
+
+                      {replies.length > 0 ? (
+                        <ul className="flex flex-col">
+                          {replies.map((reply) => (
+                            <li key={reply.id} className="min-w-0">
+                              <ThreadItem
+                                thread={reply}
+                                replyParentId={reply.parent_id ?? reply.id}
+                                isReply
+                              />
+                            </li>
+                          ))}
+                        </ul>
+                      ) : null}
+                    </FadeIn>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
         </div>
 
-        {threads.length === 0 ? (
-          <div className="px-1 py-6 text-center">
-            <p className="text-[15px] text-zinc-400">No threads yet.</p>
-            <p className="mt-1 text-xs text-zinc-500">Be the first to start the conversation.</p>
-          </div>
-        ) : (
-          <ul className="flex flex-col">
-            {threads.map((thread, index) => {
-              const tProfile = pickProfile(thread.profiles);
-              const tUsername = tProfile?.username ?? "unknown_node";
-              const tAvatar = tProfile?.avatar_url ?? null;
-              return (
-                <FadeIn key={thread.id} delay={index * 0.02}>
-                  <li className="flex items-start gap-3 border-b border-zinc-800 px-1 py-3">
-                    <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border border-zinc-800 bg-zinc-900 text-zinc-500">
-                      {tAvatar ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={tAvatar}
-                          alt={`${tUsername} avatar`}
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        <Terminal size={13} strokeWidth={1.8} />
-                      )}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-[15px] leading-relaxed text-zinc-300">
-                        {tProfile?.username ? (
-                          <Link
-                            href={`/u/${tProfile.username}`}
-                            className="mr-2 font-semibold text-zinc-100 transition-colors hover:text-cyan-400"
-                          >
-                            {tUsername}
-                          </Link>
-                        ) : (
-                          <span className="mr-2 font-semibold text-zinc-100">{tUsername}</span>
-                        )}
-                        <span>{parseRichText(thread.content)}</span>
-                      </p>
-                      <p className="mt-1 text-xs text-zinc-500">
-                        {formatTimestamp(thread.created_at)}
-                      </p>
-                    </div>
-                  </li>
-                </FadeIn>
-              );
-            })}
-          </ul>
-        )}
-      </div>
-
-      <ThreadComposer postId={post.id} />
+        <ThreadComposer postId={post.id} />
+      </ReplyProvider>
     </section>
   );
 }

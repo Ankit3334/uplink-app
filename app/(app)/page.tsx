@@ -18,6 +18,12 @@ import {
   type FeedTabValue,
 } from "@/src/lib/post-categories";
 import { FeedTabs } from "./_components/feed-tabs";
+import { PollCard } from "@/src/components/poll/poll-card";
+import {
+  toPollData,
+  type PollData,
+  type PollRow,
+} from "@/src/lib/polls";
 import { parseRichText } from "@/src/lib/utils";
 import { requireUser } from "@/src/lib/auth";
 import { createClient } from "@/src/lib/supabase/server";
@@ -216,15 +222,43 @@ async function FeedContent({ activeTab }: { activeTab: FeedTabValue }) {
   const posts = (postsData ?? []) as FeedPost[];
 
   const postIds = posts.map((p) => p.id);
-  const [{ data: boosts }, { data: bookmarks }] = postIds.length
+  const [{ data: boosts }, { data: bookmarks }, { data: polls }] = postIds.length
     ? await Promise.all([
         supabase.from("boosts").select("post_id").eq("user_id", user.id).in("post_id", postIds),
         supabase.from("bookmarks").select("post_id").eq("user_id", user.id).in("post_id", postIds),
+        supabase
+          .from("polls")
+          .select("id, post_id, ends_at, poll_options(id, option_text, vote_count)")
+          .in("post_id", postIds),
       ])
-    : [{ data: [] }, { data: [] }];
+    : [{ data: [] }, { data: [] }, { data: [] }];
 
   const boostedSet = new Set((boosts ?? []).map((b) => b.post_id as string));
   const bookmarkedSet = new Set((bookmarks ?? []).map((b) => b.post_id as string));
+
+  const pollRows = (polls ?? []) as PollRow[];
+  const pollIds = pollRows.map((poll) => poll.id);
+  const { data: pollVotes } = pollIds.length
+    ? await supabase
+        .from("poll_votes")
+        .select("poll_id, option_id")
+        .eq("user_id", user.id)
+        .in("poll_id", pollIds)
+    : { data: [] };
+
+  const votedOptionByPoll = new Map(
+    (pollVotes ?? []).map((vote) => [
+      vote.poll_id as string,
+      vote.option_id as string,
+    ]),
+  );
+  const pollsByPost = new Map<string, PollData>();
+  for (const poll of pollRows) {
+    pollsByPost.set(
+      poll.post_id,
+      toPollData(poll, votedOptionByPoll.get(poll.id) ?? null),
+    );
+  }
 
   return (
     <>
@@ -262,6 +296,7 @@ async function FeedContent({ activeTab }: { activeTab: FeedTabValue }) {
             const building = profile?.currently_building ?? "";
             const openToWork = Boolean(profile?.open_to_work);
             const shareUrl = `/post/${post.id}`;
+            const poll = pollsByPost.get(post.id);
 
             return (
               <FadeIn key={post.id} delay={index * 0.03}>
@@ -362,6 +397,8 @@ async function FeedContent({ activeTab }: { activeTab: FeedTabValue }) {
                           {parseRichText(post.caption)}
                         </p>
                       ) : null}
+
+                      {poll ? <PollCard poll={poll} /> : null}
 
                       {post.thread_count > 0 ? (
                         <Link

@@ -13,6 +13,17 @@ export type AddThreadState = {
   error?: string;
 };
 
+export type VotePollResult = {
+  success: boolean;
+  optionId?: string;
+  voteCounts?: Record<string, number>;
+  alreadyVoted?: boolean;
+  error?: string;
+};
+
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export type EditPostState = {
   error?: string;
   success?: boolean;
@@ -57,6 +68,27 @@ export async function transmitPost(
         ? languageRaw.trim().slice(0, 32)
         : null;
 
+    const seenPollOptions = new Set<string>();
+    const pollOptions = formData
+      .getAll("pollOptions")
+      .filter((value): value is string => typeof value === "string")
+      .map((value) => value.trim())
+      .filter(Boolean)
+      .slice(0, 4)
+      .map((value) => value.slice(0, 120))
+      .filter((value) => {
+        const key = value.toLowerCase();
+        if (seenPollOptions.has(key)) return false;
+        seenPollOptions.add(key);
+        return true;
+      });
+
+    const pollEnabledRaw = formData.get("poll_enabled");
+    const pollEnabled = pollEnabledRaw === "true" || pollEnabledRaw === "on";
+    if (pollEnabled && pollOptions.length < 2) {
+      return { error: "TRANSMISSION FAILED: A poll needs at least 2 options." };
+    }
+
     // TEXT post (plain signal or code snippet)
     if (mode === "text") {
       const storedBody = isCodeBlock ? stripCodeFences(bodyText) : bodyText;
@@ -72,18 +104,56 @@ export async function transmitPost(
 
       // Explicit defaults keep inserts valid even when a column was recently
       // added and the database has not backfilled a default for old rows.
-      const { error: insertError } = await supabase.from("posts").insert({
-        user_id: user.id,
-        image_url: null,
-        body: composedBody,
-        caption: caption || null,
-        category,
-        is_code_block: isCodeBlock,
-        language: isCodeBlock ? codeLanguage : null,
-      });
+      const { data: insertedPost, error: insertError } = await supabase
+        .from("posts")
+        .insert({
+          user_id: user.id,
+          image_url: null,
+          body: composedBody,
+          caption: caption || null,
+          category,
+          is_code_block: isCodeBlock,
+          language: isCodeBlock ? codeLanguage : null,
+        })
+        .select("id")
+        .single();
 
-      if (insertError) {
-        return { error: `TRANSMISSION FAILED: ${insertError.message}` };
+      if (insertError || !insertedPost) {
+        return {
+          error: `TRANSMISSION FAILED: ${insertError?.message ?? "Post insert failed."}`,
+        };
+      }
+
+      if (pollEnabled && pollOptions.length > 0) {
+        const { data: poll, error: pollError } = await supabase
+          .from("polls")
+          .insert({ post_id: insertedPost.id, ends_at: null })
+          .select("id")
+          .single();
+
+        if (pollError || !poll) {
+          await supabase.from("posts").delete().eq("id", insertedPost.id);
+          return {
+            error: `TRANSMISSION FAILED: ${pollError?.message ?? "Poll insert failed."}`,
+          };
+        }
+
+        const { error: optionsError } = await supabase
+          .from("poll_options")
+          .insert(
+            pollOptions.map((option_text) => ({
+              poll_id: poll.id,
+              option_text,
+            })),
+          );
+
+        if (optionsError) {
+          await supabase.from("polls").delete().eq("id", poll.id);
+          await supabase.from("posts").delete().eq("id", insertedPost.id);
+          return {
+            error: `TRANSMISSION FAILED: ${optionsError.message}`,
+          };
+        }
       }
 
       revalidatePath("/");
@@ -322,6 +392,11 @@ export async function addThread(
     const postId = formData.get("postId");
     const contentRaw = formData.get("content");
     const content = typeof contentRaw === "string" ? contentRaw.trim() : "";
+    const parentIdRaw = formData.get("parentId");
+    const parentId =
+      typeof parentIdRaw === "string" && parentIdRaw.trim()
+        ? parentIdRaw.trim()
+        : null;
 
     if (typeof postId !== "string" || !postId) {
       return { error: "THREAD INJECTION FAILED: Missing post reference." };
@@ -329,6 +404,10 @@ export async function addThread(
 
     if (!content) {
       return { error: "THREAD INJECTION FAILED: Payload empty." };
+    }
+
+    if (parentId && !UUID_PATTERN.test(parentId)) {
+      return { error: "THREAD INJECTION FAILED: Invalid parent thread." };
     }
 
     const supabase = await createClient();
@@ -341,9 +420,26 @@ export async function addThread(
       redirect("/auth");
     }
 
+    let rootParentId: string | null = null;
+    if (parentId) {
+      const { data: parentThread, error: parentError } = await supabase
+        .from("threads")
+        .select("id, post_id, parent_id")
+        .eq("id", parentId)
+        .maybeSingle();
+
+      if (parentError || !parentThread || parentThread.post_id !== postId) {
+        return { error: "THREAD INJECTION FAILED: Invalid parent thread." };
+      }
+
+      // Keep the tree one level deep: replying to a reply targets its root.
+      rootParentId = parentThread.parent_id ?? parentThread.id;
+    }
+
     const { error: insertError } = await supabase.from("threads").insert({
       user_id: user.id,
       post_id: postId,
+      parent_id: rootParentId,
       content,
     });
 
@@ -391,6 +487,97 @@ export async function addThread(
   } catch (error) {
     if (error instanceof Error && error.message === "NEXT_REDIRECT") throw error;
     return { error: "THREAD INJECTION FAILED: Unexpected system error." };
+  }
+}
+
+export async function voteInPoll({
+  pollId,
+  optionId,
+}: {
+  pollId: string;
+  optionId: string;
+}): Promise<VotePollResult> {
+  if (!UUID_PATTERN.test(pollId) || !UUID_PATTERN.test(optionId)) {
+    return { success: false, error: "Invalid poll reference." };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    return { success: false, error: "Authentication required." };
+  }
+
+  const { data: existingVote } = await supabase
+    .from("poll_votes")
+    .select("option_id")
+    .eq("poll_id", pollId)
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (existingVote) {
+    const { data: poll } = await supabase
+      .from("polls")
+      .select("post_id, poll_options(id, vote_count)")
+      .eq("id", pollId)
+      .maybeSingle();
+
+    const options = Array.isArray(poll?.poll_options)
+      ? poll.poll_options
+      : poll?.poll_options
+        ? [poll.poll_options]
+        : [];
+
+    return {
+      success: true,
+      alreadyVoted: true,
+      optionId: existingVote.option_id as string,
+      voteCounts: Object.fromEntries(
+        options.map((option) => [option.id as string, Number(option.vote_count ?? 0)]),
+      ),
+      error: "You already voted in this poll.",
+    };
+  }
+
+  try {
+    const { data, error: rpcError } = await supabase.rpc("cast_poll_vote", {
+      p_poll_id: pollId,
+      p_option_id: optionId,
+      p_user_id: user.id,
+    });
+
+    if (rpcError) {
+      return { success: false, error: `VOTE FAILED: ${rpcError.message}` };
+    }
+
+    const result = data as {
+      already_voted?: boolean;
+      option_id?: string;
+      post_id?: string;
+      counts?: Record<string, number>;
+    } | null;
+
+    const postId = result?.post_id;
+    if (postId) {
+      revalidatePath("/");
+      revalidatePath(`/post/${postId}`);
+    }
+
+    return {
+      success: true,
+      alreadyVoted: Boolean(result?.already_voted),
+      optionId: result?.option_id ?? optionId,
+      voteCounts: result?.counts,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error:
+        error instanceof Error ? `VOTE FAILED: ${error.message}` : "VOTE FAILED.",
+    };
   }
 }
 
