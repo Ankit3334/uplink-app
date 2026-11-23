@@ -2,6 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { loadFeedPage, type FeedPageResult } from "@/src/lib/feed";
+import { feedTabForCategory, type FeedTabValue } from "@/src/lib/post-categories";
 import { createClient } from "@/src/lib/supabase/server";
 import { stripCodeFences } from "@/src/lib/utils";
 
@@ -28,6 +30,21 @@ export type EditPostState = {
   error?: string;
   success?: boolean;
 };
+
+/** Read-only feed action used by the infinite-scroll trigger. */
+export async function getFeedPosts({
+  cursor,
+  category,
+}: {
+  cursor?: string | null;
+  category?: FeedTabValue;
+}): Promise<FeedPageResult> {
+  const safeCursor = cursor && UUID_PATTERN.test(cursor) ? cursor : null;
+  return loadFeedPage({
+    cursor: safeCursor,
+    category: feedTabForCategory(category),
+  });
+}
 
 export async function transmitPost(
   _prevState: TransmitPostState,
